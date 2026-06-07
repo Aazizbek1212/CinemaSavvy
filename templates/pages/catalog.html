@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Filmlar katalogi — Cinema.uz{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex flex-col lg:flex-row gap-8">
+
+    <!-- Sidebar filters -->
+    <aside class="lg:w-56 flex-shrink-0" x-data="{ filtersOpen: false }">
+      <button @click="filtersOpen = !filtersOpen"
+              class="lg:hidden w-full flex items-center justify-between bg-surface-800
+                     border border-surface-700 rounded-xl px-4 py-3 mb-4 text-white">
+        <span class="font-medium">Filterlar</span>
+        <svg class="w-5 h-5 transition" :class="{ 'rotate-180': filtersOpen }"
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <div class="hidden lg:block space-y-6" :class="{ '!block': filtersOpen }">
+
+        <!-- Genre filter -->
+        <div class="bg-surface-800 border border-surface-700 rounded-xl p-4">
+          <h3 class="text-white font-semibold mb-3 text-sm uppercase tracking-wide">Janr</h3>
+          <div class="space-y-2">
+            {% for genre in genres %}
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox"
+                       name="genre"
+                       value="{{ genre.slug }}"
+                       class="w-4 h-4 accent-brand-500"
+                       hx-get="{% url 'catalog' %}"
+                       hx-trigger="change"
+                       hx-target="#movies-grid"
+                       hx-include="[name='genre']:checked, [name='year_min'], [name='year_max']"
+                       {% if genre.slug in selected_genres %}checked{% endif %} />
+                <span class="text-gray-400 group-hover:text-white text-sm transition">
+                  {{ genre.name }}
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Year filter -->
+        <div class="bg-surface-800 border border-surface-700 rounded-xl p-4">
+          <h3 class="text-white font-semibold mb-3 text-sm uppercase tracking-wide">Yil</h3>
+          <div class="flex gap-2">
+            <input type="number"
+                   name="year_min"
+                   placeholder="2000"
+                   min="1888" max="2024"
+                   value="{{ year_min|default:'' }}"
+                   class="w-full bg-surface-700 border border-surface-600 rounded-lg
+                          px-3 py-2 text-sm text-white placeholder-gray-500
+                          focus:outline-none focus:border-brand-500" />
+            <input type="number"
+                   name="year_max"
+                   placeholder="2024"
+                   min="1888" max="2024"
+                   value="{{ year_max|default:'' }}"
+                   class="w-full bg-surface-700 border border-surface-600 rounded-lg
+                          px-3 py-2 text-sm text-white placeholder-gray-500
+                          focus:outline-none focus:border-brand-500" />
+          </div>
+        </div>
+
+        <!-- Premium filter -->
+        <div class="bg-surface-800 border border-surface-700 rounded-xl p-4">
+          <h3 class="text-white font-semibold mb-3 text-sm uppercase tracking-wide">Tur</h3>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="is_premium" value=""
+                     class="accent-brand-500"
+                     {% if not is_premium_filter %}checked{% endif %} />
+              <span class="text-gray-400 text-sm">Barchasi</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="is_premium" value="false"
+                     class="accent-brand-500"
+                     {% if is_premium_filter == 'false' %}checked{% endif %} />
+              <span class="text-gray-400 text-sm">Bepul</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="is_premium" value="true"
+                     class="accent-brand-500"
+                     {% if is_premium_filter == 'true' %}checked{% endif %} />
+              <span class="text-gray-400 text-sm">Premium</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Movies grid -->
+    <div class="flex-1">
+      <!-- Sort bar -->
+      <div class="flex items-center justify-between mb-6">
+        <p class="text-gray-400 text-sm">
+          <span class="text-white font-medium">{{ total_count }}</span> ta film topildi
+        </p>
+        <select name="ordering"
+                class="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2
+                       text-sm text-white focus:outline-none focus:border-brand-500"
+                hx-get="{% url 'catalog' %}"
+                hx-trigger="change"
+                hx-target="#movies-grid">
+          <option value="-published_at">Yangiligi bo'yicha</option>
+          <option value="-average_rating">Reytingi bo'yicha</option>
+          <option value="-view_count">Ko'rishlar bo'yicha</option>
+          <option value="release_year">Yili bo'yicha</option>
+        </select>
+      </div>
+
+      <!-- Grid -->
+      <div id="movies-grid"
+           class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {% for movie in movies %}
+          {% include "components/movie_card.html" %}
+        {% empty %}
+          <div class="col-span-full text-center py-16">
+            <div class="text-5xl mb-4">🎬</div>
+            <p class="text-gray-500">Filmlar topilmadi</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if movies.has_other_pages %}
+        <div class="flex justify-center mt-8 gap-2">
+          {% if movies.has_previous %}
+            <a href="?page={{ movies.previous_page_number }}"
+               class="px-4 py-2 bg-surface-800 border border-surface-700 rounded-lg
+                      text-gray-400 hover:text-white hover:border-brand-500 transition text-sm">
+              ← Oldingi
+            </a>
+          {% endif %}
+
+          <span class="px-4 py-2 bg-brand-600 rounded-lg text-white text-sm font-medium">
+            {{ movies.number }} / {{ movies.paginator.num_pages }}
+          </span>
+
+          {% if movies.has_next %}
+            <a href="?page={{ movies.next_page_number }}"
+               class="px-4 py-2 bg-surface-800 border border-surface-700 rounded-lg
+                      text-gray-400 hover:text-white hover:border-brand-500 transition text-sm">
+              Keyingi →
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

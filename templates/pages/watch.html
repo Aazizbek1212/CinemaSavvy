@@ -1,0 +1,242 @@
+<!-- templates/pages/watch.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ movie.title }} — Ko'rish{% endblock %}
+
+{% block extra_head %}
+<link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="bg-black" x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }})">
+
+  <!-- Player -->
+  <div class="max-w-6xl mx-auto">
+    <div class="relative bg-black" style="aspect-ratio: 16/9">
+      <video id="cinema-player"
+             class="video-js vjs-default-skin w-full h-full"
+             controls preload="auto"
+             playsinline>
+      </video>
+
+      <!-- Loading -->
+      <div x-show="loading"
+           class="absolute inset-0 flex flex-col items-center
+                  justify-center bg-black/80 gap-4">
+        <div class="w-12 h-12 rounded-full border-2 border-ink-700
+                    border-t-gold-500 animate-spin"></div>
+        <p class="text-ink-400 text-sm">Video yuklanmoqda...</p>
+      </div>
+
+      <!-- Error -->
+      <div x-show="error"
+           class="absolute inset-0 flex flex-col items-center
+                  justify-center bg-black/90 gap-4">
+        <div class="text-4xl">⚠️</div>
+        <p class="text-white font-medium" x-text="errorMsg"></p>
+        <button @click="loadStream()" class="btn-ghost text-sm px-5 py-2">
+          Qayta urinish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info bar -->
+  <div class="max-w-6xl mx-auto px-4 py-4 border-b border-white/5">
+    <div class="flex flex-col sm:flex-row sm:items-center
+                justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <a href="{% url 'movie-detail' movie.slug %}"
+             class="text-ink-400 hover:text-white text-xs transition-colors
+                    flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Orqaga
+          </a>
+        </div>
+        <h1 class="text-white font-bold text-lg">{{ movie.title }}</h1>
+        <p class="text-ink-500 text-xs mt-0.5">
+          {{ movie.release_year }}
+          {% if movie.duration_display %}• {{ movie.duration_display }}{% endif %}
+        </p>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Quality -->
+        {% if available_files %}
+          <div class="flex items-center gap-2">
+            <span class="text-ink-500 text-xs">Sifat:</span>
+            <select x-model="quality"
+                    @change="changeQuality()"
+                    class="bg-ink-800 border border-ink-700 rounded-lg
+                           px-3 py-1.5 text-xs text-white
+                           focus:outline-none focus:border-gold-500">
+              {% for f in available_files %}
+                <option value="{{ f.quality }}">{{ f.quality }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
+
+        <!-- Subtitles toggle -->
+        {% if subtitles %}
+          <button @click="toggleSubtitles()"
+                  :class="subtitlesOn
+                           ? 'border-gold-500/60 text-gold-400'
+                           : 'border-ink-700 text-ink-400'"
+                  class="border rounded-lg px-3 py-1.5 text-xs
+                         hover:border-gold-500/40 transition-all duration-200">
+            CC
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Subtitle tracks (hidden) -->
+  {% for sub in subtitles %}
+    <track kind="subtitles"
+           label="{{ sub.language.name }}"
+           srclang="{{ sub.language.code }}"
+           data-key="{{ sub.file_key }}" />
+  {% endfor %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
+<script>
+function videoPlayer(slug, resumePosition) {
+  return {
+    loading: true,
+    error:   false,
+    errorMsg: '',
+    quality: '{{ available_files.first.quality|default:"720p" }}',
+    subtitlesOn: true,
+    player: null,
+    progressInterval: null,
+
+    async init() {
+      await this.loadStream();
+    },
+
+    async loadStream() {
+      this.loading = true;
+      this.error   = false;
+
+      try {
+        const token = localStorage.getItem('access_token') || '';
+        const res = await fetch(
+          `/api/streaming/${slug}/?quality=${this.quality}`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        );
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.detail || 'Video yuklanmadi');
+        }
+
+        const data = await res.json();
+
+        if (this.player) {
+          this.player.src({ type: 'application/x-mpegURL', src: data.stream_url });
+        } else {
+          this.player = videojs('cinema-player', {
+            fluid: false,
+            fill:  true,
+            html5: { vhs: { overrideNative: true, withCredentials: false } },
+            controls:   true,
+            preload:    'auto',
+            responsive: true,
+          });
+
+          this.player.src({ type: 'application/x-mpegURL', src: data.stream_url });
+
+          // Resume position
+          const resume = data.resume_position || resumePosition;
+          if (resume > 10) {
+            this.player.one('loadedmetadata', () => {
+              this.player.currentTime(resume);
+            });
+          }
+
+          // Subtitles
+          if (data.subtitles?.length) {
+            data.subtitles.forEach(sub => {
+              this.player.addRemoteTextTrack({
+                kind:    'subtitles',
+                label:   sub.language_name,
+                srclang: sub.language_code,
+                src:     sub.url,
+                default: sub.language_code === 'uz',
+              }, false);
+            });
+          }
+
+          this.startProgressTracking();
+        }
+
+        this.loading = false;
+        this.player.play().catch(() => {});
+
+      } catch (err) {
+        this.loading  = false;
+        this.error    = true;
+        this.errorMsg = err.message || 'Xato yuz berdi';
+      }
+    },
+
+    changeQuality() {
+      const currentTime = this.player?.currentTime() || 0;
+      this.loadStream().then(() => {
+        this.player?.currentTime(currentTime);
+      });
+    },
+
+    toggleSubtitles() {
+      this.subtitlesOn = !this.subtitlesOn;
+      if (!this.player) return;
+      const tracks = this.player.textTracks();
+      for (let i = 0; i < tracks.length; i++) {
+        tracks[i].mode = this.subtitlesOn ? 'showing' : 'hidden';
+      }
+    },
+
+    startProgressTracking() {
+      clearInterval(this.progressInterval);
+      this.progressInterval = setInterval(async () => {
+        if (!this.player || this.player.paused()) return;
+        const pos = Math.floor(this.player.currentTime());
+        const dur = Math.floor(this.player.duration() || 0);
+        if (pos < 5) return;
+
+        const token = localStorage.getItem('access_token') || '';
+        await fetch(`/api/streaming/${slug}/progress/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken':   getCsrfToken(),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            position_seconds: pos,
+            duration_seconds: dur || undefined,
+          }),
+        }).catch(() => {});
+      }, 10_000);
+    },
+
+    destroy() {
+      clearInterval(this.progressInterval);
+      this.player?.dispose();
+    },
+  };
+}
+</script>
+{% endblock %}

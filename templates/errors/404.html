@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}404 — Sahifa topilmadi{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-4">
+  <div class="text-center animate-fade-up">
+    <div class="text-8xl font-black text-gradient-gold mb-4">404</div>
+    <h1 class="text-2xl font-bold text-white mb-2">Sahifa topilmadi</h1>
+    <p class="text-ink-400 mb-8 max-w-sm mx-auto">
+      Siz qidirayotgan sahifa mavjud emas yoki ko'chirilgan.
+    </p>
+    <div class="flex items-center justify-center gap-3">
+      <a href="/" class="btn-gold">Bosh sahifaga qaytish</a>
+      <a href="/movies/" class="btn-ghost">Filmlarni ko'rish</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

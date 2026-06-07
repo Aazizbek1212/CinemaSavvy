@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if query %}{{ query }} — Qidirish{% else %}Qidirish{% endif %} — Cinema.uz
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+
+  <!-- Search input -->
+  <div class="max-w-2xl mx-auto mb-10 animate-fade-up">
+    <div class="relative">
+      <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+        <svg class="w-5 h-5 text-ink-400" fill="none"
+             stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+      <form method="get" action="{% url 'search:search-page' %}">
+        <input type="text" name="q"
+               value="{{ query }}"
+               placeholder="Film, aktyor, janr qidirish..."
+               autofocus
+               class="input-field pl-12 pr-4 py-4 text-base" />
+      </form>
+    </div>
+  </div>
+
+  {% if query %}
+
+    {% if result %}
+
+      <!-- Stats -->
+      <div class="flex items-center justify-between mb-6 animate-fade-up">
+        <p class="text-ink-400 text-sm">
+          <span class="text-white font-semibold">
+            "{{ query }}"
+          </span>
+          bo'yicha
+          <span class="text-gold-400 font-semibold">
+            {{ result.total }}
+          </span>
+          ta natija
+          <span class="text-ink-600 text-xs ml-2">
+            ({{ result.took_ms }}ms)
+          </span>
+        </p>
+      </div>
+
+      <!-- Suggestions -->
+      {% if result.suggestions %}
+        <div class="mb-6 animate-fade-up">
+          <span class="text-ink-500 text-sm">
+            Shuni axtardingizmi:
+          </span>
+          {% for suggestion in result.suggestions %}
+            <a href="?q={{ suggestion }}"
+               class="text-gold-400 hover:text-gold-300 text-sm
+                      font-medium ml-2 transition-colors">
+              {{ suggestion }}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Persons results -->
+      {% if result.persons %}
+        <section class="mb-10 animate-fade-up">
+          <h2 class="text-lg font-bold text-white mb-4
+                     flex items-center gap-2">
+            <span class="text-gold-500">👤</span>
+            Aktyorlar / Rejissyorlar
+          </h2>
+          <div class="flex gap-4 overflow-x-auto pb-3
+                      scrollbar-hide -mx-4 px-4">
+            {% for person in result.persons %}
+              <a href="{% url 'person-detail' person.slug %}"
+                 class="flex-shrink-0 w-28 text-center group">
+                <div class="w-16 h-16 rounded-2xl overflow-hidden
+                            mx-auto mb-2 bg-ink-800
+                            ring-1 ring-white/5
+                            group-hover:ring-gold-500/40
+                            transition-all duration-200">
+                  {% if person.photo_url %}
+                    <img src="{{ person.photo_url }}"
+                         alt="{{ person.full_name }}"
+                         class="w-full h-full object-cover" />
+                  {% else %}
+                    <div class="w-full h-full flex items-center
+                                justify-center text-2xl">👤</div>
+                  {% endif %}
+                </div>
+                <p class="text-white text-xs font-medium truncate
+                          group-hover:text-gold-400 transition-colors">
+                  {{ person.full_name }}
+                </p>
+                <p class="text-ink-500 text-[10px]">
+                  {{ person.movies_count }} ta film
+                </p>
+              </a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      <!-- Movie results -->
+      {% if result.movies %}
+        <section class="animate-fade-up" style="animation-delay:100ms">
+          <h2 class="text-lg font-bold text-white mb-4
+                     flex items-center gap-2">
+            <span class="text-gold-500">🎬</span>
+            Filmlar
+          </h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3
+                      md:grid-cols-4 lg:grid-cols-5
+                      xl:grid-cols-6 gap-4">
+            {% for movie in result.movies %}
+              <article class="group animate-fade-up">
+                <a href="{% url 'movie-detail' movie.slug %}"
+                   class="block rounded-2xl overflow-hidden bg-ink-800
+                          ring-1 ring-white/5 hover:ring-gold-500/40
+                          shadow-card hover:shadow-card-hover
+                          transition-all duration-300 hover:-translate-y-1">
+                  <div class="relative aspect-[2/3] overflow-hidden bg-ink-700">
+                    {% if movie.poster_url %}
+                      <img src="{{ movie.poster_url }}"
+                           alt="{{ movie.title }}"
+                           class="w-full h-full object-cover
+                                  group-hover:scale-105
+                                  transition-transform duration-500"
+                           loading="lazy" />
+                    {% else %}
+                      <div class="w-full h-full flex items-center
+                                  justify-center text-3xl bg-ink-700">
+                        🎬
+                      </div>
+                    {% endif %}
+
+                    <!-- Highlight overlay -->
+                    {% if movie.highlight.title %}
+                      <div class="absolute bottom-0 left-0 right-0
+                                  bg-gradient-to-t from-black/80 to-transparent
+                                  px-3 py-2">
+                        <p class="text-xs text-ink-300 line-clamp-2">
+                          {{ movie.highlight.title.0|safe }}
+                        </p>
+                      </div>
+                    {% endif %}
+
+                    {% if movie.is_premium %}
+                      <div class="absolute top-2 left-2">
+                        <span class="badge-gold text-[10px] py-0.5 px-2">
+                          PRO
+                        </span>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="p-3">
+                    <h3 class="text-white text-xs font-semibold truncate">
+                      {{ movie.title }}
+                    </h3>
+                    <div class="flex items-center justify-between mt-1">
+                      <span class="text-ink-500 text-[10px]">
+                        {{ movie.release_year }}
+                      </span>
+                      {% if movie.average_rating > 0 %}
+                        <div class="flex items-center gap-0.5">
+                          <svg class="w-2.5 h-2.5 text-gold-500"
+                               fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921
+                                     1.902 0l1.07 3.292a1 1 0 00.95.69h3.462
+                                     c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1
+                                     1 0 00-.364 1.118l1.07 3.292c.3.921-.755
+                                     1.688-1.54 1.118l-2.8-2.034a1 1 0
+                                     00-1.175 0l-2.8 2.034c-.784.57-1.838-.197
+                                     -1.539-1.118l1.07-3.292a1 1 0 00-.364
+                                     -1.118L2.98 8.72c-.783-.57-.38-1.81.588
+                                     -1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                          </svg>
+                          <span class="text-gold-400 text-[10px] font-bold">
+                            {{ movie.average_rating }}
+                          </span>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </a>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      <!-- No results -->
+      {% if not result.movies and not result.persons %}
+        <div class="text-center py-20 animate-fade-up">
+          <div class="text-6xl mb-4">🔍</div>
+          <h2 class="text-xl font-bold text-white mb-2">
+            Hech narsa topilmadi
+          </h2>
+          <p class="text-ink-500 text-sm mb-6">
+            "{{ query }}" bo'yicha natija yo'q.
+            Boshqa kalit so'z sinab ko'ring.
+          </p>
+          <a href="{% url 'catalog' %}" class="btn-ghost px-6 py-2.5 text-sm">
+            Barcha filmlarga o'tish
+          </a>
+        </div>
+      {% endif %}
+
+    {% endif %}
+
+  {% else %}
+
+    <!-- Empty state -->
+    <div class="text-center py-20 animate-fade-up">
+      <div class="text-6xl mb-4">🎬</div>
+      <h2 class="text-xl font-bold text-white mb-2">
+        Qidirishni boshlang
+      </h2>
+      <p class="text-ink-500 text-sm">
+        Film nomi, aktyor yoki janrni kiriting
+      </p>
+    </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

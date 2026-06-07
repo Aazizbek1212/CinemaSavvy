@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* ─── Base ─────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #0A0A0A;
+    color: #D4D4D4;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: rgba(245, 197, 24, 0.25);
+    color: #F5C518;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #111111; }
+  ::-webkit-scrollbar-thumb {
+    background: #3A3A3A;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #F5C518; }
+}
+
+/* ─── Components ─────────────────────────── */
+@layer components {
+
+  /* Buttons */
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2
+           bg-gold-500 hover:bg-gold-400 active:bg-gold-600
+           text-ink-950 font-semibold text-sm
+           px-5 py-2.5 rounded-xl
+           transition-all duration-200
+           shadow-gold hover:shadow-gold-lg
+           animate-pulse-gold;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           bg-white/5 hover:bg-white/10 active:bg-white/15
+           text-white font-medium text-sm
+           px-5 py-2.5 rounded-xl
+           border border-white/10 hover:border-white/20
+           backdrop-blur-sm
+           transition-all duration-200;
+  }
+
+  .btn-crimson {
+    @apply inline-flex items-center justify-center gap-2
+           bg-crimson-600 hover:bg-crimson-500
+           text-white font-semibold text-sm
+           px-5 py-2.5 rounded-xl
+           transition-all duration-200;
+  }
+
+  .btn-emerald {
+    @apply inline-flex items-center justify-center gap-2
+           bg-emerald-600 hover:bg-emerald-500
+           text-white font-semibold text-sm
+           px-5 py-2.5 rounded-xl
+           transition-all duration-200;
+  }
+
+  /* Input */
+  .input-field {
+    @apply w-full bg-ink-800 border border-ink-600
+           hover:border-ink-500 focus:border-gold-500
+           focus:ring-1 focus:ring-gold-500/30
+           rounded-xl px-4 py-3 text-sm text-white
+           placeholder-ink-400
+           outline-none transition-all duration-200;
+  }
+
+  /* Card */
+  .glass-card {
+    @apply bg-ink-800/60 border border-white/5
+           backdrop-blur-md rounded-2xl
+           shadow-glass;
+  }
+
+  /* Badge */
+  .badge-gold {
+    @apply inline-flex items-center gap-1
+           bg-gold-500/15 text-gold-500
+           border border-gold-500/20
+           text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  .badge-crimson {
+    @apply inline-flex items-center gap-1
+           bg-crimson-500/15 text-crimson-400
+           border border-crimson-500/20
+           text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  .badge-emerald {
+    @apply inline-flex items-center gap-1
+           bg-emerald-500/15 text-emerald-400
+           border border-emerald-500/20
+           text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply text-xl font-bold text-white
+           flex items-center gap-2
+           after:flex-1 after:h-px after:bg-gradient-to-r
+           after:from-ink-700 after:to-transparent;
+  }
+
+  /* Skeleton */
+  .skeleton {
+    @apply bg-ink-700 rounded-lg relative overflow-hidden;
+    background: linear-gradient(
+      90deg,
+      #1A1A1A 25%,
+      #242424 50%,
+      #1A1A1A 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+
+  /* Movie card poster */
+  .poster-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255,255,255,0.05) 50%,
+      transparent 60%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+  }
+}
+
+/* ─── Utilities ──────────────────────────── */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #F5C518, #FBBF24, #D97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-white {
+    background: linear-gradient(135deg, #FFFFFF, #A3A3A3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .border-gradient-gold {
+    border-image: linear-gradient(135deg, #F5C518, transparent) 1;
+  }
+
+  .glow-gold {
+    filter: drop-shadow(0 0 8px rgba(245,197,24,0.4));
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/* ─── Video.js custom ────────────────────── */
+.video-js {
+  background: #000;
+  font-family: 'Inter', sans-serif;
+}
+.vjs-default-skin .vjs-big-play-button {
+  background: rgba(245,197,24,0.15) !important;
+  border: 2px solid rgba(245,197,24,0.6) !important;
+  border-radius: 50% !important;
+  width: 72px !important; height: 72px !important;
+  line-height: 72px !important;
+  top: 50% !important; left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+.vjs-default-skin .vjs-big-play-button:hover {
+  background: rgba(245,197,24,0.3) !important;
+  border-color: #F5C518 !important;
+  transform: translate(-50%, -50%) scale(1.1) !important;
+}
+.vjs-default-skin .vjs-progress-holder .vjs-play-progress {
+  background: #F5C518 !important;
+}
+.vjs-default-skin .vjs-volume-level { background: #F5C518 !important; }
