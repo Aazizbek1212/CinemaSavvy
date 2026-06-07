@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Ko'rish tarixi — Cinema.uz{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-3">
+      <div class="w-1 h-8 bg-gradient-to-b
+                  from-gold-500 to-gold-700 rounded-full"></div>
+      <h1 class="text-2xl font-bold text-white">Ko'rish tarixi</h1>
+    </div>
+    {% if history %}
+      <button onclick="if(confirm('Tarixni tozalash?')) location.href='?clear=1'"
+              class="text-xs text-crimson-400 hover:text-crimson-300
+                     border border-crimson-500/20 hover:border-crimson-500/40
+                     px-3 py-1.5 rounded-lg transition-all duration-200">
+        Tarixni tozalash
+      </button>
+    {% endif %}
+  </div>
+
+  {% if history %}
+    <div class="space-y-3">
+      {% for item in history %}
+        <div class="glass-card p-4 flex items-center gap-4
+                    hover:border-white/10 transition-all duration-200
+                    animate-fade-up"
+             style="animation-delay: {{ forloop.counter0 }}0ms">
+
+          <!-- Poster -->
+          <a href="{% url 'movie-detail' item.movie.slug %}"
+             class="flex-shrink-0 w-14 h-20 rounded-xl overflow-hidden
+                    bg-ink-700 ring-1 ring-white/5
+                    hover:ring-gold-500/30 transition-all duration-200">
+            {% if item.movie.poster %}
+              <img src="{{ item.movie.poster.url }}"
+                   alt="{{ item.movie.title }}"
+                   class="w-full h-full object-cover" />
+            {% else %}
+              <div class="w-full h-full flex items-center
+                          justify-center text-xl">🎬</div>
+            {% endif %}
+          </a>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <a href="{% url 'movie-detail' item.movie.slug %}"
+               class="text-white font-semibold text-sm hover:text-gold-400
+                      transition-colors truncate block">
+              {{ item.movie.title }}
+            </a>
+            <p class="text-ink-500 text-xs mt-0.5">
+              {{ item.movie.release_year }}
+              {% if item.movie.duration_display %}
+                • {{ item.movie.duration_display }}
+              {% endif %}
+            </p>
+
+            <!-- Progress bar -->
+            <div class="mt-2.5">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-ink-500 text-[10px]">
+                  {% if item.completed %}
+                    ✅ Tugatildi
+                  {% else %}
+                    {{ item.progress_percent }}% ko'rildi
+                  {% endif %}
+                </span>
+                <span class="text-ink-600 text-[10px]">
+                  {{ item.updated_at|timesince }} oldin
+                </span>
+              </div>
+              <div class="h-1 bg-ink-700 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500
+                            {% if item.completed %}
+                              bg-emerald-500
+                            {% else %}
+                              bg-gradient-to-r from-gold-600 to-gold-400
+                            {% endif %}"
+                     style="width: {{ item.progress_percent }}%">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex-shrink-0 flex items-center gap-2">
+            <a href="{% url 'watch' item.movie.slug %}"
+               class="flex items-center gap-1.5 btn-gold px-4 py-2 text-xs">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              {% if item.completed %}Qayta{% else %}Davom{% endif %}
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if history.has_other_pages %}
+      <div class="flex justify-center mt-8 gap-2">
+        {% if history.has_previous %}
+          <a href="?page={{ history.previous_page_number }}"
+             class="btn-ghost px-4 py-2 text-sm">← Oldingi</a>
+        {% endif %}
+        <span class="bg-gold-500/10 border border-gold-500/20
+                     text-gold-400 px-4 py-2 rounded-xl text-sm font-medium">
+          {{ history.number }} / {{ history.paginator.num_pages }}
+        </span>
+        {% if history.has_next %}
+          <a href="?page={{ history.next_page_number }}"
+             class="btn-ghost px-4 py-2 text-sm">Keyingi →</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="text-center py-20 animate-fade-up">
+      <div class="text-6xl mb-4">🎬</div>
+      <h2 class="text-xl font-bold text-white mb-2">
+        Hali hech narsa ko'rilmagan
+      </h2>
+      <p class="text-ink-500 text-sm mb-6">
+        Tomosha qilgan filmlaringiz shu yerda ko'rinadi.
+      </p>
+      <a href="{% url 'catalog' %}" class="btn-gold px-6 py-2.5">
+        Filmlarni ko'rish
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

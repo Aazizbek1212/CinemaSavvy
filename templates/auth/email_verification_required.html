@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Emailni tasdiqlang — Cinema.uz{% endblock %}
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-4">
+  <div class="w-full max-w-md text-center animate-scale-in">
+    <div class="glass-card p-10">
+      <div class="w-20 h-20 rounded-full bg-gold-500/15
+                  border-2 border-gold-500/30
+                  flex items-center justify-center mx-auto mb-6">
+        <svg class="w-10 h-10 text-gold-400" fill="none"
+             stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2
+                   2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2
+                   2 0 002 2z"/>
+        </svg>
+      </div>
+
+      {% if resent %}
+        <div class="flex items-center gap-2 bg-emerald-500/10
+                    border border-emerald-500/30 rounded-xl p-3 mb-6">
+          <svg class="w-4 h-4 text-emerald-400" fill="none"
+               stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span class="text-emerald-300 text-sm">
+            Havola qayta yuborildi!
+          </span>
+        </div>
+      {% endif %}
+
+      <h1 class="text-2xl font-bold text-white mb-3">
+        Emailingizni tasdiqlang
+      </h1>
+      <p class="text-ink-400 text-sm mb-2">
+        Hisobingizni faollashtirish uchun emailingizga
+        yuborilgan havolani bosing.
+      </p>
+      {% if user.is_authenticated %}
+        <p class="text-ink-500 text-xs mb-8">
+          {{ user.email }}
+        </p>
+        <form method="post" action="">
+          {% csrf_token %}
+          <button type="submit" class="btn-ghost w-full py-3 text-sm mb-3">
+            Havolani qayta yuborish
+          </button>
+        </form>
+      {% endif %}
+      <a href="{% url 'auth:login' %}"
+         class="text-ink-500 hover:text-ink-300 text-sm transition-colors">
+        Boshqa hisob bilan kirish
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
