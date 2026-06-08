@@ -31,8 +31,8 @@ tzlocal==5.3.1
 urllib3==2.7.0
 vine==5.1.0
 wcwidth==0.7.0
-elasticsearch==8.12.0
-django-elasticsearch-dsl==8.0
+elasticsearch==7.17.9
+django-elasticsearch-dsl==7.3.0
 django-elasticsearch-dsl-drf==0.22.5
 django-jazzmin
 django-storages
