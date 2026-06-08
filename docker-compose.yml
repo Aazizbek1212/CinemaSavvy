@@ -63,3 +63,6 @@ services:
 volumes:
   postgres_data:
   es_data:
+
+
+touch docker-compose.yml
