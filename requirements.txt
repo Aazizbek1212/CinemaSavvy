@@ -58,3 +58,4 @@ urllib3==2.7.0
 vine==5.1.0
 wcwidth==0.7.0
 boto3==1.34.0
+botocore==1.34.0
