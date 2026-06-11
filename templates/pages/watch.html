@@ -133,10 +133,12 @@ function videoPlayer(slug, resumePosition) {
       try {
         const token = localStorage.getItem('access_token') || '';
         const res = await fetch(
-          `/api/streaming/${slug}/?quality=${this.quality}`,
-          { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+            `/api/streaming/${slug}/?quality=${this.quality}`,
+            { 
+                headers: { 'X-CSRFToken': getCsrfToken() },
+                credentials: 'include',
+            }
         );
-
         if (!res.ok) {
           const data = await res.json();
           throw new Error(data.detail || 'Video yuklanmadi');

@@ -1,7 +1,7 @@
 from logging import getLogger
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,7 +20,7 @@ class StreamURLView(APIView):
     Returns presigned HLS URL + resume position.
     Premium check included.
     """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get(self, request: Request, slug: str) -> Response:
         movie = get_object_or_404(Movie.objects.published(), slug=slug)
@@ -48,7 +48,9 @@ class StreamURLView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        resume_position = WatchHistoryService.get_resume_position(request.user, movie)
+        resume_position = 0
+        if request.user.is_authenticated:
+            resume_position = WatchHistoryService.get_resume_position(request.user, movie)
 
         # Subtitle presigned URLs
         subtitles = []
