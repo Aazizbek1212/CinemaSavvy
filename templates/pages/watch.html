@@ -1,112 +1,152 @@
-<!-- templates/pages/watch.html -->
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ movie.title }} — Ko'rish{% endblock %}
+{% block title %}{{ movie.title }} — Ko'rish | CinemaSavvy{% endblock %}
 
 {% block extra_head %}
 <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gdim:rgba(201,168,76,0.15);--gmid:rgba(201,168,76,0.3);--bg:#0A0A0F;--bg2:#12121A;--bg3:#1A1A26;--tx:#F0E6C8;--txd:#7A6A52;--txm:#3A3028}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif}
+.cs-watch-nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;background:rgba(10,10,15,0.97);border-bottom:1px solid var(--gdim);position:sticky;top:0;z-index:50}
+.cs-watch-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--gold);text-decoration:none}
+.cs-watch-logo span{color:var(--tx)}
+.cs-nav-back{display:flex;align-items:center;gap:6px;color:var(--txd);font-size:12px;cursor:pointer;transition:color 0.2s;text-decoration:none}
+.cs-nav-back:hover{color:var(--gold)}
+.cs-nav-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--tx)}
+.player-wrap{position:relative;background:#000;width:100%;overflow:hidden}
+.player-info-bar{max-width:100%;padding:16px 28px;background:var(--bg2);border-bottom:1px solid var(--gdim);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.pi-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--tx)}
+.pi-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pi-meta-item{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txd)}
+.pi-controls{display:flex;align-items:center;gap:10px}
+.pi-select{background:var(--bg3);border:1px solid var(--gdim);border-radius:3px;padding:6px 12px;color:var(--tx);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;outline:none;cursor:pointer;transition:border-color 0.2s}
+.pi-select:focus{border-color:var(--gold)}
+.pi-btn{background:transparent;border:1px solid var(--gdim);color:var(--txd);padding:6px 14px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;border-radius:3px;transition:all 0.2s}
+.pi-btn:hover,.pi-btn.active{border-color:var(--gold);color:var(--gold)}
+.content-area{max-width:1100px;margin:0 auto;padding:28px}
+.cs-related-section{}
+.cs-rel-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.cs-rel-title::after{content:'';flex:1;height:1px;background:var(--gdim)}
+.cs-rel-grid{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+.cs-rel-grid::-webkit-scrollbar{height:2px}
+.cs-rel-grid::-webkit-scrollbar-thumb{background:var(--gold)}
+.cs-rel-card{flex:0 0 130px;text-decoration:none;display:block}
+.cs-rel-poster{aspect-ratio:2/3;background:var(--bg3);border:1px solid var(--gdim);border-radius:3px;overflow:hidden;transition:border-color 0.2s;position:relative}
+.cs-rel-card:hover .cs-rel-poster{border-color:var(--gmid)}
+.cs-rel-poster img{width:100%;height:100%;object-fit:cover}
+.cs-rel-info{padding:6px 2px}
+.cs-rel-name{font-size:11px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.cs-rel-year{font-size:10px;color:#5A4F3E;font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+/* Video.js gold theme */
+.vjs-default-skin .vjs-play-progress,.vjs-default-skin .vjs-volume-level{background:var(--gold)!important}
+.vjs-default-skin .vjs-big-play-button{background:rgba(201,168,76,0.15)!important;border:2px solid rgba(201,168,76,0.5)!important;border-radius:50%!important;width:80px!important;height:80px!important;line-height:76px!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;margin:0!important}
+.vjs-default-skin:hover .vjs-big-play-button{background:rgba(201,168,76,0.25)!important;border-color:var(--gold)!important}
+.vjs-default-skin .vjs-control-bar{background:linear-gradient(to top,rgba(0,0,0,0.9),transparent)!important;height:48px!important}
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="bg-black" x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }})">
+<div x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }})">
 
-  <!-- Player -->
-  <div class="max-w-6xl mx-auto">
-    <div class="relative bg-black" style="aspect-ratio: 16/9">
-      <video id="cinema-player"
-             class="video-js vjs-default-skin w-full h-full"
-             controls preload="auto"
-             playsinline>
-      </video>
+  <!-- NAV -->
+  <nav class="cs-watch-nav">
+    <a href="{% url 'home' %}" class="cs-watch-logo">Cinema<span>Savvy</span></a>
+    <div class="cs-nav-title">{{ movie.title }}</div>
+    <a href="{% url 'movie-detail' movie.slug %}" class="cs-nav-back">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+      Orqaga
+    </a>
+  </nav>
 
-      <!-- Loading -->
-      <div x-show="loading"
-           class="absolute inset-0 flex flex-col items-center
-                  justify-center bg-black/80 gap-4">
-        <div class="w-12 h-12 rounded-full border-2 border-ink-700
-                    border-t-gold-500 animate-spin"></div>
-        <p class="text-ink-400 text-sm">Video yuklanmoqda...</p>
-      </div>
+  <!-- PLAYER -->
+  <div class="player-wrap">
+    <video id="cinema-player"
+           class="video-js vjs-default-skin w-full h-full"
+           controls preload="auto" playsinline
+           style="width:100%;aspect-ratio:16/9;max-height:75vh;display:block;">
+    </video>
 
-      <!-- Error -->
-      <div x-show="error"
-           class="absolute inset-0 flex flex-col items-center
-                  justify-center bg-black/90 gap-4">
-        <div class="text-4xl">⚠️</div>
-        <p class="text-white font-medium" x-text="errorMsg"></p>
-        <button @click="loadStream()" class="btn-ghost text-sm px-5 py-2">
-          Qayta urinish
-        </button>
-      </div>
+    <!-- Loading overlay -->
+    <div x-show="loading" style="position:absolute;inset:0;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+      <div style="width:48px;height:48px;border-radius:50%;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);animation:spin 0.7s linear infinite;"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:rgba(201,168,76,0.6);">Yuklanmoqda...</div>
+    </div>
+
+    <!-- Error overlay -->
+    <div x-show="error" style="position:absolute;inset:0;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+      <div style="font-size:48px;">⚠️</div>
+      <div style="font-size:14px;color:var(--tx);" x-text="errorMsg"></div>
+      <button @click="loadStream()" style="background:var(--gold);color:#000;border:none;padding:10px 24px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;border-radius:3px;">Qayta urinish</button>
     </div>
   </div>
 
-  <!-- Info bar -->
-  <div class="max-w-6xl mx-auto px-4 py-4 border-b border-white/5">
-    <div class="flex flex-col sm:flex-row sm:items-center
-                justify-between gap-3">
-      <div>
-        <div class="flex items-center gap-2 mb-1">
-          <a href="{% url 'movie-detail' movie.slug %}"
-             class="text-ink-400 hover:text-white text-xs transition-colors
-                    flex items-center gap-1">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Orqaga
-          </a>
-        </div>
-        <h1 class="text-white font-bold text-lg">{{ movie.title }}</h1>
-        <p class="text-ink-500 text-xs mt-0.5">
-          {{ movie.release_year }}
-          {% if movie.duration_display %}• {{ movie.duration_display }}{% endif %}
-        </p>
-      </div>
-
-      <!-- Controls -->
-      <div class="flex items-center gap-3">
-        <!-- Quality -->
-        {% if available_files %}
-          <div class="flex items-center gap-2">
-            <span class="text-ink-500 text-xs">Sifat:</span>
-            <select x-model="quality"
-                    @change="changeQuality()"
-                    class="bg-ink-800 border border-ink-700 rounded-lg
-                           px-3 py-1.5 text-xs text-white
-                           focus:outline-none focus:border-gold-500">
-              {% for f in available_files %}
-                <option value="{{ f.quality }}">{{ f.quality }}</option>
-              {% endfor %}
-            </select>
-          </div>
+  <!-- INFO BAR -->
+  <div class="player-info-bar">
+    <div>
+      <div class="pi-title">{{ movie.title }}</div>
+      <div class="pi-meta">
+        <span class="pi-meta-item">{{ movie.release_year }}</span>
+        {% if movie.duration_display %}
+          <span class="pi-meta-item">· {{ movie.duration_display }}</span>
         {% endif %}
-
-        <!-- Subtitles toggle -->
-        {% if subtitles %}
-          <button @click="toggleSubtitles()"
-                  :class="subtitlesOn
-                           ? 'border-gold-500/60 text-gold-400'
-                           : 'border-ink-700 text-ink-400'"
-                  class="border rounded-lg px-3 py-1.5 text-xs
-                         hover:border-gold-500/40 transition-all duration-200">
-            CC
-          </button>
-        {% endif %}
+        {% for genre in movie.genres.all|slice:":2" %}
+          <span class="pi-meta-item">· {{ genre.name }}</span>
+        {% endfor %}
       </div>
+    </div>
+    <div class="pi-controls">
+      {% if available_files %}
+        <select x-model="quality" @change="changeQuality()" class="pi-select">
+          {% for f in available_files %}
+            <option value="{{ f.quality }}">{{ f.quality }}</option>
+          {% endfor %}
+        </select>
+      {% endif %}
+      {% if subtitles %}
+        <button @click="toggleSubtitles()" :class="subtitlesOn ? 'active' : ''" class="pi-btn">CC</button>
+      {% endif %}
+      <a href="{% url 'movie-detail' movie.slug %}" class="pi-btn">Batafsil</a>
     </div>
   </div>
 
-  <!-- Subtitle tracks (hidden) -->
+  <!-- Subtitle tracks -->
   {% for sub in subtitles %}
-    <track kind="subtitles"
-           label="{{ sub.language.name }}"
-           srclang="{{ sub.language.code }}"
-           data-key="{{ sub.file_key }}" />
+    <track kind="subtitles" label="{{ sub.language.name }}" srclang="{{ sub.language.code }}" data-key="{{ sub.file_key }}" />
   {% endfor %}
 
 </div>
+
+<!-- RELATED MOVIES -->
+{% if related_movies %}
+<div class="content-area">
+  <div class="cs-related-section">
+    <div class="cs-rel-title">O'xshash filmlar</div>
+    <div class="cs-rel-grid">
+      {% for rel in related_movies|slice:":10" %}
+        <a href="{% url 'movie-detail' rel.slug %}" class="cs-rel-card">
+          <div class="cs-rel-poster">
+            {% if rel.poster %}
+              <img src="{{ rel.poster.url }}" alt="{{ rel.title }}">
+            {% else %}
+              <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.2);font-size:24px;">🎬</div>
+            {% endif %}
+          </div>
+          <div class="cs-rel-info">
+            <div class="cs-rel-name">{{ rel.title }}</div>
+            <div class="cs-rel-year">{{ rel.release_year }}</div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -115,7 +155,7 @@
 function videoPlayer(slug, resumePosition) {
   return {
     loading: true,
-    error:   false,
+    error: false,
     errorMsg: '',
     quality: '{{ available_files.first.quality|default:"720p" }}',
     subtitlesOn: true,
@@ -128,77 +168,53 @@ function videoPlayer(slug, resumePosition) {
 
     async loadStream() {
       this.loading = true;
-      this.error   = false;
-
+      this.error = false;
       try {
-        const token = localStorage.getItem('access_token') || '';
         const res = await fetch(
-            `/api/streaming/${slug}/?quality=${this.quality}`,
-            { 
-                headers: { 'X-CSRFToken': getCsrfToken() },
-                credentials: 'include',
-            }
+          `/api/streaming/${slug}/?quality=${this.quality}`,
+          { headers: { 'X-CSRFToken': getCsrfToken() }, credentials: 'include' }
         );
         if (!res.ok) {
           const data = await res.json();
           throw new Error(data.detail || 'Video yuklanmadi');
         }
-
         const data = await res.json();
 
         if (this.player) {
           this.player.src({ type: 'application/x-mpegURL', src: data.stream_url });
         } else {
           this.player = videojs('cinema-player', {
-            fluid: false,
-            fill:  true,
+            fluid: false, fill: true,
             html5: { vhs: { overrideNative: true, withCredentials: false } },
-            controls:   true,
-            preload:    'auto',
-            responsive: true,
+            controls: true, preload: 'auto', responsive: true,
           });
-
           this.player.src({ type: 'application/x-mpegURL', src: data.stream_url });
-
-          // Resume position
           const resume = data.resume_position || resumePosition;
           if (resume > 10) {
-            this.player.one('loadedmetadata', () => {
-              this.player.currentTime(resume);
-            });
+            this.player.one('loadedmetadata', () => { this.player.currentTime(resume); });
           }
-
-          // Subtitles
           if (data.subtitles?.length) {
             data.subtitles.forEach(sub => {
               this.player.addRemoteTextTrack({
-                kind:    'subtitles',
-                label:   sub.language_name,
-                srclang: sub.language_code,
-                src:     sub.url,
-                default: sub.language_code === 'uz',
+                kind: 'subtitles', label: sub.language_name, srclang: sub.language_code,
+                src: sub.url, default: sub.language_code === 'uz',
               }, false);
             });
           }
-
           this.startProgressTracking();
         }
-
         this.loading = false;
         this.player.play().catch(() => {});
-
       } catch (err) {
-        this.loading  = false;
-        this.error    = true;
+        this.loading = false;
+        this.error = true;
         this.errorMsg = err.message || 'Xato yuz berdi';
       }
     },
 
     changeQuality() {
-      const currentTime = this.player?.currentTime() || 0;
-      this.loadStream().then(() => {
-        this.player?.currentTime(currentTime);
-      });
+      const t = this.player?.currentTime() || 0;
+      this.loadStream().then(() => { this.player?.currentTime(t); });
     },
 
     toggleSubtitles() {
@@ -217,21 +233,12 @@ function videoPlayer(slug, resumePosition) {
         const pos = Math.floor(this.player.currentTime());
         const dur = Math.floor(this.player.duration() || 0);
         if (pos < 5) return;
-
-        const token = localStorage.getItem('access_token') || '';
         await fetch(`/api/streaming/${slug}/progress/`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken':   getCsrfToken(),
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            position_seconds: pos,
-            duration_seconds: dur || undefined,
-          }),
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({ position_seconds: pos, duration_seconds: dur || undefined }),
         }).catch(() => {});
-      }, 10_000);
+      }, 10000);
     },
 
     destroy() {

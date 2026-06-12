@@ -1,407 +1,316 @@
-<!-- templates/pages/movie_detail.html -->
 {% extends "base.html" %}
 {% load static %}
 
 {% block meta_description %}{{ movie.description|truncatechars:155 }}{% endblock %}
+{% block title %}{{ movie.title }} ({{ movie.release_year }}) — CinemaSavvy{% endblock %}
 
 {% block extra_head %}
-<!-- OG tags -->
-<meta property="og:title"       content="{{ movie.title }} — Cinema.uz" />
+<meta property="og:title" content="{{ movie.title }} — CinemaSavvy" />
 <meta property="og:description" content="{{ movie.description|truncatechars:155 }}" />
 {% if movie.poster %}<meta property="og:image" content="{{ movie.poster.url }}" />{% endif %}
-<meta property="og:type"        content="video.movie" />
+<meta property="og:type" content="video.movie" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gdim:rgba(201,168,76,0.15);--gmid:rgba(201,168,76,0.3);--bg:#0A0A0F;--bg2:#12121A;--bg3:#1A1A26;--tx:#F0E6C8;--txd:#7A6A52;--txm:#3A3028}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif}
+.hero-banner{position:relative;height:420px;overflow:hidden;background:var(--bg2)}
+.banner-bg{position:absolute;inset:0;background:linear-gradient(135deg,#1a1020 0%,#0d1020 50%,#0d1a14 100%)}
+.banner-visual{position:absolute;right:0;top:0;bottom:0;width:55%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.banner-visual img{height:100%;width:auto;opacity:0.5;object-fit:cover}
+.banner-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,15,0.98) 35%,rgba(10,10,15,0.6) 65%,rgba(10,10,15,0.2) 100%)}
+.banner-overlay-b{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,var(--bg),transparent)}
+.scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,0.3),transparent);z-index:2;animation:scan 7s ease-in-out infinite}
+@keyframes scan{0%{top:0;opacity:0}5%{opacity:1}95%{opacity:0.4}100%{top:100%;opacity:0}}
+.banner-content{position:absolute;left:36px;bottom:48px;z-index:5;max-width:520px;animation:fadeUp 0.8s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.badge{padding:3px 10px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;border-radius:2px}
+.badge-gold{background:var(--gdim);border:1px solid var(--gmid);color:var(--gold)}
+.badge-red{background:rgba(139,26,26,0.3);border:1px solid rgba(139,26,26,0.5);color:#E07070}
+.badge-green{background:rgba(26,92,46,0.3);border:1px solid rgba(26,92,46,0.5);color:#70C085}
+.movie-title{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;line-height:1.1;color:var(--tx);margin-bottom:8px}
+.movie-meta-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txd);font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px}
+.meta-dot{width:3px;height:3px;border-radius:50%;background:var(--txm)}
+.rating-num{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--gold)}
+.movie-desc{font-size:14px;color:var(--txd);line-height:1.7;margin-bottom:20px;max-width:480px;font-weight:300}
+.action-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn-play{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:var(--bg);border:none;padding:13px 28px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;cursor:pointer;border-radius:3px;transition:opacity 0.2s;text-decoration:none}
+.btn-play:hover{opacity:0.88}
+.btn-trailer{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--tx);border:1px solid var(--gmid);padding:12px 22px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;border-radius:3px;transition:all 0.2s;text-decoration:none}
+.btn-trailer:hover{border-color:var(--gold);color:var(--gold)}
+.icon-btn{width:42px;height:42px;border:1px solid rgba(201,168,76,0.2);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s;background:transparent;border-style:solid}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
+.main-content{display:flex;gap:0;padding:0 36px 40px;margin-top:32px;flex-wrap:wrap}
+.content-left{flex:1;min-width:300px}
+.content-right{width:260px;flex-shrink:0;padding-left:32px;border-left:1px solid var(--gdim);margin-left:32px}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--gdim)}
+.tabs-row{display:flex;gap:0;border-bottom:1px solid var(--gdim);margin-bottom:24px}
+.cs-tab{padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--txd);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s}
+.cs-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.cs-tab:hover:not(.active){color:var(--tx)}
+.tab-content{display:none;animation:fadeUp 0.35s ease}
+.tab-content.active{display:block}
+.info-list{display:flex;flex-direction:column;gap:0;margin-bottom:28px}
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--gdim)}
+.info-row:last-child{border-bottom:none}
+.info-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)}
+.info-value{font-size:12px;color:var(--tx);text-align:right;max-width:200px;line-height:1.5}
+.cast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-bottom:28px}
+.cast-card{background:var(--bg3);border:1px solid var(--gdim);border-radius:3px;overflow:hidden;cursor:pointer;transition:border-color 0.2s,transform 0.2s}
+.cast-card:hover{border-color:var(--gmid);transform:translateY(-2px)}
+.cast-avatar{height:80px;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.2);font-size:28px;overflow:hidden}
+.cast-avatar img{width:100%;height:100%;object-fit:cover}
+.cast-info{padding:8px}
+.cast-name{font-size:11px;font-weight:500;color:var(--tx);margin-bottom:2px}
+.cast-role{font-size:10px;color:var(--txd);font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+.review-item{padding:16px;background:var(--bg3);border:1px solid var(--gdim);border-radius:3px;margin-bottom:12px}
+.review-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.r-avatar{width:36px;height:36px;border-radius:50%;background:var(--gdim);border:1px solid var(--gmid);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--gold);flex-shrink:0}
+.r-name{font-size:13px;font-weight:500;color:var(--tx)}
+.r-date{font-size:11px;color:var(--txm);font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+.r-text{font-size:13px;color:var(--txd);line-height:1.7}
+.rb-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rb-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--txd);width:16px}
+.rb-bar{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.rb-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 1s ease}
+.rb-count{font-size:11px;color:var(--txm);width:28px;text-align:right}
+.rel-card{display:flex;gap:10px;cursor:pointer;padding:10px;background:var(--bg3);border:1px solid var(--gdim);border-radius:3px;transition:border-color 0.2s,transform 0.2s;text-decoration:none;margin-bottom:10px}
+.rel-card:hover{border-color:var(--gmid);transform:translateX(3px)}
+.rel-thumb{width:50px;height:68px;background:var(--bg2);border-radius:2px;display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.2);font-size:18px;flex-shrink:0;overflow:hidden}
+.rel-thumb img{width:100%;height:100%;object-fit:cover}
+.rel-genre{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:3px}
+.rel-title{font-size:12px;font-weight:500;color:var(--tx);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rel-year{font-size:11px;color:var(--txd)}
+.rel-rating{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);align-self:center;flex-shrink:0}
+.genre-badge{padding:4px 12px;background:var(--gdim);border:1px solid var(--gmid);color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;border-radius:2px;cursor:pointer;text-decoration:none;display:inline-block;margin-right:8px;margin-bottom:8px;transition:background 0.2s}
+.genre-badge:hover{background:rgba(201,168,76,0.25)}
+@media(max-width:768px){.content-right{width:100%;padding-left:0;border-left:none;margin-left:0;margin-top:32px}.banner-visual{display:none}.movie-title{font-size:28px}}
+</style>
 {% endblock %}
 
-{% block title %}{{ movie.title }} ({{ movie.release_year }}) — Cinema.uz{% endblock %}
-
 {% block content %}
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="banner-bg"></div>
+  <div class="banner-visual">
+    {% if movie.backdrop %}
+      <img src="{{ movie.backdrop.url }}" alt="{{ movie.title }}">
+    {% elif movie.poster %}
+      <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+    {% endif %}
+  </div>
+  <div class="banner-overlay"></div>
+  <div class="banner-overlay-b"></div>
+  <div class="scan-line"></div>
 
-<!-- ── BACKDROP HERO ──────────────────────── -->
-<div class="relative h-[55vh] min-h-80 overflow-hidden -mt-px">
-  {% if movie.backdrop %}
-    <img src="{{ movie.backdrop.url }}" alt=""
-         class="absolute inset-0 w-full h-full object-cover object-top" />
-  {% elif movie.poster %}
-    <img src="{{ movie.poster.url }}" alt=""
-         class="absolute inset-0 w-full h-full object-cover object-top blur-sm scale-110" />
-  {% else %}
-    <div class="absolute inset-0 bg-gradient-to-br from-ink-800 to-ink-950"></div>
-  {% endif %}
-  <div class="absolute inset-0 bg-gradient-to-t
-              from-ink-950 via-ink-950/60 to-ink-950/20"></div>
-  <div class="absolute inset-0 bg-gradient-to-r
-              from-ink-950/80 via-transparent to-transparent"></div>
-</div>
-
-<!-- ── MAIN CONTENT ──────────────────────── -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 -mt-48 relative z-10 pb-16">
-  <div class="flex flex-col md:flex-row gap-8 lg:gap-12">
-
-    <!-- Poster -->
-    <div class="flex-shrink-0 animate-fade-up">
-      <div class="w-44 sm:w-52 md:w-60 mx-auto md:mx-0
-                  rounded-2xl overflow-hidden shadow-card
-                  ring-1 ring-white/10">
-        {% if movie.poster %}
-          <img src="{{ movie.poster.url }}" alt="{{ movie.title }}"
-               class="w-full aspect-[2/3] object-cover" />
-        {% else %}
-          <div class="aspect-[2/3] bg-ink-800 flex items-center
-                      justify-center text-5xl">🎬</div>
-        {% endif %}
-      </div>
-
-      <!-- Watch / trailer buttons (mobile) -->
-      <div class="flex gap-2 mt-4 md:hidden">
-        {% if movie.is_premium and not user.is_premium %}
-          <a href="{% url 'auth:subscription' %}" class="btn-gold flex-1 justify-center">
-            ⭐ Premium
-          </a>
-        {% else %}
-          <a href="{% url 'watch' movie.slug %}" class="btn-gold flex-1 justify-center">
-            ▶ Ko'rish
-          </a>
-        {% endif %}
-        {% if movie.trailer_url %}
-          <a href="{{ movie.trailer_url }}" target="_blank" class="btn-ghost px-4">
-            🎬
-          </a>
-        {% endif %}
-      </div>
+  <div class="banner-content">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <span class="badge badge-gold">{{ movie.release_year }}</span>
+      {% if movie.is_premium %}
+        <span class="badge badge-gold">⭐ Premium</span>
+      {% else %}
+        <span class="badge badge-green">✓ Bepul</span>
+      {% endif %}
+      {% if movie.age_rating and movie.age_rating != 'all' %}
+        <span class="badge badge-red">{{ movie.age_rating }}</span>
+      {% endif %}
+      {% if movie.duration_display %}
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:var(--txd);">{{ movie.duration_display }}</span>
+      {% endif %}
     </div>
 
-    <!-- Info -->
-    <div class="flex-1 pt-2 md:pt-32 animate-fade-up" style="animation-delay:100ms">
+    <div class="movie-title">{{ movie.title }}</div>
 
-      <!-- Badges -->
-      <div class="flex flex-wrap items-center gap-2 mb-3">
-        {% if movie.is_premium %}
-          <span class="badge-gold">⭐ Premium</span>
-        {% else %}
-          <span class="badge-emerald">✓ Bepul</span>
-        {% endif %}
-        {% if movie.age_rating != 'all' %}
-          <span class="badge-crimson">{{ movie.age_rating }}</span>
-        {% endif %}
-        <span class="text-ink-500 text-xs px-2 py-0.5 rounded-full
-                     bg-ink-800 border border-ink-700">
-          {{ movie.status|upper }}
-        </span>
-      </div>
+    <div class="movie-meta-row">
+      {% if movie.average_rating > 0 %}
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="rating-num">{{ movie.average_rating }}</div>
+          <div style="font-size:11px;color:var(--txd);">/ 10 · {{ movie.rating_count }} ovoz</div>
+        </div>
+        <div class="meta-dot"></div>
+      {% endif %}
+      {% for genre in movie.genres.all|slice:":3" %}
+        <div class="meta-item">{{ genre.name }}</div>
+        {% if not forloop.last %}<div class="meta-dot"></div>{% endif %}
+      {% endfor %}
+      {% if movie.director %}
+        <div class="meta-dot"></div>
+        <div class="meta-item">{{ movie.director }}</div>
+      {% endif %}
+    </div>
 
-      <!-- Title -->
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white
-                 leading-tight tracking-tight mb-1">
-        {{ movie.title }}
-      </h1>
-      {% if movie.title_original %}
-        <p class="text-ink-500 text-base italic mb-4">{{ movie.title_original }}</p>
+    {% if movie.description %}
+      <div class="movie-desc">{{ movie.description|truncatechars:200 }}</div>
+    {% endif %}
+
+    <div class="action-row">
+      {% if movie.is_premium and not user.is_premium %}
+        <a href="{% url 'auth:subscription' %}" class="btn-play">⭐ Premium olish</a>
+      {% else %}
+        <a href="{% url 'watch' movie.slug %}" class="btn-play">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          Ko'rish
+        </a>
+      {% endif %}
+      {% if movie.trailer_url %}
+        <a href="{{ movie.trailer_url }}" target="_blank" class="btn-trailer">
+          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
+          Treyler
+        </a>
+      {% endif %}
+      <button class="icon-btn" title="Yoqdim" hx-post="{% url 'auth:profile' %}" style="font-size:17px;">♥</button>
+      <button class="icon-btn" title="Ro'yxatga qo'shish" style="font-size:17px;">🔖</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+  <div class="content-left">
+    <div class="tabs-row">
+      <div class="cs-tab active" onclick="switchTab(this,'t-about')">Haqida</div>
+      <div class="cs-tab" onclick="switchTab(this,'t-cast')">Aktyorlar</div>
+      <div class="cs-tab" onclick="switchTab(this,'t-reviews')">Sharhlar</div>
+    </div>
+
+    <!-- ABOUT TAB -->
+    <div class="tab-content active" id="t-about">
+      {% if movie.description %}
+        <div class="section-title">Syujet</div>
+        <p style="font-size:14px;color:var(--txd);line-height:1.8;margin-bottom:24px;font-weight:300;">{{ movie.description }}</p>
       {% endif %}
 
-      <!-- Meta info -->
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5
-                  text-sm text-ink-400 mb-5">
-        <span class="flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5 text-ink-600" fill="none"
-               stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2
-                     2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-          </svg>
-          {{ movie.release_year }}
-        </span>
-        {% if movie.duration_display %}
-          <span class="text-ink-600">•</span>
-          <span class="flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-ink-600" fill="none"
-                 stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            {{ movie.duration_display }}
-          </span>
-        {% endif %}
-        {% if movie.country %}
-          <span class="text-ink-600">•</span>
-          <span>{{ movie.country }}</span>
-        {% endif %}
-      </div>
-
-      <!-- Rating -->
-      {% if movie.average_rating > 0 %}
-        <div class="flex items-center gap-4 mb-5">
-          <div class="flex items-center gap-2 bg-gold-500/10
-                      border border-gold-500/20 rounded-xl px-4 py-2">
-            <svg class="w-5 h-5 text-gold-500" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07
-                       3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588
-                       1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3
-                       .921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175
-                       0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07
-                       -3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38
-                       -1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-            </svg>
-            <span class="text-gold-400 font-bold text-xl">
-              {{ movie.average_rating }}
-            </span>
-            <span class="text-ink-500 text-sm">/10</span>
-          </div>
-          <span class="text-ink-500 text-sm">
-            {{ movie.rating_count }} ta baho
-          </span>
-          <span class="text-ink-500 text-sm">
-            {{ movie.view_count }} ko'rilgan
-          </span>
+      {% if movie.genres.all %}
+        <div class="section-title">Janrlar</div>
+        <div style="margin-bottom:24px;">
+          {% for genre in movie.genres.all %}
+            <a href="{% url 'catalog' %}?genre={{ genre.slug }}" class="genre-badge">{{ genre.name }}</a>
+          {% endfor %}
         </div>
       {% endif %}
 
-      <!-- Genres -->
-      <div class="flex flex-wrap gap-2 mb-5">
-        {% for genre in movie.genres.all %}
-          <a href="{% url 'catalog' %}?genre={{ genre.slug }}"
-             class="text-xs text-ink-300 hover:text-gold-400
-                    bg-ink-800 hover:bg-gold-500/10
-                    border border-ink-700 hover:border-gold-500/30
-                    px-3 py-1.5 rounded-full transition-all duration-200">
-            {{ genre.name }}
-          </a>
-        {% endfor %}
+      <div class="section-title">Film haqida</div>
+      <div class="info-list">
+        {% if movie.director %}<div class="info-row"><div class="info-label">Rejissyor</div><div class="info-value">{{ movie.director }}</div></div>{% endif %}
+        <div class="info-row"><div class="info-label">Chiqarilgan</div><div class="info-value">{{ movie.release_year }}</div></div>
+        {% if movie.duration_display %}<div class="info-row"><div class="info-label">Davomiyligi</div><div class="info-value">{{ movie.duration_display }}</div></div>{% endif %}
+        {% if movie.language %}<div class="info-row"><div class="info-label">Til</div><div class="info-value">{{ movie.get_language_display }}</div></div>{% endif %}
+        {% if movie.age_rating %}<div class="info-row"><div class="info-label">Yosh chegarasi</div><div class="info-value">{{ movie.get_age_rating_display }}</div></div>{% endif %}
+        {% if movie.country %}<div class="info-row"><div class="info-label">Mamlakat</div><div class="info-value">{{ movie.country }}</div></div>{% endif %}
       </div>
+    </div>
 
-      <!-- Tagline -->
-      {% if movie.tagline %}
-        <p class="text-gold-400/70 italic text-base mb-3 border-l-2
-                  border-gold-500/40 pl-3">
-          "{{ movie.tagline }}"
-        </p>
+    <!-- CAST TAB -->
+    <div class="tab-content" id="t-cast">
+      <div class="section-title">Aktyorlar</div>
+      {% if movie.cast.all %}
+        <div class="cast-grid">
+          {% for member in movie.cast.all|slice:":12" %}
+            <div class="cast-card">
+              <div class="cast-avatar">
+                {% if member.photo %}
+                  <img src="{{ member.photo.url }}" alt="{{ member.name }}">
+                {% else %}👤{% endif %}
+              </div>
+              <div class="cast-info">
+                <div class="cast-name">{{ member.name }}</div>
+                <div class="cast-role">{{ member.role }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="font-size:13px;color:var(--txd);">Ma'lumot yo'q</p>
       {% endif %}
+    </div>
 
-      <!-- Description -->
-      {% if movie.description %}
-        <p class="text-ink-300 text-sm leading-relaxed mb-7 max-w-2xl"
-           x-data="{ expanded: false }">
-          <span x-show="!expanded" class="line-clamp-3">{{ movie.description }}</span>
-          <span x-show="expanded">{{ movie.description }}</span>
-          {% if movie.description|length > 200 %}
-            <button @click="expanded = !expanded"
-                    class="text-gold-500 hover:text-gold-400 text-xs
-                           font-medium ml-1 transition-colors">
-              <span x-text="expanded ? 'Yig\'ish ↑' : 'Ko\'proq ↓'"></span>
-            </button>
-          {% endif %}
-        </p>
-      {% endif %}
-
-      <!-- CTA buttons (desktop) -->
-      <div class="hidden md:flex flex-wrap items-center gap-3 mb-6">
-        {% if movie.is_premium and not user.is_premium %}
-          <a href="{% url 'auth:subscription' %}" class="btn-gold text-base px-7 py-3">
-            ⭐ Premium olish
-          </a>
-        {% else %}
-          <a href="{% url 'watch' movie.slug %}" class="btn-gold text-base px-7 py-3">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-            Tomosha qilish
-          </a>
-        {% endif %}
-        {% if movie.trailer_url %}
-          <a href="{{ movie.trailer_url }}" target="_blank"
-             class="btn-ghost text-base px-6 py-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010
-                       9.87v4.263a1 1 0 001.555.832l3.197-2.132a1
-                       1 0 000-1.664z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Treyler
-          </a>
-        {% endif %}
-      </div>
-
-      <!-- Languages & Subtitles -->
-      {% if movie.languages.all %}
-        <div class="flex items-center gap-3 text-sm">
-          <span class="text-ink-500">Tillar:</span>
-          <div class="flex gap-1.5">
-            {% for lang in movie.languages.all %}
-              <span class="bg-ink-800 border border-ink-700 text-ink-300
-                           px-2.5 py-1 rounded-lg text-xs font-medium uppercase">
-                {{ lang.code }}
-              </span>
-            {% endfor %}
+    <!-- REVIEWS TAB -->
+    <div class="tab-content" id="t-reviews">
+      <div class="section-title">Tomoshabinlar sharhlari</div>
+      {% if reviews %}
+        {% for review in reviews %}
+          <div class="review-item">
+            <div class="review-head">
+              <div class="r-avatar">{{ review.user.full_name|first|upper }}</div>
+              <div>
+                <div class="r-name">{{ review.user.full_name }}</div>
+                <div class="r-date">{{ review.created_at|date:"d M Y" }}</div>
+              </div>
+              {% if review.rating %}
+                <div style="margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold);">{{ review.rating }}</div>
+              {% endif %}
+            </div>
+            <div class="r-text">{{ review.text }}</div>
           </div>
+        {% endfor %}
+      {% else %}
+        <p style="font-size:13px;color:var(--txd);padding:20px 0;">Hali sharhlar yo'q. Birinchi bo'lib sharh yozing!</p>
+      {% endif %}
+
+      {% if user.is_authenticated %}
+        <div style="margin-top:20px;">
+          <div class="section-title">Sharh yozish</div>
+          <form method="post" action="{% url 'reviews:create' movie.slug %}">
+            {% csrf_token %}
+            <textarea name="text" placeholder="Fikringizni yozing..." style="width:100%;background:var(--bg3);border:1px solid var(--gdim);border-radius:3px;padding:12px;color:var(--tx);font-family:'Inter',sans-serif;font-size:13px;resize:vertical;min-height:80px;outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--gdim)'"></textarea>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+              <select name="rating" style="background:var(--bg3);border:1px solid var(--gdim);border-radius:3px;padding:8px 12px;color:var(--tx);font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;outline:none;">
+                <option value="">Baho</option>
+                {% for i in "12345678910" %}
+                  <option value="{{ forloop.counter }}">{{ forloop.counter }} / 10</option>
+                {% endfor %}
+              </select>
+              <button type="submit" style="background:var(--gold);color:var(--bg);border:none;padding:9px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;border-radius:3px;">Jo'natish</button>
+            </div>
+          </form>
         </div>
       {% endif %}
     </div>
   </div>
 
-  <!-- ── CAST ───────────────────────────── -->
-  {% if movie.movie_cast.all %}
-    <section class="mt-14 animate-fade-up" style="animation-delay:200ms">
-      <h2 class="text-xl font-bold text-white mb-5 flex items-center gap-2">
-        <span class="text-gold-500">🎭</span> Aktyorlar
-      </h2>
-      <div class="flex gap-4 overflow-x-auto pb-3 scrollbar-hide -mx-4 px-4">
-        {% for cast in movie.movie_cast.all %}
-          <a href="{% url 'person-detail' cast.person.slug %}"
-             class="flex-shrink-0 w-24 text-center group">
-            <div class="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-2
-                        bg-ink-800 ring-1 ring-white/5
-                        group-hover:ring-gold-500/40 transition-all duration-200">
-              {% if cast.person.photo %}
-                <img src="{{ cast.person.photo.url }}"
-                     alt="{{ cast.person.full_name }}"
-                     class="w-full h-full object-cover
-                            group-hover:scale-105 transition-transform duration-300" />
-              {% else %}
-                <div class="w-full h-full flex items-center
-                            justify-center text-2xl bg-ink-700">👤</div>
-              {% endif %}
-            </div>
-            <p class="text-white text-xs font-medium truncate
-                      group-hover:text-gold-400 transition-colors">
-              {{ cast.person.full_name }}
-            </p>
-            {% if cast.character_name %}
-              <p class="text-ink-500 text-[10px] truncate mt-0.5">
-                {{ cast.character_name }}
-              </p>
-            {% endif %}
-          </a>
-        {% endfor %}
-      </div>
-    </section>
-  {% endif %}
-
-  <!-- ── REVIEWS ───────────────────────── -->
-  <section class="mt-14 animate-fade-up" style="animation-delay:300ms">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="text-xl font-bold text-white flex items-center gap-2">
-        <span class="text-gold-500">💬</span> Izohlar
-        {% if movie.rating_count > 0 %}
-          <span class="text-ink-500 text-base font-normal">
-            ({{ movie.rating_count }})
-          </span>
-        {% endif %}
-      </h2>
-    </div>
-
-    <!-- Review form -->
-    {% if user.is_authenticated %}
-      {% if not user_review %}
-        <div class="glass-card p-6 mb-6"
-             x-data="reviewForm()">
-          <h3 class="text-white font-semibold mb-4 text-sm">
-            Bahoyingizni qoldiring
-          </h3>
-
-          <!-- Stars -->
-          <div class="flex items-center gap-0.5 mb-4">
-            <template x-for="i in 10" :key="i">
-              <button @click="rating = i"
-                      :class="i <= rating
-                               ? 'text-gold-400 scale-110'
-                               : 'text-ink-600 hover:text-gold-300'"
-                      class="text-2xl transition-all duration-100 leading-none">
-                ★
-              </button>
-            </template>
-            <span x-show="rating > 0"
-                  x-text="rating + '/10'"
-                  class="text-gold-400 text-sm font-semibold ml-3"></span>
-          </div>
-
-          <textarea x-model="text"
-                    placeholder="Fikringizni yozing... (ixtiyoriy)"
-                    rows="3"
-                    class="input-field resize-none text-sm mb-3">
-          </textarea>
-
-          <button @click="submitReview('{{ movie.slug }}')"
-                  :disabled="rating === 0 || submitting"
-                  class="btn-gold px-6 py-2 text-sm
-                         disabled:opacity-40 disabled:cursor-not-allowed">
-            <span x-show="!submitting">Yuborish</span>
-            <span x-show="submitting">Yuklanmoqda...</span>
-          </button>
+  <!-- RIGHT SIDEBAR -->
+  <aside class="content-right">
+    {% if movie.average_rating > 0 %}
+      <div class="section-title">Reyting</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg3);border:1px solid var(--gdim);border-radius:3px;margin-bottom:16px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:2px;color:var(--gold);line-height:1;">{{ movie.average_rating }}</div>
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--txd);">{{ movie.rating_count }} ta ovoz</div>
         </div>
-      {% else %}
-        <!-- User's own review -->
-        <div class="glass-card p-5 mb-6 border border-gold-500/20">
-          <div class="flex items-center justify-between mb-2">
-            <span class="badge-gold text-xs">Sizning bahoyingiz</span>
-            <div class="flex items-center gap-1">
-              <svg class="w-4 h-4 text-gold-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1
-                         0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1
-                         1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54
-                         1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57
-                         -1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98
-                         8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69
-                         l1.07-3.292z"/>
-              </svg>
-              <span class="text-gold-400 font-bold">{{ user_review.rating }}/10</span>
-            </div>
-          </div>
-          {% if user_review.text %}
-            <p class="text-ink-300 text-sm">{{ user_review.text }}</p>
-          {% endif %}
-        </div>
-      {% endif %}
-    {% else %}
-      <div class="glass-card p-5 mb-6 text-center">
-        <p class="text-ink-400 text-sm mb-3">
-          Baho qoldirish uchun tizimga kiring
-        </p>
-        <a href="{% url 'auth:login' %}?next={{ request.path }}"
-           class="btn-gold px-6 py-2 text-sm">
-          Kirish
-        </a>
       </div>
     {% endif %}
 
-    <!-- Reviews list via HTMX -->
-    <div id="reviews-list"
-         hx-get="{% url 'reviews:movie-reviews' slug=movie.slug %}"
-         hx-trigger="load"
-         hx-swap="innerHTML">
-      <!-- Skeleton -->
-      <div class="space-y-3">
-        {% for i in "123" %}
-          <div class="glass-card p-4">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="skeleton w-9 h-9 rounded-xl"></div>
-              <div class="space-y-1.5 flex-1">
-                <div class="skeleton h-3 w-28 rounded"></div>
-                <div class="skeleton h-2.5 w-16 rounded"></div>
-              </div>
-            </div>
-            <div class="skeleton h-3 w-full rounded mb-1.5"></div>
-            <div class="skeleton h-3 w-2/3 rounded"></div>
+    {% if related_movies %}
+      <div class="section-title">O'xshash filmlar</div>
+      {% for rel in related_movies|slice:":5" %}
+        <a href="{% url 'movie-detail' rel.slug %}" class="rel-card">
+          <div class="rel-thumb">
+            {% if rel.poster %}
+              <img src="{{ rel.poster.url }}" alt="{{ rel.title }}">
+            {% else %}🎬{% endif %}
           </div>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
-
-  <!-- ── RELATED MOVIES ─────────────────── -->
-  {% if related_movies %}
-    <section class="mt-14 animate-fade-up" style="animation-delay:400ms">
-      <h2 class="text-xl font-bold text-white mb-5 flex items-center gap-2">
-        <span class="text-gold-500">🎬</span> O'xshash filmlar
-      </h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3
-                  md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {% for movie in related_movies %}
-          {% include "components/movie_card.html" %}
-        {% endfor %}
-      </div>
-    </section>
-  {% endif %}
-
+          <div style="flex:1;min-width:0;">
+            <div class="rel-genre">{% for g in rel.genres.all|slice:":1" %}{{ g.name }}{% endfor %} · {{ rel.release_year }}</div>
+            <div class="rel-title">{{ rel.title }}</div>
+          </div>
+          {% if rel.average_rating > 0 %}
+            <div class="rel-rating">{{ rel.average_rating }}</div>
+          {% endif %}
+        </a>
+      {% endfor %}
+    {% endif %}
+  </aside>
 </div>
+
+<script>
+function switchTab(el, tid) {
+  document.querySelectorAll('.cs-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tid).classList.add('active');
+}
+</script>
 {% endblock %}

@@ -1,194 +1,196 @@
-<!-- templates/auth/register.html -->
 {% extends "base.html" %}
-{% block title %}Ro'yxatdan o'tish — Cinema.uz{% endblock %}
+{% block title %}Ro'yxatdan o'tish — CinemaSavvy{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,600;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold-dim:rgba(201,168,76,0.15);--gold-mid:rgba(201,168,76,0.3);--bg:#0A0A0F;--bg2:#12121A;--bg3:#1A1A26;--text:#F0E6C8;--text-dim:#7A6A52;--text-muted:#3A3028}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;margin:0}
+.page{display:flex;min-height:100vh;background:var(--bg)}
+.left-panel{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:500px}
+canvas#bgc{position:absolute;inset:0;z-index:0}
+.lp-scan{position:absolute;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,0.4),transparent);z-index:2;animation:lscan 6s ease-in-out infinite}
+@keyframes lscan{0%{top:0;opacity:0}5%{opacity:1}95%{opacity:0.5}100%{top:100%;opacity:0}}
+.lp-corner{position:absolute;width:16px;height:16px;z-index:3}
+.lp-corner.tl{top:32px;left:32px;border-top:1px solid var(--gold-mid);border-left:1px solid var(--gold-mid)}
+.lp-corner.tr{top:32px;right:32px;border-top:1px solid var(--gold-mid);border-right:1px solid var(--gold-mid)}
+.lp-corner.bl{bottom:32px;left:32px;border-bottom:1px solid var(--gold-mid);border-left:1px solid var(--gold-mid)}
+.lp-corner.br{bottom:32px;right:32px;border-bottom:1px solid var(--gold-mid);border-right:1px solid var(--gold-mid)}
+.lp-content{position:relative;z-index:4;text-align:center;padding:32px}
+.lp-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:5px;color:var(--gold);margin-bottom:4px;text-decoration:none;display:block}
+.lp-logo span{color:var(--text)}
+.lp-ring{position:relative;width:120px;height:120px;margin:28px auto 20px;display:flex;align-items:center;justify-content:center}
+.lp-ring svg{position:absolute;inset:0;width:100%;height:100%}
+.lp-tagline{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:5px;color:rgba(201,168,76,0.4);margin-bottom:28px}
+.lp-features{display:flex;flex-direction:column;gap:12px;text-align:left;max-width:260px;margin:0 auto}
+.lp-feat{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(201,168,76,0.05);border:1px solid var(--gold-dim);border-radius:3px;animation:fadeSlide 0.6s ease forwards;opacity:0}
+.lp-feat:nth-child(1){animation-delay:0.3s}.lp-feat:nth-child(2){animation-delay:0.5s}.lp-feat:nth-child(3){animation-delay:0.7s}
+@keyframes fadeSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.lp-feat-icon{color:var(--gold);font-size:18px;flex-shrink:0}
+.lp-feat-text{font-size:12px;color:var(--text-dim)}
+.lp-feat-text strong{color:var(--text);font-weight:500;display:block;font-size:13px}
+.filmstrip-v{position:absolute;right:0;top:0;bottom:0;width:28px;z-index:2;display:flex;flex-direction:column;overflow:hidden}
+.fsv-seg{width:28px;height:40px;background:#16121e;border-bottom:2px solid #2a2035;flex-shrink:0;position:relative}
+.fsv-seg::before,.fsv-seg::after{content:'';position:absolute;width:8px;height:12px;background:var(--bg);border-radius:1px;left:50%;transform:translateX(-50%)}
+.fsv-seg::before{top:4px}.fsv-seg::after{bottom:4px}
+.fsv-inner{display:flex;flex-direction:column;animation:fsDown 16s linear infinite}
+@keyframes fsDown{to{transform:translateY(-50%)}}
+.right-panel{width:440px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:40px 36px;border-left:1px solid var(--gold-dim);background:var(--bg2);overflow-y:auto}
+.auth-box{width:100%;max-width:368px}
+.tab-row{display:flex;margin-bottom:32px;border-bottom:1px solid var(--gold-dim)}
+.tab{flex:1;padding:12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.25s;text-decoration:none}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab:hover:not(.active){color:var(--text)}
+.form-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--text);margin-bottom:6px}
+.form-sub{font-size:13px;color:var(--text-dim);margin-bottom:28px;line-height:1.5}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:var(--text-dim);margin-bottom:7px}
+.field-wrap{position:relative;display:flex;align-items:center}
+.field-wrap input{width:100%;background:var(--bg3);border:1px solid rgba(201,168,76,0.15);border-radius:3px;padding:11px 40px 11px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color 0.2s}
+.field-wrap input::placeholder{color:var(--text-muted)}
+.field-wrap input:focus{border-color:var(--gold)}
+.field-icon{position:absolute;right:12px;color:var(--text-dim);font-size:16px;pointer-events:none}
+.strength-bar{height:3px;background:var(--bg3);border-radius:2px;margin-top:6px;overflow:hidden}
+.strength-fill{height:100%;width:0%;border-radius:2px;transition:width 0.3s,background 0.3s}
+.agree-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px}
+.agree-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--gold);margin-top:1px;flex-shrink:0;cursor:pointer}
+.agree-row label{font-size:12px;color:var(--text-dim);line-height:1.5;cursor:pointer}
+.agree-row label a{color:var(--gold);text-decoration:none}
+.submit-btn{width:100%;background:var(--gold);color:var(--bg);border:none;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;cursor:pointer;border-radius:3px;transition:opacity 0.2s;margin-bottom:20px}
+.submit-btn:hover{opacity:0.88}
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.divider-line{flex:1;height:1px;background:var(--gold-dim)}
+.divider-text{font-size:11px;color:var(--text-muted);font-family:'Bebas Neue',sans-serif;letter-spacing:2px}
+.terms{font-size:11px;color:var(--text-muted);text-align:center;line-height:1.6}
+.terms a{color:var(--text-dim);cursor:pointer;transition:color 0.2s}
+.terms a:hover{color:var(--gold)}
+.error-box{background:rgba(139,26,26,0.2);border:1px solid rgba(224,82,82,0.3);border-radius:3px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:#E05252;display:flex;align-items:center;gap:8px}
+.field-hint{font-size:11px;color:var(--text-muted);margin-top:5px}
+@media(max-width:768px){.left-panel{display:none}.right-panel{width:100%;border-left:none}}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="min-h-[90vh] flex items-center justify-center px-4 py-12">
-
-  <div class="fixed inset-0 pointer-events-none">
-    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2
-                w-96 h-96 rounded-full bg-emerald-500/3 blur-3xl"></div>
+<div class="page">
+  <div class="left-panel">
+    <canvas id="bgc"></canvas>
+    <div class="lp-scan"></div>
+    <div class="lp-corner tl"></div><div class="lp-corner tr"></div>
+    <div class="lp-corner bl"></div><div class="lp-corner br"></div>
+    <div class="filmstrip-v"><div class="fsv-inner" id="fsv"></div></div>
+    <div class="lp-content">
+      <a href="{% url 'home' %}" class="lp-logo">Cinema<span>Savvy</span></a>
+      <div class="lp-tagline">PREMIUM · CINEMA · STREAMING</div>
+      <div class="lp-ring">
+        <svg viewBox="0 0 120 120" fill="none">
+          <circle cx="60" cy="60" r="54" stroke="rgba(201,168,76,0.1)" stroke-width="1"/>
+          <circle cx="60" cy="60" r="54" stroke="url(#lg1r)" stroke-width="1.5" stroke-dasharray="339" stroke-dashoffset="339" stroke-linecap="round">
+            <animate attributeName="stroke-dashoffset" from="339" to="0" dur="2s" fill="freeze"/>
+          </circle>
+          <defs>
+            <linearGradient id="lg1r" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#C9A84C"/><stop offset="50%" stop-color="#F0E6C8"/><stop offset="100%" stop-color="#C9A84C"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span style="position:relative;z-index:2;color:var(--gold);font-size:36px;">🎬</span>
+      </div>
+      <div class="lp-features">
+        <div class="lp-feat"><span class="lp-feat-icon">📺</span><div class="lp-feat-text"><strong>12,000+ Film</strong>Ultra HD sifatda</div></div>
+        <div class="lp-feat"><span class="lp-feat-icon">🛡️</span><div class="lp-feat-text"><strong>Xavfsiz platforma</strong>Ma'lumotlaringiz himoyada</div></div>
+        <div class="lp-feat"><span class="lp-feat-icon">🚫</span><div class="lp-feat-text"><strong>Reklama yo'q</strong>Uzluksiz tomosha</div></div>
+      </div>
+    </div>
   </div>
 
-  <div class="w-full max-w-md relative animate-scale-in">
+  <div class="right-panel">
+    <div class="auth-box">
+      <div class="tab-row">
+        <a href="{% url 'auth:login' %}" class="tab">Kirish</a>
+        <a href="{% url 'auth:register' %}" class="tab active">Ro'yxat</a>
+      </div>
 
-    <!-- Logo -->
-    <div class="text-center mb-8">
-      <a href="{% url 'home' %}"
-         class="inline-flex flex-col items-center gap-3 group">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br
-                    from-gold-500 to-gold-700
-                    flex items-center justify-center shadow-gold-lg
-                    group-hover:scale-105 transition-transform duration-200">
-          <svg class="w-7 h-7 text-ink-950" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M18 4H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0
-                     2-.9 2-2V6c0-1.1-.9-2-2-2zM9 17V7l8 5-8 5z"/>
-          </svg>
-        </div>
-        <span class="text-2xl font-bold text-white">
-          Cinema<span class="text-gradient-gold">.uz</span>
-        </span>
-      </a>
-      <p class="text-ink-400 mt-2 text-sm">Hisob yarating</p>
-    </div>
+      <div class="form-title">Hisob yarating</div>
+      <div class="form-sub">Bir daqiqada ro'yxatdan o'ting va kino olamiga qo'shiling.</div>
 
-    <div class="glass-card p-8 shadow-card">
-
-      <!-- Error -->
       {% if error %}
-        <div class="flex items-center gap-3 bg-crimson-500/10
-                    border border-crimson-500/30 rounded-xl p-4 mb-6">
-          <svg class="w-5 h-5 text-crimson-400 flex-shrink-0"
-               fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <p class="text-crimson-300 text-sm">{{ error }}</p>
-        </div>
+        <div class="error-box"><span>⚠</span><span>{{ error }}</span></div>
       {% endif %}
 
-      <form method="post" action="{% url 'auth:register' %}"
-            class="space-y-4"
-            x-data="{ showPass: false, showConfirm: false }">
+      <form method="post" action="{% url 'auth:register' %}">
         {% csrf_token %}
 
-        <!-- Full name -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300
-                        mb-2 uppercase tracking-wider">
-            To'liq ism
-          </label>
-          <input type="text" name="full_name"
-                 value="{{ form_data.full_name|default:'' }}"
-                 placeholder="Ism Familiya"
-                 autocomplete="name"
-                 class="input-field" />
-        </div>
-
-        <!-- Email -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300
-                        mb-2 uppercase tracking-wider">
-            Email manzil
-          </label>
-          <input type="email" name="email" required
-                 value="{{ form_data.email|default:'' }}"
-                 placeholder="email@example.com"
-                 autocomplete="email"
-                 class="input-field" />
-        </div>
-
-        <!-- Password -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300
-                        mb-2 uppercase tracking-wider">
-            Parol
-          </label>
-          <div class="relative">
-            <input name="password" required
-                   :type="showPass ? 'text' : 'password'"
-                   placeholder="Kamida 8 ta belgi"
-                   autocomplete="new-password"
-                   class="input-field pr-11" />
-            <button type="button" @click="showPass = !showPass"
-                    class="absolute right-3 top-1/2 -translate-y-1/2
-                           text-ink-400 hover:text-ink-200 transition-colors">
-              <svg x-show="!showPass" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0
-                         8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542
-                         7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              <svg x-show="showPass" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478
-                         0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029
-                         m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242
-                         4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29
-                         3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478
-                         0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132
-                         5.411m0 0L21 21"/>
-              </svg>
-            </button>
+        <div class="field">
+          <label>To'liq ism</label>
+          <div class="field-wrap">
+            <input type="text" name="full_name" required placeholder="Aziz Karimov">
+            <span class="field-icon">👤</span>
           </div>
         </div>
 
-        <!-- Confirm password -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300
-                        mb-2 uppercase tracking-wider">
-            Parolni tasdiqlang
-          </label>
-          <div class="relative">
-            <input name="password_confirm" required
-                   :type="showConfirm ? 'text' : 'password'"
-                   placeholder="Parolni qayta kiriting"
-                   autocomplete="new-password"
-                   class="input-field pr-11" />
-            <button type="button" @click="showConfirm = !showConfirm"
-                    class="absolute right-3 top-1/2 -translate-y-1/2
-                           text-ink-400 hover:text-ink-200 transition-colors">
-              <svg x-show="!showConfirm" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0
-                         8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542
-                         7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              <svg x-show="showConfirm" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478
-                         0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029
-                         m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242
-                         4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29
-                         3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478
-                         0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132
-                         5.411m0 0L21 21"/>
-              </svg>
-            </button>
+        <div class="field">
+          <label>Email manzil</label>
+          <div class="field-wrap">
+            <input type="email" name="email" required autocomplete="email" placeholder="sizning@email.com">
+            <span class="field-icon">✉</span>
           </div>
         </div>
 
-        <!-- Terms -->
-        <label class="flex items-start gap-3 cursor-pointer group">
-          <input type="checkbox" name="agree" required
-                 class="mt-0.5 w-4 h-4 accent-gold-500 flex-shrink-0" />
-          <span class="text-xs text-ink-400 leading-relaxed">
-            <a href="/terms/" class="text-gold-500 hover:text-gold-400
-                                     transition-colors">Foydalanish shartlari</a>
-            va
-            <a href="/privacy/" class="text-gold-500 hover:text-gold-400
-                                       transition-colors">Maxfiylik siyosati</a>
-            bilan roziman
-          </span>
-        </label>
+        <div class="field">
+          <label>Parol</label>
+          <div class="field-wrap">
+            <input type="password" name="password1" required placeholder="Kuchli parol yarating" id="pass1" oninput="checkStrength(this.value)">
+          </div>
+          <div class="strength-bar"><div class="strength-fill" id="str-fill"></div></div>
+          <div class="field-hint" id="str-hint">Kamida 8 ta belgi</div>
+        </div>
 
-        <button type="submit" class="btn-gold w-full py-3 text-base mt-2">
-          Ro'yxatdan o'tish
-        </button>
+        <div class="field">
+          <label>Parolni tasdiqlang</label>
+          <div class="field-wrap">
+            <input type="password" name="password2" required placeholder="Parolni qayta kiriting">
+          </div>
+        </div>
+
+        <div class="agree-row">
+          <input type="checkbox" id="r-agree" name="agree" required>
+          <label for="r-agree">Men <a href="#">foydalanish shartlari</a> va <a href="#">maxfiylik siyosati</a>ga roziman</label>
+        </div>
+
+        <button type="submit" class="submit-btn">Ro'yxatdan o'tish</button>
       </form>
 
-      <p class="text-center text-ink-500 text-sm mt-6">
-        Hisobingiz bormi?
-        <a href="{% url 'auth:login' %}"
-           class="text-gold-500 hover:text-gold-400 font-medium transition-colors">
-          Kirish
-        </a>
-      </p>
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-text">yoki</div>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="terms">Hisobingiz bormi? <a href="{% url 'auth:login' %}">Kiring</a></div>
     </div>
   </div>
 </div>
+
+<script>
+const fsv=document.getElementById('fsv');
+if(fsv){for(let i=0;i<40;i++){const s=document.createElement('div');s.className='fsv-seg';fsv.appendChild(s.cloneNode());}}
+const canvas=document.getElementById('bgc');
+if(canvas){
+  const ctx=canvas.getContext('2d');
+  function resize(){canvas.width=canvas.parentElement.offsetWidth;canvas.height=canvas.parentElement.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+  const pts=Array.from({length:50},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.2,vy:(Math.random()-0.5)*0.2,r:Math.random()*1.3+0.3,a:Math.random()*0.5+0.2}));
+  function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(201,168,76,${p.a*0.3})`;ctx.fill();});pts.forEach((p,i)=>pts.slice(i+1).forEach(q=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<80){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=`rgba(201,168,76,${0.06*(1-d/80)})`;ctx.lineWidth=0.5;ctx.stroke();}}));requestAnimationFrame(draw);}
+  draw();
+}
+function checkStrength(v){
+  const fill=document.getElementById('str-fill');const hint=document.getElementById('str-hint');
+  let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  const pct=[0,28,55,78,100][s];const colors=['','#E05252','#C9A84C','#8BC34A','#4CAF50'][s];const labels=["Kamida 8 ta belgi","Zaif","O'rtacha","Yaxshi","Kuchli"][s];
+  fill.style.width=pct+'%';fill.style.background=colors;hint.textContent=labels;
+  hint.style.color=s>=3?'#4CAF50':s===2?'#C9A84C':'var(--text-muted)';
+}
+</script>
 {% endblock %}
