@@ -63,7 +63,7 @@ document.addEventListener('alpine:init', () => {
       if (!this.rating || this.submitting) return;
       this.submitting = true;
       try {
-        const res = await fetch(`/api/movies/${slug}/reviews/create/`, {
+        const res = await fetch(`/api/reviews/movies/${slug}/reviews/create/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
