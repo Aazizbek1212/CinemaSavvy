@@ -50,7 +50,7 @@ class PremiumRequiredMixin(LoginRequiredMixin):
             return self.handle_no_permission()
         if not request.user.is_premium:
             from django.shortcuts import redirect
-            return redirect("pages:subscription")
+            return redirect("auth:subscription")
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -255,7 +255,7 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
         # Premium check
         if movie.is_premium and not request.user.is_premium:
             from django.shortcuts import redirect
-            return redirect("pages:subscription")
+            return redirect("auth:subscription")
 
         return response
 

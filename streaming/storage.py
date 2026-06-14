@@ -79,6 +79,22 @@ class MinIOStorage:
             logger.error("Upload failed for %s: %s", file_key, exc)
             return False
 
+    def download_file(
+        self,
+        file_key: str,
+        local_path: str,
+        bucket: str | None = None,
+    ) -> bool:
+        """Download a file from MinIO to a local path."""
+        bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
+        try:
+            self.client.download_file(bucket, file_key, local_path)
+            logger.info("File downloaded: %s/%s → %s", bucket, file_key, local_path)
+            return True
+        except ClientError as exc:
+            logger.error("Download failed for %s: %s", file_key, exc)
+            return False
+
     def delete_file(self, file_key: str, bucket: str | None = None) -> bool:
         bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
         try:
