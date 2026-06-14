@@ -1,194 +1,180 @@
-<!-- templates/auth/register.html -->
 {% extends "base.html" %}
-{% block title %}Ro'yxatdan o'tish — Cinema.uz{% endblock %}
+{% block title %}Ro'yxatdan o'tish — CinemaSavvy{% endblock %}
 
 {% block content %}
-<div class="min-h-[90vh] flex items-center justify-center px-4 py-12">
-
-  <div class="fixed inset-0 pointer-events-none">
-    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2
-                w-96 h-96 rounded-full bg-emerald-500/3 blur-3xl"></div>
+<div style="display:flex;min-height:calc(100vh - 62px);background:var(--bg)">
+  <!-- Left panel — same as login -->
+  <div style="flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:500px">
+    <canvas id="reg-bg"></canvas>
+    <div class="auth-scan" style="position:absolute;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,0.35),transparent);z-index:2;animation:csScan 6s ease-in-out infinite"></div>
+    <!-- Corners -->
+    <div style="position:absolute;top:28px;left:28px;width:16px;height:16px;border-top:1px solid var(--gmid);border-left:1px solid var(--gmid);z-index:3"></div>
+    <div style="position:absolute;top:28px;right:28px;width:16px;height:16px;border-top:1px solid var(--gmid);border-right:1px solid var(--gmid);z-index:3"></div>
+    <div style="position:absolute;bottom:28px;left:28px;width:16px;height:16px;border-bottom:1px solid var(--gmid);border-left:1px solid var(--gmid);z-index:3"></div>
+    <div style="position:absolute;bottom:28px;right:28px;width:16px;height:16px;border-bottom:1px solid var(--gmid);border-right:1px solid var(--gmid);z-index:3"></div>
+    <!-- Filmstrip -->
+    <div style="position:absolute;right:0;top:0;bottom:0;width:26px;z-index:2;overflow:hidden">
+      <div style="display:flex;flex-direction:column;animation:fsDown 16s linear infinite" id="reg-fs"></div>
+    </div>
+    <div style="position:relative;z-index:4;text-align:center;padding:32px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:5px;color:var(--gold)">Cinema<span style="color:var(--tx)">Savvy</span></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:5px;color:rgba(201,168,76,0.4);margin-bottom:28px">PREMIUM · CINEMA · STREAMING</div>
+      <div style="position:relative;width:110px;height:110px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center">
+        <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 110 110" fill="none">
+          <circle cx="55" cy="55" r="50" stroke="rgba(201,168,76,0.1)" stroke-width="1"/>
+          <circle cx="55" cy="55" r="50" stroke="url(#rg1)" stroke-width="1.5" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round">
+            <animate attributeName="stroke-dashoffset" from="314" to="0" dur="2s" fill="freeze"/>
+          </circle>
+          <defs><linearGradient id="rg1" x1="0" y1="0" x2="110" y2="110" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#C9A84C"/><stop offset="50%" stop-color="#F0E6C8"/><stop offset="100%" stop-color="#C9A84C"/></linearGradient></defs>
+        </svg>
+        <i class="ti ti-user-plus" style="font-size:32px;color:var(--gold);position:relative;z-index:2" aria-hidden="true"></i>
+      </div>
+      <!-- Features -->
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:240px;margin:0 auto;text-align:left">
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(201,168,76,0.05);border:1px solid var(--gdim);border-radius:3px;animation:fadeSlideUp 0.6s ease 0.3s both">
+          <i class="ti ti-bolt" style="color:var(--gold);font-size:16px;flex-shrink:0" aria-hidden="true"></i>
+          <div><strong style="display:block;font-size:12px;color:var(--tx)">Tezkor ro'yxat</strong><span style="font-size:11px;color:var(--txd)">1 daqiqada hisob yarating</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(201,168,76,0.05);border:1px solid var(--gdim);border-radius:3px;animation:fadeSlideUp 0.6s ease 0.5s both">
+          <i class="ti ti-star" style="color:var(--gold);font-size:16px;flex-shrink:0" aria-hidden="true"></i>
+          <div><strong style="display:block;font-size:12px;color:var(--tx)">7 kun bepul</strong><span style="font-size:11px;color:var(--txd)">Premium sinab ko'ring</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(201,168,76,0.05);border:1px solid var(--gdim);border-radius:3px;animation:fadeSlideUp 0.6s ease 0.7s both">
+          <i class="ti ti-device-tv" style="color:var(--gold);font-size:16px;flex-shrink:0" aria-hidden="true"></i>
+          <div><strong style="display:block;font-size:12px;color:var(--tx)">12,000+ film</strong><span style="font-size:11px;color:var(--txd)">4K sifatda</span></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="w-full max-w-md relative animate-scale-in">
+  <!-- Right panel -->
+  <div style="width:440px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:40px 36px;border-left:1px solid rgba(201,168,76,0.1);background:var(--bg2)">
+    <div style="width:100%;max-width:368px">
+      <div style="margin-bottom:24px">
+        <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--tx);margin-bottom:5px">Hisob yarating</div>
+        <div style="font-size:13px;color:var(--txd)">Bir daqiqada ro'yxatdan o'ting va kino olamiga qo'shiling.</div>
+      </div>
 
-    <!-- Logo -->
-    <div class="text-center mb-8">
-      <a href="{% url 'home' %}"
-         class="inline-flex flex-col items-center gap-3 group">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br
-                    from-gold-500 to-gold-700
-                    flex items-center justify-center shadow-gold-lg
-                    group-hover:scale-105 transition-transform duration-200">
-          <svg class="w-7 h-7 text-ink-950" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M18 4H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0
-                     2-.9 2-2V6c0-1.1-.9-2-2-2zM9 17V7l8 5-8 5z"/>
-          </svg>
-        </div>
-        <span class="text-2xl font-bold text-white">
-          Cinema<span class="text-gradient-gold">.uz</span>
-        </span>
-      </a>
-      <p class="text-ink-400 mt-2 text-sm">Hisob yarating</p>
-    </div>
-
-    <div class="glass-card p-8 shadow-card">
-
-      <!-- Error -->
       {% if error %}
-        <div class="flex items-center gap-3 bg-crimson-500/10
-                    border border-crimson-500/30 rounded-xl p-4 mb-6">
-          <svg class="w-5 h-5 text-crimson-400 flex-shrink-0"
-               fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <p class="text-crimson-300 text-sm">{{ error }}</p>
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(139,26,26,0.15);border:1px solid rgba(139,26,26,0.3);border-radius:3px;padding:10px 14px;margin-bottom:18px">
+          <i class="ti ti-alert-circle" style="font-size:16px;color:#E07070;flex-shrink:0" aria-hidden="true"></i>
+          <p style="font-size:13px;color:#E07070">{{ error }}</p>
         </div>
       {% endif %}
 
       <form method="post" action="{% url 'auth:register' %}"
-            class="space-y-4"
-            x-data="{ showPass: false, showConfirm: false }">
+            x-data="{showPass:false,showConfirm:false,strength:0,strengthLabel:'Kamida 8 ta belgi',strengthColor:'var(--txm)'}">
         {% csrf_token %}
 
-        <!-- Full name -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300
-                        mb-2 uppercase tracking-wider">
-            To'liq ism
-          </label>
-          <input type="text" name="full_name"
-                 value="{{ form_data.full_name|default:'' }}"
-                 placeholder="Ism Familiya"
-                 autocomplete="name"
-                 class="input-field" />
+        <div style="margin-bottom:15px">
+          <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txd);margin-bottom:6px">To'liq ism</label>
+          <div style="position:relative">
+            <input type="text" name="full_name" value="{{ form_data.full_name|default:'' }}"
+                   placeholder="Ism Familiya" autocomplete="name" class="input-field" style="padding-right:38px" />
+            <i class="ti ti-user" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--txd);font-size:15px;pointer-events:none" aria-hidden="true"></i>
+          </div>
         </div>
 
-        <!-- Email -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300
-                        mb-2 uppercase tracking-wider">
-            Email manzil
-          </label>
-          <input type="email" name="email" required
-                 value="{{ form_data.email|default:'' }}"
-                 placeholder="email@example.com"
-                 autocomplete="email"
-                 class="input-field" />
+        <div style="margin-bottom:15px">
+          <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txd);margin-bottom:6px">Email manzil</label>
+          <div style="position:relative">
+            <input type="email" name="email" required value="{{ form_data.email|default:'' }}"
+                   placeholder="email@example.com" autocomplete="email" class="input-field" style="padding-right:38px" />
+            <i class="ti ti-mail" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--txd);font-size:15px;pointer-events:none" aria-hidden="true"></i>
+          </div>
         </div>
 
-        <!-- Password -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300
-                        mb-2 uppercase tracking-wider">
-            Parol
-          </label>
-          <div class="relative">
-            <input name="password" required
-                   :type="showPass ? 'text' : 'password'"
-                   placeholder="Kamida 8 ta belgi"
-                   autocomplete="new-password"
-                   class="input-field pr-11" />
-            <button type="button" @click="showPass = !showPass"
-                    class="absolute right-3 top-1/2 -translate-y-1/2
-                           text-ink-400 hover:text-ink-200 transition-colors">
-              <svg x-show="!showPass" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0
-                         8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542
-                         7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              <svg x-show="showPass" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478
-                         0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029
-                         m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242
-                         4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29
-                         3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478
-                         0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132
-                         5.411m0 0L21 21"/>
-              </svg>
+        <div style="margin-bottom:6px">
+          <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txd);margin-bottom:6px">Parol</label>
+          <div style="position:relative">
+            <input name="password" required :type="showPass?'text':'password'"
+                   placeholder="Kamida 8 ta belgi" autocomplete="new-password"
+                   class="input-field" style="padding-right:38px"
+                   @input="checkStr($event.target.value)" />
+            <button type="button" @click="showPass=!showPass"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--txd);background:none;border:none;cursor:pointer;font-size:15px;transition:color 0.2s"
+                    onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--txd)'"
+                    aria-label="Parolni ko'rsatish">
+              <i :class="showPass?'ti ti-eye-off':'ti ti-eye'" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div style="height:3px;background:var(--bg3);border-radius:2px;margin-top:6px;overflow:hidden">
+            <div :style="`width:${strength}%;background:${strengthColor};height:100%;border-radius:2px;transition:width 0.3s,background 0.3s`"></div>
+          </div>
+          <div :style="`font-size:11px;margin-top:4px;color:${strengthColor}`" x-text="strengthLabel"></div>
+        </div>
+
+        <div style="margin-bottom:18px">
+          <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txd);margin-bottom:6px">Parolni tasdiqlang</label>
+          <div style="position:relative">
+            <input name="password_confirm" required :type="showConfirm?'text':'password'"
+                   placeholder="Parolni qayta kiriting" autocomplete="new-password"
+                   class="input-field" style="padding-right:38px" />
+            <button type="button" @click="showConfirm=!showConfirm"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--txd);background:none;border:none;cursor:pointer;font-size:15px"
+                    aria-label="Parolni ko'rsatish">
+              <i :class="showConfirm?'ti ti-eye-off':'ti ti-eye'" aria-hidden="true"></i>
             </button>
           </div>
         </div>
 
-        <!-- Confirm password -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300
-                        mb-2 uppercase tracking-wider">
-            Parolni tasdiqlang
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:20px">
+          <input type="checkbox" name="agree" required id="reg-agree"
+                 style="width:15px;height:15px;accent-color:var(--gold);margin-top:1px;flex-shrink:0;cursor:pointer" />
+          <label for="reg-agree" style="font-size:12px;color:var(--txd);line-height:1.5;cursor:pointer">
+            <a href="/terms/" style="color:var(--gold);text-decoration:none">Foydalanish shartlari</a> va
+            <a href="/privacy/" style="color:var(--gold);text-decoration:none">Maxfiylik siyosati</a>ga roziman
           </label>
-          <div class="relative">
-            <input name="password_confirm" required
-                   :type="showConfirm ? 'text' : 'password'"
-                   placeholder="Parolni qayta kiriting"
-                   autocomplete="new-password"
-                   class="input-field pr-11" />
-            <button type="button" @click="showConfirm = !showConfirm"
-                    class="absolute right-3 top-1/2 -translate-y-1/2
-                           text-ink-400 hover:text-ink-200 transition-colors">
-              <svg x-show="!showConfirm" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0
-                         8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542
-                         7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              <svg x-show="showConfirm" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478
-                         0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029
-                         m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242
-                         4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29
-                         3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478
-                         0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132
-                         5.411m0 0L21 21"/>
-              </svg>
-            </button>
-          </div>
         </div>
 
-        <!-- Terms -->
-        <label class="flex items-start gap-3 cursor-pointer group">
-          <input type="checkbox" name="agree" required
-                 class="mt-0.5 w-4 h-4 accent-gold-500 flex-shrink-0" />
-          <span class="text-xs text-ink-400 leading-relaxed">
-            <a href="/terms/" class="text-gold-500 hover:text-gold-400
-                                     transition-colors">Foydalanish shartlari</a>
-            va
-            <a href="/privacy/" class="text-gold-500 hover:text-gold-400
-                                       transition-colors">Maxfiylik siyosati</a>
-            bilan roziman
-          </span>
-        </label>
-
-        <button type="submit" class="btn-gold w-full py-3 text-base mt-2">
+        <button type="submit" class="btn-gold" style="width:100%;padding:13px;font-size:14px;letter-spacing:3px;margin-bottom:18px">
           Ro'yxatdan o'tish
         </button>
       </form>
 
-      <p class="text-center text-ink-500 text-sm mt-6">
-        Hisobingiz bormi?
-        <a href="{% url 'auth:login' %}"
-           class="text-gold-500 hover:text-gold-400 font-medium transition-colors">
-          Kirish
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="flex:1;height:1px;background:rgba(201,168,76,0.1)"></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">yoki</div>
+        <div style="flex:1;height:1px;background:rgba(201,168,76,0.1)"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:20px">
+        <a href="{% url 'social:begin' 'google-oauth2' %}"
+           style="flex:1;background:var(--bg3);border:1px solid rgba(201,168,76,0.12);border-radius:3px;padding:10px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;color:var(--txd);text-decoration:none;transition:border-color 0.2s"
+           onmouseover="this.style.borderColor='var(--gmid)';this.style.color='var(--tx)'"
+           onmouseout="this.style.borderColor='rgba(201,168,76,0.12)';this.style.color='var(--txd)'">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
         </a>
+      </div>
+      <p style="text-align:center;font-size:12px;color:var(--txd)">
+        Hisobingiz bormi?
+        <a href="{% url 'auth:login' %}" style="color:var(--gold);text-decoration:none;font-weight:500">Kirish</a>
       </p>
     </div>
   </div>
 </div>
+
+<script>
+const rfs=document.getElementById('reg-fs');
+if(rfs){for(let i=0;i<40;i++){const s=document.createElement('div');s.style.cssText='width:26px;height:38px;background:#16121e;border-bottom:2px solid #2a2035;flex-shrink:0;position:relative';rfs.appendChild(s.cloneNode());}}
+const rc=document.getElementById('reg-bg');
+if(rc){const ctx=rc.getContext('2d');function rz(){rc.width=rc.parentElement.offsetWidth;rc.height=rc.parentElement.offsetHeight;}rz();const pts=Array.from({length:45},()=>({x:Math.random()*rc.width,y:Math.random()*rc.height,vx:(Math.random()-0.5)*0.2,vy:(Math.random()-0.5)*0.2,r:Math.random()*1.3+0.3,a:Math.random()*0.5+0.2}));function draw(){ctx.clearRect(0,0,rc.width,rc.height);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=rc.width;if(p.x>rc.width)p.x=0;if(p.y<0)p.y=rc.height;if(p.y>rc.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(201,168,76,${p.a*0.25})`;ctx.fill();});pts.forEach((p,i)=>pts.slice(i+1).forEach(q=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<80){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=`rgba(201,168,76,${0.04*(1-d/80)})`;ctx.lineWidth=0.5;ctx.stroke();}}));requestAnimationFrame(draw);}draw();}
+
+document.addEventListener('alpine:init',()=>{
+  Alpine.data('checkStr',()=>({
+    checkStr(v){
+      let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+      const pct=[0,25,55,78,100][s];
+      const colors=['','#E07070','#C9A84C','#8BC34A','#4CAF50'][s];
+      const labels=['Kamida 8 ta belgi','Zaif','O\'rtacha','Yaxshi','Kuchli'][s];
+      this.strength=pct;this.strengthColor=colors||'var(--txm)';this.strengthLabel=labels;
+    }
+  }));
+});
+</script>
+
+<script>
+// Inline Alpine method since it's declared in the form
+document.addEventListener('alpine:init',()=>{});
+</script>
 {% endblock %}

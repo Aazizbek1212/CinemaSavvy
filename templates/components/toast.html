@@ -1,7 +1,6 @@
 <div x-data="toastManager()"
      @show-toast.window="addToast($event.detail)"
-     class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
-
+     style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none">
   <template x-for="toast in toasts" :key="toast.id">
     <div x-show="toast.visible"
          x-transition:enter="transition ease-out duration-300"
@@ -9,16 +8,14 @@
          x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-end="opacity-0"
-         :class="{
-           'bg-green-600': toast.type === 'success',
-           'bg-red-600': toast.type === 'error',
-           'bg-blue-600': toast.type === 'info',
-         }"
-         class="pointer-events-auto flex items-center gap-3 px-4 py-3
-                rounded-xl shadow-xl text-white text-sm font-medium min-w-64">
-      <span x-text="toast.type === 'success' ? '✅' : toast.type === 'error' ? '❌' : 'ℹ️'"></span>
-      <span x-text="toast.message" class="flex-1"></span>
-      <button @click="removeToast(toast.id)" class="text-white/70 hover:text-white">✕</button>
+         :style="`background:${toast.type==='success'?'#1A5C2E':toast.type==='error'?'#5C1A1A':'#1A3A5C'};border:1px solid ${toast.type==='success'?'rgba(112,192,133,0.3)':toast.type==='error'?'rgba(224,112,112,0.3)':'rgba(112,160,224,0.3)'}`"
+         style="pointer-events:auto;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:3px;min-width:260px;max-width:360px;backdrop-filter:blur(10px)">
+      <i :class="toast.type==='success'?'ti ti-check':toast.type==='error'?'ti ti-alert-circle':'ti ti-info-circle'"
+         :style="`color:${toast.type==='success'?'#70C085':toast.type==='error'?'#E07070':'#70A0E0'};font-size:16px;flex-shrink:0`"></i>
+      <span x-text="toast.message" style="font-size:13px;color:#F0E6C8;flex:1;line-height:1.4"></span>
+      <button @click="removeToast(toast.id)" style="color:#7A6A52;background:none;border:none;cursor:pointer;font-size:16px;padding:0;line-height:1;flex-shrink:0">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
     </div>
   </template>
 </div>
