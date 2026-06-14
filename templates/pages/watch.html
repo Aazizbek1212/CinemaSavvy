@@ -1,112 +1,209 @@
-<!-- templates/pages/watch.html -->
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ movie.title }} — Ko'rish{% endblock %}
+{% block title %}{{ movie.title }} — Ko'rish | CinemaSavvy{% endblock %}
 
 {% block extra_head %}
-<link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://vjs.zencdn.net/8.6.1/video-js.css" />
+<style>
+.watch-page { background: #000; min-height: calc(100vh - 62px); }
+.player-wrap {
+  position: relative; background: #000; width: 100%;
+  aspect-ratio: 16/9; overflow: hidden; max-height: 540px;
+}
+.player-controls { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 18px 14px; background: linear-gradient(to top, rgba(0,0,0,0.88), transparent); z-index: 10; opacity: 0; transition: opacity 0.3s; }
+.player-wrap:hover .player-controls { opacity: 1; }
+.player-top { position: absolute; top: 0; left: 0; right: 0; padding: 14px 18px; background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); z-index: 10; display: flex; align-items: center; justify-content: space-between; opacity: 0; transition: opacity 0.3s; }
+.player-wrap:hover .player-top { opacity: 1; }
+.progress-wrap { height: 20px; display: flex; align-items: center; cursor: pointer; margin-bottom: 10px; position: relative; }
+.progress-bg { position: absolute; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; transition: height 0.15s; }
+.progress-buf { position: absolute; left: 0; height: 3px; background: rgba(201,168,76,0.2); border-radius: 2px; }
+.progress-fill { position: absolute; left: 0; height: 3px; background: var(--gold); border-radius: 2px; transition: height 0.15s; }
+.progress-wrap:hover .progress-bg, .progress-wrap:hover .progress-fill { height: 5px; }
+.progress-thumb { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--gold); border: 2px solid #fff; top: 50%; transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.2s; }
+.progress-wrap:hover .progress-thumb { opacity: 1; }
+.ctrl-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: var(--txd); cursor: pointer; border: none; background: transparent; font-size: 18px; border-radius: 2px; transition: color 0.2s; padding: 0; }
+.ctrl-btn:hover { color: var(--tx); }
+.play-sm { width: 40px; height: 40px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; color: var(--bg); cursor: pointer; font-size: 18px; border: none; transition: transform 0.2s; flex-shrink: 0; }
+.play-sm:hover { transform: scale(1.08); }
+.qual-badge { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--gold); border: 1px solid var(--gmid); padding: 2px 8px; border-radius: 2px; cursor: pointer; background: transparent; transition: background 0.2s; }
+.qual-badge:hover { background: var(--gdim); }
+.vol-slider { width: 64px; height: 3px; -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.2); border-radius: 2px; outline: none; cursor: pointer; }
+.vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); cursor: pointer; }
+.cs-pill { display: flex; align-items: center; gap: 7px; padding: 7px 14px; border: 1px solid rgba(201,168,76,0.18); border-radius: 2px; font-size: 12px; color: var(--txd); cursor: pointer; transition: all 0.2s; background: transparent; font-family: 'Inter', sans-serif; }
+.cs-pill:hover, .cs-pill.active { border-color: var(--gold); color: var(--gold); background: var(--gdim); }
+.ep-card { display: flex; gap: 10px; padding: 10px; background: var(--bg3); border: 1px solid rgba(201,168,76,0.1); border-radius: 3px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.ep-card:hover { border-color: rgba(201,168,76,0.35); transform: translateX(3px); }
+.ep-card.active { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="bg-black" x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }})">
+<div class="watch-page" x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }})">
 
-  <!-- Player -->
-  <div class="max-w-6xl mx-auto">
-    <div class="relative bg-black" style="aspect-ratio: 16/9">
-      <video id="cinema-player"
-             class="video-js vjs-default-skin w-full h-full"
-             controls preload="auto"
-             playsinline>
-      </video>
+  <!-- PLAYER -->
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="player-wrap" id="player-container">
 
-      <!-- Loading -->
-      <div x-show="loading"
-           class="absolute inset-0 flex flex-col items-center
-                  justify-center bg-black/80 gap-4">
-        <div class="w-12 h-12 rounded-full border-2 border-ink-700
-                    border-t-gold-500 animate-spin"></div>
-        <p class="text-ink-400 text-sm">Video yuklanmoqda...</p>
+      <video id="cinema-player" class="video-js vjs-default-skin" style="width:100%;height:100%" controls preload="auto" playsinline></video>
+
+      <!-- Loading overlay -->
+      <div x-show="loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);gap:16px;z-index:20">
+        <div style="width:48px;height:48px;border-radius:50%;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);animation:spin 0.7s linear infinite"></div>
+        <p style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--txd)">Video yuklanmoqda...</p>
       </div>
 
-      <!-- Error -->
-      <div x-show="error"
-           class="absolute inset-0 flex flex-col items-center
-                  justify-center bg-black/90 gap-4">
-        <div class="text-4xl">⚠️</div>
-        <p class="text-white font-medium" x-text="errorMsg"></p>
-        <button @click="loadStream()" class="btn-ghost text-sm px-5 py-2">
-          Qayta urinish
-        </button>
+      <!-- Error overlay -->
+      <div x-show="error" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.9);gap:16px;z-index:20">
+        <i class="ti ti-alert-triangle" style="font-size:44px;color:#E07070" aria-hidden="true"></i>
+        <p style="font-size:14px;color:var(--tx);font-weight:500" x-text="errorMsg"></p>
+        <button @click="loadStream()" class="cs-btn-ghost" style="padding:9px 20px;font-size:13px">Qayta urinish</button>
       </div>
-    </div>
-  </div>
 
-  <!-- Info bar -->
-  <div class="max-w-6xl mx-auto px-4 py-4 border-b border-white/5">
-    <div class="flex flex-col sm:flex-row sm:items-center
-                justify-between gap-3">
-      <div>
-        <div class="flex items-center gap-2 mb-1">
-          <a href="{% url 'movie-detail' movie.slug %}"
-             class="text-ink-400 hover:text-white text-xs transition-colors
-                    flex items-center gap-1">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Orqaga
-          </a>
+      <!-- Top bar -->
+      <div class="player-top">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="qual-badge">4K HDR</span>
+          <span style="font-size:13px;color:var(--tx);font-weight:500">{{ movie.title }}</span>
         </div>
-        <h1 class="text-white font-bold text-lg">{{ movie.title }}</h1>
-        <p class="text-ink-500 text-xs mt-0.5">
-          {{ movie.release_year }}
-          {% if movie.duration_display %}• {{ movie.duration_display }}{% endif %}
-        </p>
+        <div style="display:flex;gap:8px">
+          <button style="width:34px;height:34px;background:rgba(0,0,0,0.5);border:1px solid rgba(201,168,76,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;font-size:15px;transition:all 0.2s"
+                  onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+                  onmouseout="this.style.borderColor='rgba(201,168,76,0.2)';this.style.color='var(--txd)'"
+                  aria-label="Subtitles">
+            <i class="ti ti-subtitles" aria-hidden="true"></i>
+          </button>
+          <button style="width:34px;height:34px;background:rgba(0,0,0,0.5);border:1px solid rgba(201,168,76,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;font-size:15px;transition:all 0.2s"
+                  onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+                  onmouseout="this.style.borderColor='rgba(201,168,76,0.2)';this.style.color='var(--txd)'"
+                  aria-label="To'liq ekran">
+            <i class="ti ti-arrows-maximize" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Controls -->
-      <div class="flex items-center gap-3">
-        <!-- Quality -->
-        {% if available_files %}
-          <div class="flex items-center gap-2">
-            <span class="text-ink-500 text-xs">Sifat:</span>
-            <select x-model="quality"
-                    @change="changeQuality()"
-                    class="bg-ink-800 border border-ink-700 rounded-lg
-                           px-3 py-1.5 text-xs text-white
-                           focus:outline-none focus:border-gold-500">
-              {% for f in available_files %}
-                <option value="{{ f.quality }}">{{ f.quality }}</option>
-              {% endfor %}
-            </select>
+      <div class="player-controls">
+        <!-- Progress bar -->
+        <div class="progress-wrap" @click="seekVideo($event)" @mousemove="showTip($event)" @mouseleave="hideTip()">
+          <div class="progress-bg"></div>
+          <div class="progress-buf" :style="`width:${buffered}%`"></div>
+          <div class="progress-fill" id="prog-fill" :style="`width:${progress}%`"></div>
+          <div class="progress-thumb" :style="`left:${progress}%`"></div>
+          <div x-show="tipVisible" :style="`position:absolute;top:-28px;left:${tipX}px;background:rgba(0,0,0,0.88);color:var(--tx);font-size:11px;padding:3px 8px;border-radius:2px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;border:1px solid var(--gdim);pointer-events:none`" x-text="tipTime"></div>
+        </div>
+        <!-- Buttons row -->
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="ctrl-btn" @click="skipSec(-10)" aria-label="10 sekund orqaga"><i class="ti ti-rewind" aria-hidden="true"></i></button>
+            <button class="play-sm" @click="togglePlay()" aria-label="Play/Pause">
+              <i :class="playing?'ti ti-player-pause':'ti ti-player-play'" :style="playing?'':'margin-left:3px'" aria-hidden="true"></i>
+            </button>
+            <button class="ctrl-btn" @click="skipSec(10)" aria-label="10 sekund oldinga"><i class="ti ti-fast-forward" aria-hidden="true"></i></button>
+            <div style="display:flex;align-items:center;gap:7px">
+              <button class="ctrl-btn" @click="toggleMute()" aria-label="Ovoz">
+                <i :class="muted?'ti ti-volume-off':vol<50?'ti ti-volume-2':'ti ti-volume'" aria-hidden="true"></i>
+              </button>
+              <input type="range" class="vol-slider" min="0" max="100" x-model="vol" @input="setVolume()" aria-label="Ovoz balandligi" />
+            </div>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--tx);letter-spacing:1px;padding:0 6px" x-text="curTime+' / '+durTime"></span>
           </div>
-        {% endif %}
-
-        <!-- Subtitles toggle -->
-        {% if subtitles %}
-          <button @click="toggleSubtitles()"
-                  :class="subtitlesOn
-                           ? 'border-gold-500/60 text-gold-400'
-                           : 'border-ink-700 text-ink-400'"
-                  class="border rounded-lg px-3 py-1.5 text-xs
-                         hover:border-gold-500/40 transition-all duration-200">
-            CC
-          </button>
-        {% endif %}
+          <div style="display:flex;align-items:center;gap:8px">
+            {% if available_files %}
+              <select x-model="quality" @change="changeQuality()"
+                      style="background:var(--bg3);border:1px solid rgba(201,168,76,0.2);border-radius:2px;padding:4px 8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--gold);outline:none;cursor:pointer"
+                      aria-label="Sifat tanlash">
+                {% for f in available_files %}
+                  <option value="{{ f.quality }}">{{ f.quality }}</option>
+                {% endfor %}
+              </select>
+            {% endif %}
+            {% if subtitles %}
+              <button class="ctrl-btn" :class="{gold:subtitlesOn}" @click="toggleSubtitles()" aria-label="Subtitles">
+                <i class="ti ti-subtitles" aria-hidden="true"></i>
+              </button>
+            {% endif %}
+            <button class="ctrl-btn" aria-label="To'liq ekran"><i class="ti ti-arrows-maximize" aria-hidden="true"></i></button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Subtitle tracks (hidden) -->
-  {% for sub in subtitles %}
-    <track kind="subtitles"
-           label="{{ sub.language.name }}"
-           srclang="{{ sub.language.code }}"
-           data-key="{{ sub.file_key }}" />
-  {% endfor %}
+  <!-- INFO BAR -->
+  <div style="max-width:1100px;margin:0 auto;padding:16px 0 0">
+    <div style="display:flex;gap:24px;padding:0 0 0">
+      <!-- Left: movie info -->
+      <div style="flex:1">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--tx)">{{ movie.title }}</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
+              {% if movie.average_rating > 0 %}
+                <span style="display:flex;align-items:center;gap:4px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold)"><i class="ti ti-star" style="font-size:12px" aria-hidden="true"></i> {{ movie.average_rating }}</span>
+                <span style="color:var(--txm)">·</span>
+              {% endif %}
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--txd)">{{ movie.release_year }}</span>
+              {% if movie.duration_display %}
+                <span style="color:var(--txm)">·</span>
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--txd)">{{ movie.duration_display }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button style="width:38px;height:38px;background:var(--bg3);border:1px solid rgba(201,168,76,0.12);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s"
+                    onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+                    onmouseout="this.style.borderColor='rgba(201,168,76,0.12)';this.style.color='var(--txd)'"
+                    aria-label="Sevimlilar"><i class="ti ti-heart" style="font-size:16px" aria-hidden="true"></i></button>
+            <button style="width:38px;height:38px;background:var(--bg3);border:1px solid rgba(201,168,76,0.12);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s"
+                    onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+                    onmouseout="this.style.borderColor='rgba(201,168,76,0.12)';this.style.color='var(--txd)'"
+                    aria-label="Ulashish"><i class="ti ti-share" style="font-size:16px" aria-hidden="true"></i></button>
+          </div>
+        </div>
+        {% if movie.description %}
+          <p style="font-size:13px;color:var(--txd);line-height:1.7;max-width:600px;margin-bottom:14px;font-weight:300">{{ movie.description|truncatechars:200 }}</p>
+        {% endif %}
+        <!-- Pills -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          {% if subtitles %}
+            <button class="cs-pill active"><i class="ti ti-subtitles" style="font-size:13px" aria-hidden="true"></i> Subtitrl</button>
+          {% endif %}
+          {% if available_files %}
+            <button class="cs-pill"><i class="ti ti-download" style="font-size:13px" aria-hidden="true"></i> Yuklab olish</button>
+          {% endif %}
+          <button class="cs-pill"><i class="ti ti-users" style="font-size:13px" aria-hidden="true"></i> Birga ko'rish</button>
+          <a href="{% url 'movie-detail' movie.slug %}" class="cs-pill" style="text-decoration:none"><i class="ti ti-info-circle" style="font-size:13px" aria-hidden="true"></i> Batafsil</a>
+        </div>
+      </div>
 
+      <!-- Right: Keyingi filmlar -->
+      <div style="width:280px;flex-shrink:0">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+          Keyingi filmlar<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span>
+        </div>
+        <!-- Watch history / related -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="{% url 'movie-detail' movie.slug %}" class="ep-card active" style="text-decoration:none">
+            <div style="width:68px;height:44px;background:var(--bg2);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative">
+              {% if movie.poster %}<img src="{{ movie.poster.url }}" alt="" style="width:100%;height:100%;object-fit:cover" />{% else %}<i class="ti ti-movie" style="font-size:16px;color:rgba(201,168,76,0.2)" aria-hidden="true"></i>{% endif %}
+              <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold)"></div>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;color:var(--txd);margin-bottom:2px">Hozir ko'rilmoqda</div>
+              <div style="font-size:11px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ movie.title }}</div>
+              <div style="font-size:10px;color:var(--txm);font-family:'Bebas Neue',sans-serif;margin-top:2px">{{ movie.duration_display }}</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -114,130 +211,111 @@
 <script>
 function videoPlayer(slug, resumePosition) {
   return {
-    loading: true,
-    error:   false,
-    errorMsg: '',
-    quality: '{{ available_files.first.quality|default:"720p" }}',
-    subtitlesOn: true,
-    player: null,
-    progressInterval: null,
+    loading: true, error: false, errorMsg: '',
+    playing: false, progress: 0, buffered: 0, vol: 80, muted: false,
+    curTime: '00:00', durTime: '00:00', quality: '{{ available_files.first.quality|default:"720p" }}',
+    subtitlesOn: true, player: null, progressInterval: null,
+    tipVisible: false, tipX: 0, tipTime: '00:00',
 
-    async init() {
-      await this.loadStream();
-    },
+    async init() { await this.loadStream(); },
 
     async loadStream() {
-      this.loading = true;
-      this.error   = false;
-
+      this.loading = true; this.error = false;
       try {
-        const token = localStorage.getItem('access_token') || '';
-        const res = await fetch(
-            `/api/streaming/${slug}/?quality=${this.quality}`,
-            { 
-                headers: { 'X-CSRFToken': getCsrfToken() },
-                credentials: 'include',
-            }
-        );
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.detail || 'Video yuklanmadi');
-        }
-
+        const res = await fetch(`/api/streaming/${slug}/?quality=${this.quality}`, {
+          headers: { 'X-CSRFToken': getCsrfToken() }, credentials: 'include',
+        });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.detail || 'Video yuklanmadi'); }
         const data = await res.json();
 
         if (this.player) {
           this.player.src({ type: 'application/x-mpegURL', src: data.stream_url });
         } else {
           this.player = videojs('cinema-player', {
-            fluid: false,
-            fill:  true,
+            fluid: false, fill: true, controls: true, preload: 'auto',
             html5: { vhs: { overrideNative: true, withCredentials: false } },
-            controls:   true,
-            preload:    'auto',
-            responsive: true,
           });
-
           this.player.src({ type: 'application/x-mpegURL', src: data.stream_url });
 
-          // Resume position
           const resume = data.resume_position || resumePosition;
           if (resume > 10) {
-            this.player.one('loadedmetadata', () => {
-              this.player.currentTime(resume);
+            this.player.one('loadedmetadata', () => { this.player.currentTime(resume); });
+          }
+
+          if (data.subtitles?.length) {
+            data.subtitles.forEach(sub => {
+              this.player.addRemoteTextTrack({ kind: 'subtitles', label: sub.language_name, srclang: sub.language_code, src: sub.url, default: sub.language_code === 'uz' }, false);
             });
           }
 
-          // Subtitles
-          if (data.subtitles?.length) {
-            data.subtitles.forEach(sub => {
-              this.player.addRemoteTextTrack({
-                kind:    'subtitles',
-                label:   sub.language_name,
-                srclang: sub.language_code,
-                src:     sub.url,
-                default: sub.language_code === 'uz',
-              }, false);
-            });
-          }
+          this.player.on('timeupdate', () => {
+            const cur = this.player.currentTime() || 0;
+            const dur = this.player.duration() || 0;
+            this.progress = dur > 0 ? (cur / dur) * 100 : 0;
+            this.curTime = this.fmtTime(cur);
+            this.durTime = this.fmtTime(dur);
+          });
+          this.player.on('progress', () => {
+            const dur = this.player.duration() || 0;
+            if (dur > 0 && this.player.bufferedEnd) {
+              this.buffered = (this.player.bufferedEnd(0) / dur) * 100;
+            }
+          });
+          this.player.on('play', () => { this.playing = true; });
+          this.player.on('pause', () => { this.playing = false; });
 
           this.startProgressTracking();
         }
-
         this.loading = false;
         this.player.play().catch(() => {});
-
       } catch (err) {
-        this.loading  = false;
-        this.error    = true;
-        this.errorMsg = err.message || 'Xato yuz berdi';
+        this.loading = false; this.error = true; this.errorMsg = err.message || 'Xato yuz berdi';
       }
     },
 
-    changeQuality() {
-      const currentTime = this.player?.currentTime() || 0;
-      this.loadStream().then(() => {
-        this.player?.currentTime(currentTime);
-      });
+    togglePlay() { if (!this.player) return; this.player.paused() ? this.player.play() : this.player.pause(); },
+    skipSec(s) { if (!this.player) return; this.player.currentTime(Math.max(0, (this.player.currentTime()||0)+s)); },
+    seekVideo(e) {
+      const wrap = e.currentTarget; const rect = wrap.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      if (this.player && this.player.duration()) this.player.currentTime(pct * this.player.duration());
     },
-
+    showTip(e) {
+      const wrap = e.currentTarget; const rect = wrap.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const dur = this.player?.duration() || 0;
+      this.tipX = e.clientX - rect.left - 20;
+      this.tipTime = this.fmtTime(pct * dur);
+      this.tipVisible = true;
+    },
+    hideTip() { this.tipVisible = false; },
+    toggleMute() { this.muted = !this.muted; if (this.player) this.player.muted(this.muted); },
+    setVolume() { if (this.player) { this.player.volume(this.vol / 100); this.muted = this.vol == 0; } },
+    changeQuality() { const cur = this.player?.currentTime() || 0; this.loadStream().then(() => { this.player?.currentTime(cur); }); },
     toggleSubtitles() {
       this.subtitlesOn = !this.subtitlesOn;
       if (!this.player) return;
       const tracks = this.player.textTracks();
-      for (let i = 0; i < tracks.length; i++) {
-        tracks[i].mode = this.subtitlesOn ? 'showing' : 'hidden';
-      }
+      for (let i = 0; i < tracks.length; i++) tracks[i].mode = this.subtitlesOn ? 'showing' : 'hidden';
     },
-
+    fmtTime(s) {
+      s = Math.floor(s || 0);
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+      return h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    },
     startProgressTracking() {
       clearInterval(this.progressInterval);
       this.progressInterval = setInterval(async () => {
         if (!this.player || this.player.paused()) return;
-        const pos = Math.floor(this.player.currentTime());
-        const dur = Math.floor(this.player.duration() || 0);
+        const pos = Math.floor(this.player.currentTime()); const dur = Math.floor(this.player.duration() || 0);
         if (pos < 5) return;
-
-        const token = localStorage.getItem('access_token') || '';
         await fetch(`/api/streaming/${slug}/progress/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken':   getCsrfToken(),
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            position_seconds: pos,
-            duration_seconds: dur || undefined,
-          }),
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({ position_seconds: pos, duration_seconds: dur || undefined }),
         }).catch(() => {});
-      }, 10_000);
+      }, 10000);
     },
-
-    destroy() {
-      clearInterval(this.progressInterval);
-      this.player?.dispose();
-    },
+    destroy() { clearInterval(this.progressInterval); this.player?.dispose(); },
   };
 }
 </script>

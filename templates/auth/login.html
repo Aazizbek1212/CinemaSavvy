@@ -1,147 +1,202 @@
 {% extends "base.html" %}
-{% block title %}Kirish — Cinema.uz{% endblock %}
+{% block title %}Kirish — CinemaSavvy{% endblock %}
 
 {% block content %}
-<div class="min-h-[90vh] flex items-center justify-center px-4 py-12">
+<style>
+.auth-page { display:flex; min-height:calc(100vh - 62px); background:var(--bg); }
+.auth-left {
+  flex:1; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; min-height:500px;
+}
+canvas#auth-bg { position:absolute; inset:0; z-index:0; }
+.auth-scan { position:absolute; left:0; right:0; height:1px;
+  background:linear-gradient(to right,transparent,rgba(201,168,76,0.35),transparent);
+  z-index:2; animation:csScan 6s ease-in-out infinite; }
+.auth-corner { position:absolute; width:16px; height:16px; z-index:3; }
+.auth-corner.tl { top:28px; left:28px; border-top:1px solid var(--gmid); border-left:1px solid var(--gmid); }
+.auth-corner.tr { top:28px; right:28px; border-top:1px solid var(--gmid); border-right:1px solid var(--gmid); }
+.auth-corner.bl { bottom:28px; left:28px; border-bottom:1px solid var(--gmid); border-left:1px solid var(--gmid); }
+.auth-corner.br { bottom:28px; right:28px; border-bottom:1px solid var(--gmid); border-right:1px solid var(--gmid); }
+.auth-left-content { position:relative; z-index:4; text-align:center; padding:32px; }
+.auth-logo { font-family:'Bebas Neue',sans-serif; font-size:34px; letter-spacing:5px; color:var(--gold); margin-bottom:4px; }
+.auth-logo span { color:var(--tx); }
+.auth-logo-sub { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:5px; color:rgba(201,168,76,0.4); margin-bottom:28px; }
+.auth-ring { position:relative; width:110px; height:110px; margin:0 auto 24px; display:flex; align-items:center; justify-content:center; }
+.auth-ring svg { position:absolute; inset:0; width:100%; height:100%; }
+.auth-ring-icon { position:relative; z-index:2; color:var(--gold); font-size:32px; }
+.auth-feats { display:flex; flex-direction:column; gap:10px; max-width:240px; margin:0 auto; text-align:left; }
+.auth-feat { display:flex; align-items:center; gap:10px; padding:9px 12px;
+  background:rgba(201,168,76,0.05); border:1px solid var(--gdim); border-radius:3px;
+  animation:fadeSlideUp 0.6s ease both; }
+.auth-feat:nth-child(1){animation-delay:0.3s}
+.auth-feat:nth-child(2){animation-delay:0.5s}
+.auth-feat:nth-child(3){animation-delay:0.7s}
+.auth-feat-icon { color:var(--gold); font-size:16px; flex-shrink:0; }
+.auth-feat-text strong { display:block; font-size:12px; font-weight:500; color:var(--tx); margin-bottom:1px; }
+.auth-feat-text span { font-size:11px; color:var(--txd); }
+.auth-filmstrip { position:absolute; right:0; top:0; bottom:0; width:26px; z-index:2; overflow:hidden; }
+.auth-fs-inner { display:flex; flex-direction:column; animation:fsDown 16s linear infinite; }
+@keyframes fsDown { to { transform: translateY(-50%); } }
+.auth-fs-seg { width:26px; height:38px; background:#16121e; border-bottom:2px solid #2a2035; flex-shrink:0; position:relative; }
+.auth-fs-seg::before,.auth-fs-seg::after { content:''; position:absolute; width:7px; height:11px; background:var(--bg); border-radius:1px; left:50%; transform:translateX(-50%); }
+.auth-fs-seg::before { top:3px; } .auth-fs-seg::after { bottom:3px; }
 
-  <!-- Background glow -->
-  <div class="fixed inset-0 pointer-events-none">
-    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2
-                w-96 h-96 rounded-full bg-gold-500/3 blur-3xl"></div>
+.auth-right { width:420px; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:40px 36px; border-left:1px solid rgba(201,168,76,0.1); background:var(--bg2); }
+.auth-box { width:100%; max-width:348px; }
+.auth-field { margin-bottom:16px; }
+.auth-field label { display:block; font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:2px; color:var(--txd); margin-bottom:6px; }
+.auth-field-wrap { position:relative; display:flex; align-items:center; }
+.auth-field-wrap .field-icon { position:absolute; right:12px; color:var(--txd); font-size:15px; pointer-events:none; }
+.auth-field-wrap .field-toggle { position:absolute; right:12px; color:var(--txd); font-size:15px; cursor:pointer; background:none; border:none; padding:0; transition:color 0.2s; }
+.auth-field-wrap .field-toggle:hover { color:var(--gold); }
+.auth-submit { width:100%; background:var(--gold); color:var(--bg); border:none; padding:13px; font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:3px; cursor:pointer; border-radius:3px; transition:opacity 0.2s; margin-bottom:18px; position:relative; overflow:hidden; }
+.auth-submit:hover { opacity:0.88; }
+.auth-divider { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+.auth-divider-line { flex:1; height:1px; background:rgba(201,168,76,0.1); }
+.auth-divider-text { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:2px; color:var(--txm); }
+.auth-social-row { display:flex; gap:8px; margin-bottom:20px; }
+.auth-social-btn { flex:1; background:var(--bg3); border:1px solid rgba(201,168,76,0.12); border-radius:3px; padding:10px; display:flex; align-items:center; justify-content:center; gap:7px; font-size:12px; color:var(--txd); cursor:pointer; transition:all 0.2s; text-decoration:none; font-family:'Inter',sans-serif; }
+.auth-social-btn:hover { border-color:var(--gmid); color:var(--tx); }
+.auth-error { display:flex; align-items:center; gap:8px; background:rgba(139,26,26,0.15); border:1px solid rgba(139,26,26,0.3); border-radius:3px; padding:10px 14px; margin-bottom:18px; }
+</style>
+
+<div class="auth-page">
+  <!-- Left panel -->
+  <div class="auth-left">
+    <canvas id="auth-bg"></canvas>
+    <div class="auth-scan"></div>
+    <div class="auth-corner tl"></div>
+    <div class="auth-corner tr"></div>
+    <div class="auth-corner bl"></div>
+    <div class="auth-corner br"></div>
+    <div class="auth-filmstrip"><div class="auth-fs-inner" id="auth-fs"></div></div>
+    <div class="auth-left-content">
+      <div class="auth-logo">Cinema<span>Savvy</span></div>
+      <div class="auth-logo-sub">PREMIUM · CINEMA · STREAMING</div>
+      <div class="auth-ring">
+        <svg viewBox="0 0 110 110" fill="none">
+          <circle cx="55" cy="55" r="50" stroke="rgba(201,168,76,0.1)" stroke-width="1"/>
+          <circle cx="55" cy="55" r="50" stroke="url(#ag1)" stroke-width="1.5" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round">
+            <animate attributeName="stroke-dashoffset" from="314" to="0" dur="2s" fill="freeze"/>
+          </circle>
+          <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.5s" fill="freeze" begin="1.8s"/>
+            <animateTransform attributeName="transform" type="rotate" from="0 55 55" to="360 55 55" dur="20s" repeatCount="indefinite"/>
+            <circle cx="55" cy="5" r="3" fill="#C9A84C" opacity="0.8"/>
+            <circle cx="105" cy="55" r="2" fill="#C9A84C" opacity="0.5"/>
+          </g>
+          <defs>
+            <linearGradient id="ag1" x1="0" y1="0" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#C9A84C"/><stop offset="50%" stop-color="#F0E6C8"/><stop offset="100%" stop-color="#C9A84C"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <i class="ti ti-movie auth-ring-icon" aria-hidden="true"></i>
+      </div>
+      <div class="auth-feats">
+        <div class="auth-feat">
+          <i class="ti ti-device-tv auth-feat-icon" aria-hidden="true"></i>
+          <div class="auth-feat-text"><strong>12,000+ Film</strong><span>Ultra HD sifatda</span></div>
+        </div>
+        <div class="auth-feat">
+          <i class="ti ti-shield-check auth-feat-icon" aria-hidden="true"></i>
+          <div class="auth-feat-text"><strong>Xavfsiz platforma</strong><span>Ma'lumotlaringiz himoyada</span></div>
+        </div>
+        <div class="auth-feat">
+          <i class="ti ti-ad-off auth-feat-icon" aria-hidden="true"></i>
+          <div class="auth-feat-text"><strong>Reklama yo'q</strong><span>Uzluksiz tomosha</span></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="w-full max-w-md relative animate-scale-in">
+  <!-- Right panel -->
+  <div class="auth-right">
+    <div class="auth-box">
+      <div style="margin-bottom:28px">
+        <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--tx);margin-bottom:5px">Qaytib keldingiz</div>
+        <div style="font-size:13px;color:var(--txd)">Hisobingizga kiring va tomosha qilishni davom eting.</div>
+      </div>
 
-    <!-- Logo -->
-    <div class="text-center mb-8">
-      <a href="{% url 'home' %}" class="inline-flex flex-col items-center gap-3 group">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-gold-500 to-gold-700
-                    flex items-center justify-center shadow-gold-lg
-                    group-hover:scale-105 transition-transform duration-200">
-          <svg class="w-7 h-7 text-ink-950" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M18 4H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM9 17V7l8 5-8 5z"/>
-          </svg>
-        </div>
-        <span class="text-2xl font-bold text-white">
-          Cinema<span class="text-gradient-gold">.uz</span>
-        </span>
-      </a>
-      <p class="text-ink-400 mt-2 text-sm">Hisobingizga kiring</p>
-    </div>
-
-    <!-- Card -->
-    <div class="glass-card p-8 shadow-card">
-
-      <!-- Error -->
       {% if form.errors %}
-        <div class="flex items-center gap-3 bg-crimson-500/10 border border-crimson-500/30
-                    rounded-xl p-4 mb-6 animate-fade-in">
-          <svg class="w-5 h-5 text-crimson-400 flex-shrink-0" fill="none"
-               stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <p class="text-crimson-300 text-sm">Email yoki parol noto'g'ri.</p>
+        <div class="auth-error">
+          <i class="ti ti-alert-circle" style="font-size:16px;color:#E07070;flex-shrink:0" aria-hidden="true"></i>
+          <p style="font-size:13px;color:#E07070">Email yoki parol noto'g'ri.</p>
         </div>
       {% endif %}
 
-      <form method="post" action="{% url 'auth:login' %}" class="space-y-5"
-            x-data="{ showPassword: false }">
+      <form method="post" action="{% url 'auth:login' %}" x-data="{showPass:false}">
         {% csrf_token %}
 
-        <!-- Email -->
-        <div>
-          <label class="block text-xs font-semibold text-ink-300 mb-2
-                        uppercase tracking-wider">
-            Email manzil
-          </label>
-          <input type="email" name="email" required autocomplete="email"
-                 placeholder="email@example.com"
-                 class="input-field" />
+        <div class="auth-field">
+          <label>Email manzil</label>
+          <div class="auth-field-wrap">
+            <input type="email" name="email" required autocomplete="email" placeholder="email@example.com" class="input-field" style="padding-right:38px" />
+            <i class="ti ti-mail field-icon" aria-hidden="true"></i>
+          </div>
         </div>
 
-        <!-- Password -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-xs font-semibold text-ink-300 uppercase tracking-wider">
-              Parol
-            </label>
-            <a href="{% url 'auth:password-reset' %}"
-               class="text-gold-500 hover:text-gold-400 text-xs transition-colors">
-              Unutdingizmi?
-            </a>
+        <div class="auth-field">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <label style="margin-bottom:0">Parol</label>
+            <a href="{% url 'auth:password-reset' %}" style="font-size:11px;color:var(--gold);text-decoration:none;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">Unutdingizmi?</a>
           </div>
-          <div class="relative">
-            <input name="password"
-                   required
-                   autocomplete="current-password"
-                   placeholder="••••••••"
-                   x-bind:type="showPassword ? 'text' : 'password'"
-                   class="input-field pr-11" />
-            <button type="button"
-                    x-on:click="showPassword = !showPassword"
-                    class="absolute right-3 top-1/2 -translate-y-1/2
-                           text-ink-400 hover:text-ink-200 transition-colors">
-              <svg x-show="!showPassword" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268
-                         2.943 9.542 7-1.274 4.057-5.064 7-9.542
-                         7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              <svg x-show="showPassword" class="w-4 h-4" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478
-                         0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029
-                         m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242
-                         4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29
-                         3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478
-                         0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132
-                         5.411m0 0L21 21"/>
-              </svg>
+          <div class="auth-field-wrap">
+            <input name="password" required autocomplete="current-password" placeholder="••••••••"
+                   :type="showPass?'text':'password'" class="input-field" style="padding-right:38px" />
+            <button type="button" class="field-toggle" @click="showPass=!showPass" aria-label="Parolni ko'rsatish">
+              <i :class="showPass?'ti ti-eye-off':'ti ti-eye'" aria-hidden="true"></i>
             </button>
           </div>
         </div>
 
-        <!-- Submit -->
-        <button type="submit" class="btn-gold w-full py-3 text-base mt-2">
-          Kirish
-        </button>
+        <button type="submit" class="auth-submit">Kirish</button>
+      </form>
 
-        <!-- Divider -->
-        <div class="relative my-2">
-          <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-ink-700"></div>
-          </div>
-          <div class="relative flex justify-center">
-            <span class="px-3 bg-ink-800 text-ink-500 text-xs">yoki</span>
-          </div>
-        </div>
+      <div class="auth-divider">
+        <div class="auth-divider-line"></div>
+        <div class="auth-divider-text">yoki</div>
+        <div class="auth-divider-line"></div>
+      </div>
 
-        <!-- Google login -->
-        <a href="{% url 'social:begin' 'google-oauth2' %}"
-           class="btn-ghost w-full py-3 text-sm">
-          <svg class="w-4 h-4" viewBox="0 0 24 24">
+      <div class="auth-social-row">
+        <a href="{% url 'social:begin' 'google-oauth2' %}" class="auth-social-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          Google orqali kirish
+          Google
         </a>
-      </form>
+        <a href="#" class="auth-social-btn">
+          <i class="ti ti-brand-apple" style="font-size:16px;color:var(--tx)" aria-hidden="true"></i>
+          Apple
+        </a>
+      </div>
 
-      <p class="text-center text-ink-500 text-sm mt-6">
+      <p style="text-align:center;font-size:12px;color:var(--txd)">
         Hisob yo'qmi?
-        <a href="{% url 'auth:register' %}"
-           class="text-gold-500 hover:text-gold-400 font-medium transition-colors">
-          Ro'yxatdan o'tish
-        </a>
+        <a href="{% url 'auth:register' %}" style="color:var(--gold);text-decoration:none;font-weight:500">Ro'yxatdan o'tish</a>
       </p>
     </div>
   </div>
 </div>
+
+<script>
+const fs=document.getElementById('auth-fs');
+for(let i=0;i<40;i++){const s=document.createElement('div');s.className='auth-fs-seg';fs.appendChild(s.cloneNode());}
+const canvas=document.getElementById('auth-bg');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=canvas.parentElement.offsetWidth;canvas.height=canvas.parentElement.offsetHeight;}
+resize();
+const pts=Array.from({length:45},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.2,vy:(Math.random()-0.5)*0.2,r:Math.random()*1.3+0.3,a:Math.random()*0.5+0.2}));
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(201,168,76,${p.a*0.28})`;ctx.fill();});
+  pts.forEach((p,i)=>pts.slice(i+1).forEach(q=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<80){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=`rgba(201,168,76,${0.05*(1-d/80)})`;ctx.lineWidth=0.5;ctx.stroke();}}));
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
 {% endblock %}
