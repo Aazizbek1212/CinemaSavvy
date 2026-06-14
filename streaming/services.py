@@ -57,7 +57,7 @@ class VideoStreamingService:
                 return file
 
         # Quality priority fallback
-        priority = ["1080p", "720p", "360p", "4k"]
+        priority = ["4k", "1080p", "720p", "360p"]  # 4K birinchi
         for quality in priority:
             file = ready_files.filter(quality=quality).first()
             if file:
@@ -145,14 +145,10 @@ class VideoProcessingService:
 
             # Download original video
             logger.info("Downloading original video: %s", movie_file.file_key)
-            try:
-                minio_storage.client.download_file(
-                    Bucket=movie_file.movie.title,
-                    Key=movie_file.file_key,
-                    Filename=input_path,
+            if not minio_storage.download_file(movie_file.file_key, input_path):
+                return VideoProcessingService._fail(
+                    job, movie_file, f"Download failed: {movie_file.file_key}"
                 )
-            except Exception as exc:
-                return VideoProcessingService._fail(job, movie_file, str(exc))
 
             # Convert to HLS
             result = ffmpeg_processor.convert_to_hls(

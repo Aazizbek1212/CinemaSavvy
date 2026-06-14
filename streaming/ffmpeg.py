@@ -42,6 +42,12 @@ class FFmpegProcessor:
             "audio_bitrate": "192k",
             "crf": "20",
         },
+        "4k": {
+            "resolution": "3840x2160",
+            "video_bitrate": "15000k",
+            "audio_bitrate": "256k",
+            "crf": "18",
+        },
     }
 
     @staticmethod
@@ -90,7 +96,8 @@ class FFmpegProcessor:
         segment_pattern = str(output_path / "segment_%03d.ts")
 
         cmd = [
-            "ffmpeg", "-i", input_path,
+            "ffmpeg", "-y",  # overwrite output (global flag must come before output)
+            "-i", input_path,
             "-vf", f"scale={settings['resolution']}",
             "-c:v", "libx264",
             "-crf", settings["crf"],
@@ -107,7 +114,6 @@ class FFmpegProcessor:
             "-hls_segment_filename", segment_pattern,
             "-hls_flags", "independent_segments",
             playlist_path,
-            "-y",  # overwrite output
         ]
 
         logger.info("Starting HLS conversion: %s → %s (%s)", input_path, output_dir, quality)

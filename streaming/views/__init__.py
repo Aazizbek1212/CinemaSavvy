@@ -25,12 +25,13 @@ class StreamURLView(APIView):
     def get(self, request: Request, slug: str) -> Response:
         movie = get_object_or_404(Movie.objects.published(), slug=slug)
 
-        # Premium gating
-        if movie.is_premium and not request.user.is_premium:
-            return Response(
-                {"detail": "Bu kontent premium obuna talab qiladi."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        # Premium gating — AnonymousUser uchun xavfsiz tekshiruv
+        if movie.is_premium:
+            if not request.user.is_authenticated or not getattr(request.user, "is_premium", False):
+                return Response(
+                    {"detail": "Bu kontent premium obuna talab qiladi."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         quality = request.query_params.get("quality")
         movie_file = VideoStreamingService.get_best_quality_file(movie, quality)

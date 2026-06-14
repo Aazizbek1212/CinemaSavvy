@@ -1,42 +1,36 @@
 import logging
-from movies.models import Genre
+
+from django.urls import reverse
+
+from movies.models import Genre, Movie
 
 logger = logging.getLogger(__name__)
 
 
-def global_context(request) -> dict:
-    """
-    Injected into every template context.
-    Cached per request — no repeated DB queries.
-    """
+def global_context(request):
+    """Har bir shablon kontekstiga qo'shiladi (navbar va footer uchun)."""
+    nav_items = [
+        {"title": "Bosh sahifa", "url": reverse("home"), "icon": "🏠"},
+        {"title": "Katalog", "url": reverse("catalog"), "icon": "🎬"},
+        {"title": "To'plamlar", "url": "#", "icon": "📁"},
+        {"title": "Premium", "url": reverse("auth:subscription"), "icon": "👑"},
+    ]
+
     nav_genres = []
+    footer_movie_links = []
     try:
-        nav_genres = list(Genre.objects.all()[:8])
-    except Exception as exc:
-        logger.warning("Could not load nav genres: %s", exc)
+        nav_genres = list(Genre.objects.all()[:10])
+        footer_movie_links = list(
+            Movie.objects.filter(status=Movie.Status.PUBLISHED)
+            .order_by("-average_rating")[:5]
+        )
+    except Exception as exc:  # DB hali tayyor bo'lmasa (migratsiyalardan oldin)
+        logger.warning("global_context ma'lumot yuklay olmadi: %s", exc)
 
     return {
-        "nav_items": [
-            {"label": "Bosh sahifa", "url": "/"},
-            {"label": "Filmlar",     "url": "/movies/"},
-            {"label": "Seriallar",   "url": "/movies/?type=series"},
-            {"label": "O'zbek",      "url": "/movies/?language=uz"},
-            {"label": "Top",         "url": "/movies/?ordering=-average_rating"},
-        ],
+        "nav_items": nav_items,
         "nav_genres": nav_genres,
-        "site_name":  "Cinema.uz",
-        "site_url":   "https://cinema.uz",
-    }
-
-
-def global_context(request) -> dict:
-    return {
-        # ... mavjud kod ...
-        "footer_movie_links": [
-            {"label": "Yangi filmlar",    "url": "/movies/?ordering=-published_at"},
-            {"label": "Top reytingli",    "url": "/movies/?ordering=-average_rating"},
-            {"label": "O'zbek filmlar",   "url": "/movies/?language=uz"},
-            {"label": "Bepul filmlar",    "url": "/movies/?is_premium=false"},
-            {"label": "Premium kontent",  "url": "/movies/?is_premium=true"},
-        ],
+        "site_name": "CinemaSavvy",
+        "site_url": "https://cinemasavvy.uz",
+        "footer_movie_links": footer_movie_links,
     }

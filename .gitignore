@@ -218,3 +218,10 @@ __marimo__/
 .streamlit/secrets.toml
 ".env.production" 
 ".env" 
+
+# Project artifacts
+node_modules/
+staticfiles/
+media/
+logs/
+*.log
