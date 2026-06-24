@@ -1,0 +1,28 @@
+{% for review in reviews %}
+  <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.08);border-radius:3px;padding:14px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      {% if review.user.avatar %}
+        <img src="{{ review.user.avatar.url }}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover">
+      {% else %}
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:600">
+          {{ review.user.display_name|first|upper }}
+        </div>
+      {% endif %}
+      <div style="flex:1">
+        <div style="font-size:13px;color:#fff;font-weight:600">{{ review.user.display_name }}</div>
+        <div style="font-size:11px;color:var(--txd)">{{ review.created_at|date:"d.m.Y" }}</div>
+      </div>
+      <div style="color:var(--gold);font-weight:700;font-size:13px">★ {{ review.rating }}/10</div>
+    </div>
+    {% if review.text %}
+      <p style="font-size:13px;color:var(--txl);line-height:1.6">{{ review.text }}</p>
+    {% endif %}
+    {% if review.like_count %}
+      <div style="font-size:11px;color:var(--txd);margin-top:8px">❤ {{ review.like_count }}</div>
+    {% endif %}
+  </div>
+{% empty %}
+  <p style="font-size:13px;color:var(--txd);text-align:center;padding:24px 0">
+    Hali sharhlar yo'q. Birinchi bo'lib baho bering!
+  </p>
+{% endfor %}

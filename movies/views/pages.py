@@ -99,6 +99,12 @@ class CatalogPageView(SeoMixin, TemplateView):
     seo_title      = "Filmlar katalogi — Cinema.uz"
     paginate_by    = 24
 
+    def get_template_names(self) -> list[str]:
+        # HTMX so'rovi bo'lsa faqat grid partial'ini qaytaramiz (to'liq sahifa emas)
+        if self.request.headers.get("HX-Request"):
+            return ["partials/movies_grid.html"]
+        return [self.template_name]
+
     ALLOWED_ORDERINGS = {
         "-published_at":    "Yangiligi",
         "-average_rating":  "Reytingi",
@@ -183,6 +189,22 @@ class CatalogPageView(SeoMixin, TemplateView):
 # ─────────────────────────────────────────────
 # Movie Detail
 # ─────────────────────────────────────────────
+
+class MovieReviewsPartialView(ListView):
+    """movie_detail sahifasidagi HTMX uchun sharhlar ro'yxatini HTML partial qaytaradi."""
+    template_name = "partials/review_list.html"
+    context_object_name = "reviews"
+
+    def get_queryset(self) -> QuerySet:
+        from reviews.models import Review
+        movie = get_object_or_404(Movie, slug=self.kwargs["slug"])
+        return (
+            Review.objects.active()
+            .with_relations()
+            .filter(movie=movie)
+            .order_by("-created_at")
+        )
+
 
 class MovieDetailPageView(SeoMixin, DetailView):
     template_name   = "pages/movie_detail.html"

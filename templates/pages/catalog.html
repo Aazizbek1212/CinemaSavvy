@@ -117,14 +117,7 @@
       <!-- Grid -->
       <div id="movies-grid"
            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {% for movie in movies %}
-          {% include "components/movie_card.html" %}
-        {% empty %}
-          <div class="col-span-full text-center py-16">
-            <div class="text-5xl mb-4">🎬</div>
-            <p class="text-gray-500">Filmlar topilmadi</p>
-          </div>
-        {% endfor %}
+        {% include "partials/movies_grid.html" %}
       </div>
 
       <!-- Pagination -->

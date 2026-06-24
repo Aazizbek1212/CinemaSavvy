@@ -3,6 +3,7 @@ from movies.views.pages import (
     HomePageView,
     CatalogPageView,
     MovieDetailPageView,
+    MovieReviewsPartialView,
     WatchPageView,
     PersonDetailPageView,
     SearchView,
@@ -21,6 +22,10 @@ urlpatterns = [
     path("movies/<slug:slug>/",
          MovieDetailPageView.as_view(),
          name="movie-detail"),
+
+    path("movies/<slug:slug>/reviews-html/",
+         MovieReviewsPartialView.as_view(),
+         name="movie-reviews-html"),
 
     path("watch/<slug:slug>/",
          WatchPageView.as_view(),
