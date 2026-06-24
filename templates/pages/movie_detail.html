@@ -302,7 +302,7 @@
 
         <!-- Reviews list via HTMX -->
         <div id="reviews-list"
-             hx-get="{% url 'reviews:movie-reviews' slug=movie.slug %}"
+             hx-get="{% url 'movie-reviews-html' slug=movie.slug %}"
              hx-trigger="load"
              hx-swap="innerHTML">
           {% for i in "123" %}
