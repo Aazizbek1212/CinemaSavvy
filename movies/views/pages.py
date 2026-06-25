@@ -292,6 +292,7 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
             ),
             "subtitles": movie.subtitles.select_related("language").all(),
             "youtube_url": movie.youtube_url,
+            "video_url": f"/media/videos/{movie.slug}.mp4" if not movie.youtube_url else "",
             "youtube_embed_id": movie.youtube_url.split("v=")[-1].split("&")[0] if movie.youtube_url and "v=" in movie.youtube_url else "",
         })
         return ctx
