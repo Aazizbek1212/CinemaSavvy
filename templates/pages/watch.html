@@ -39,26 +39,34 @@
 {% endblock %}
 
 {% block content %}
-<div class="watch-page" x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }})">
+<div class="watch-page" {% if not youtube_url %}x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }})"{% endif %}>
 
   <!-- PLAYER -->
   <div style="max-width:1100px;margin:0 auto">
     <div class="player-wrap" id="player-container">
 
-      <video id="cinema-player" class="video-js vjs-default-skin" style="width:100%;height:100%" controls preload="auto" playsinline></video>
+      {% if youtube_url %}
+        <iframe id="yt-player" src="https://www.youtube.com/embed/{{ youtube_embed_id }}?autoplay=1&rel=0&modestbranding=1" style="width:100%;height:100%;position:absolute;inset:0;border:none" allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe>
+      {% else %}
+        <video id="cinema-player" class="video-js vjs-default-skin" style="width:100%;height:100%" controls preload="auto" playsinline></video>
+      {% endif %}
 
       <!-- Loading overlay -->
+      {% if not youtube_url %}
       <div x-show="loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);gap:16px;z-index:20">
         <div style="width:48px;height:48px;border-radius:50%;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);animation:spin 0.7s linear infinite"></div>
         <p style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--txd)">Video yuklanmoqda...</p>
       </div>
+      {% endif %}
 
       <!-- Error overlay -->
+      {% if not youtube_url %}
       <div x-show="error" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.9);gap:16px;z-index:20">
         <i class="ti ti-alert-triangle" style="font-size:44px;color:#E07070" aria-hidden="true"></i>
         <p style="font-size:14px;color:var(--tx);font-weight:500" x-text="errorMsg"></p>
         <button @click="loadStream()" class="cs-btn-ghost" style="padding:9px 20px;font-size:13px">Qayta urinish</button>
       </div>
+      {% endif %}
 
       <!-- Top bar -->
       <div class="player-top">
