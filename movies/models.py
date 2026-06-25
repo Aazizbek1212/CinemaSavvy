@@ -212,6 +212,7 @@ class Movie(TimeStampedModel):
         null=True, blank=True,
     )
     trailer_url = models.URLField(_("trailer URL"), blank=True)
+    youtube_url = models.URLField(_("YouTube URL"), blank=True, help_text="YouTube video URL (embed uchun)")
 
     # Details
     release_year = models.PositiveSmallIntegerField(

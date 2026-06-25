@@ -220,3 +220,7 @@ LOGGING = {
         "movies": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
 }
+CSRF_TRUSTED_ORIGINS = ['http://63.180.177.136']
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = None
