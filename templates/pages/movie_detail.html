@@ -176,20 +176,20 @@
   <div style="margin-top:40px" x-data="{tab:'about'}">
 
     <!-- Tab buttons -->
-    <div style="display:flex;border-bottom:1px solid rgba(201,168,76,0.1);margin-bottom:24px">
+   <div style="display:flex;border-bottom:1px solid rgba(201,168,76,0.1);margin-bottom:24px">
       <button @click="tab='about'"
-              :style="tab==='about'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
-              style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s">
+              :style="tab==='about'?'color:var(--gold);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:var(--gold)':'color:var(--txd);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:transparent'"
+              style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;background:none;cursor:pointer;margin-bottom:-1px;transition:all 0.2s;border:none">
         Haqida
       </button>
       <button @click="tab='cast'"
-              :style="tab==='cast'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
-              style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s">
+              :style="tab==='cast'?'color:var(--gold);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:var(--gold)':'color:var(--txd);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:transparent'"
+              style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;background:none;cursor:pointer;margin-bottom:-1px;transition:all 0.2s;border:none">
         Aktyorlar
       </button>
       <button @click="tab='reviews'"
-              :style="tab==='reviews'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
-              style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s">
+              :style="tab==='reviews'?'color:var(--gold);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:var(--gold)':'color:var(--txd);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:transparent'"
+              style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;background:none;cursor:pointer;margin-bottom:-1px;transition:all 0.2s;border:none">
         Sharhlar {% if movie.rating_count > 0 %}<span style="font-size:11px;color:var(--txd)">({{ movie.rating_count }})</span>{% endif %}
       </button>
     </div>
