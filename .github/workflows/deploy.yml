@@ -1,38 +1,36 @@
-name: Deploy to Production
+name: Deploy CinemaSavvy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
+    name: Deploy to Lightsail
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /app/CinemaSavvy
-
-            # Kodni yangilash
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+            set -e
+            cd /home/ubuntu/CinemaSavvy
             git pull origin main
-
-            # Docker rebuild
+            docker compose pull
             docker compose up -d --build
-
-            # Migratsiyalar
             docker compose exec -T web python manage.py migrate --noinput
-
-            # Static fayllar
             docker compose exec -T web python manage.py collectstatic --noinput
-
-            # Keraksiz image'larni tozalash
             docker image prune -f
-
-            echo "✅ Deploy muvaffaqiyatli!"
+            echo "Deploy muvaffaqiyatli!"
+          ENDSSH
