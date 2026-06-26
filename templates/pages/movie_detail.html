@@ -22,12 +22,10 @@
   {% else %}
     <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a1020,#0d1020)"></div>
   {% endif %}
-  <!-- Grid pattern overlay -->
   <div style="position:absolute;inset:0;opacity:0.03;background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,var(--gold) 40px,var(--gold) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,var(--gold) 40px,var(--gold) 41px)"></div>
   <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,15,0.97) 35%,rgba(10,10,15,0.6) 65%,rgba(10,10,15,0.2) 100%)"></div>
   <div style="position:absolute;bottom:0;left:0;right:0;height:140px;background:linear-gradient(to top,var(--bg),transparent)"></div>
   <div class="cs-scan"></div>
-  <!-- Poster -->
   <div style="position:absolute;right:5%;top:50%;transform:translateY(-50%);opacity:0.25">
     {% if movie.poster %}
       <img src="{{ movie.poster.url }}" alt="" style="height:300px;border-radius:4px;object-fit:cover" />
@@ -116,14 +114,15 @@
 
       <!-- Description -->
       {% if movie.description %}
-        <p style="font-size:14px;color:var(--txd);line-height:1.8;max-width:580px;margin-bottom:22px;font-weight:300"
-           x-data="{exp:false}">
-          <span x-show="!exp" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">{{ movie.description }}</span>
-          <span x-show="exp">{{ movie.description }}</span>
+        <div x-data="{exp:false}" style="margin-bottom:22px">
+          <p style="font-size:14px;color:var(--txd);line-height:1.8;max-width:580px;font-weight:300;margin:0">
+            <span x-show="!exp" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">{{ movie.description }}</span>
+            <span x-show="exp">{{ movie.description }}</span>
+          </p>
           {% if movie.description|length > 180 %}
-            <button @click="exp=!exp" style="color:var(--gold);background:none;border:none;cursor:pointer;font-size:12px;margin-left:6px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px" x-text="exp?'YIGISH ↑':'KO\\'PROQ ↓'"></button>
+            <button @click="exp=!exp" style="color:var(--gold);background:none;border:none;cursor:pointer;font-size:12px;margin-top:6px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px" x-text="exp?'YIGISH ↑':'KO\'PROQ ↓'"></button>
           {% endif %}
-        </p>
+        </div>
       {% endif %}
 
       <!-- CTA buttons -->
@@ -140,7 +139,6 @@
             <i class="ti ti-brand-youtube" style="font-size:14px" aria-hidden="true"></i> Treyler
           </a>
         {% endif %}
-        <!-- Icon buttons -->
         <button style="width:42px;height:42px;border:1px solid rgba(201,168,76,0.18);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s;background:transparent"
                 onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
                 onmouseout="this.style.borderColor='rgba(201,168,76,0.18)';this.style.color='var(--txd)'"
@@ -173,152 +171,194 @@
     </div>
   </div>
 
-  <!-- TABS -->
-  <div style="margin-top:40px">
-    <div style="display:flex;border-bottom:1px solid rgba(201,168,76,0.1);margin-bottom:24px" x-data="{tab:'about'}">
-      <button @click="tab='about'" :style="tab==='about'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
+  <!-- ==================== TABS ==================== -->
+  <!-- FIX: x-data wrapper divda, buttons va contentlar ALOHIDA divlarda -->
+  <div style="margin-top:40px" x-data="{tab:'about'}">
+
+    <!-- Tab buttons -->
+    <div style="display:flex;border-bottom:1px solid rgba(201,168,76,0.1);margin-bottom:24px">
+      <button @click="tab='about'"
+              :style="tab==='about'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
               style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s">
         Haqida
       </button>
-      <button @click="tab='cast'" :style="tab==='cast'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
+      <button @click="tab='cast'"
+              :style="tab==='cast'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
               style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s">
         Aktyorlar
       </button>
-      <button @click="tab='reviews'" :style="tab==='reviews'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
+      <button @click="tab='reviews'"
+              :style="tab==='reviews'?'color:var(--gold);border-bottom-color:var(--gold)':'color:var(--txd)'"
               style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s">
         Sharhlar {% if movie.rating_count > 0 %}<span style="font-size:11px;color:var(--txd)">({{ movie.rating_count }})</span>{% endif %}
       </button>
+    </div>
 
-      <!-- Tab contents -->
-      <div x-show="tab==='about'" style="width:100%;margin-top:0" x-transition>
-        <div style="display:grid;grid-template-columns:1fr 280px;gap:32px;padding-top:8px">
-          <div>
-            {% if movie.description %}
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">Syujet<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span></div>
-              <p style="font-size:14px;color:var(--txd);line-height:1.8;margin-bottom:24px;font-weight:300">{{ movie.description }}</p>
-            {% endif %}
-            <!-- Info table -->
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">Ma'lumotlar<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span></div>
-            <div style="display:flex;flex-direction:column;gap:0">
-              {% if movie.director %}<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)"><span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Rejissyor</span><span style="font-size:13px;color:var(--tx)">{{ movie.director }}</span></div>{% endif %}
-              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)"><span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Chiqarilgan</span><span style="font-size:13px;color:var(--tx)">{{ movie.release_year }}</span></div>
-              {% if movie.duration_display %}<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)"><span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Davomiyligi</span><span style="font-size:13px;color:var(--tx)">{{ movie.duration_display }}</span></div>{% endif %}
-              {% if movie.country %}<div style="display:flex;justify-content:space-between;padding:10px 0"><span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Mamlakat</span><span style="font-size:13px;color:var(--tx)">{{ movie.country }}</span></div>{% endif %}
+    <!-- ===== HAQIDA ===== -->
+    <div x-show="tab==='about'" x-transition style="padding-top:8px">
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:32px">
+        <div>
+          {% if movie.description %}
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+              Syujet<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span>
             </div>
+            <p style="font-size:14px;color:var(--txd);line-height:1.8;margin-bottom:24px;font-weight:300">{{ movie.description }}</p>
+          {% endif %}
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            Ma'lumotlar<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span>
           </div>
-          <!-- Related -->
-          <div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">O'xshash<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span></div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              {% for rel in related_movies %}
-                <a href="{% url 'movie-detail' rel.slug %}"
-                   style="display:flex;gap:10px;padding:10px;background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:3px;text-decoration:none;transition:all 0.2s"
-                   onmouseover="this.style.borderColor='rgba(201,168,76,0.35)';this.style.transform='translateX(3px)'"
-                   onmouseout="this.style.borderColor='rgba(201,168,76,0.1)';this.style.transform='translateX(0)'">
-                  {% if rel.poster %}
-                    <img src="{{ rel.poster.url }}" alt="{{ rel.title }}" style="width:46px;height:64px;border-radius:2px;object-fit:cover;flex-shrink:0" loading="lazy" />
-                  {% else %}
-                    <div style="width:46px;height:64px;background:var(--bg2);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.2)"><i class="ti ti-movie" aria-hidden="true"></i></div>
-                  {% endif %}
-                  <div style="flex:1;min-width:0">
-                    <div style="font-size:12px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">{{ rel.title }}</div>
-                    <div style="font-size:10px;color:var(--txd);font-family:'Bebas Neue',sans-serif;letter-spacing:1px">{{ rel.release_year }}</div>
-                    {% if rel.average_rating > 0 %}<div style="font-size:12px;color:var(--gold);font-family:'Bebas Neue',sans-serif;margin-top:4px">★ {{ rel.average_rating }}</div>{% endif %}
-                  </div>
-                </a>
-              {% endfor %}
+          <div style="display:flex;flex-direction:column;gap:0">
+            {% if movie.director %}
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Rejissyor</span>
+                <span style="font-size:13px;color:var(--tx)">{{ movie.director }}</span>
+              </div>
+            {% endif %}
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)">
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Chiqarilgan</span>
+              <span style="font-size:13px;color:var(--tx)">{{ movie.release_year }}</span>
             </div>
+            {% if movie.duration_display %}
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Davomiyligi</span>
+                <span style="font-size:13px;color:var(--tx)">{{ movie.duration_display }}</span>
+              </div>
+            {% endif %}
+            {% if movie.country %}
+              <div style="display:flex;justify-content:space-between;padding:10px 0">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Mamlakat</span>
+                <span style="font-size:13px;color:var(--tx)">{{ movie.country }}</span>
+              </div>
+            {% endif %}
           </div>
         </div>
-      </div>
-
-      <!-- Cast tab -->
-      <div x-show="tab==='cast'" x-transition style="padding-top:8px">
-        {% if movie.movie_cast.all %}
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-bottom:24px">
-            {% for cast in movie.movie_cast.all %}
-              <a href="{% url 'person-detail' cast.person.slug %}"
-                 style="background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:3px;overflow:hidden;text-decoration:none;transition:all 0.2s"
-                 onmouseover="this.style.borderColor='rgba(201,168,76,0.4)';this.style.transform='translateY(-2px)'"
-                 onmouseout="this.style.borderColor='rgba(201,168,76,0.1)';this.style.transform='translateY(0)'">
-                <div style="height:80px;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden">
-                  {% if cast.person.photo %}
-                    <img src="{{ cast.person.photo.url }}" alt="{{ cast.person.full_name }}" style="width:100%;height:100%;object-fit:cover" />
-                  {% else %}
-                    <i class="ti ti-user" style="font-size:28px;color:rgba(201,168,76,0.2)" aria-hidden="true"></i>
+        <!-- Related -->
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            O'xshash<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            {% for rel in related_movies %}
+              <a href="{% url 'movie-detail' rel.slug %}"
+                 style="display:flex;gap:10px;padding:10px;background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:3px;text-decoration:none;transition:all 0.2s"
+                 onmouseover="this.style.borderColor='rgba(201,168,76,0.35)';this.style.transform='translateX(3px)'"
+                 onmouseout="this.style.borderColor='rgba(201,168,76,0.1)';this.style.transform='translateX(0)'">
+                {% if rel.poster %}
+                  <img src="{{ rel.poster.url }}" alt="{{ rel.title }}" style="width:46px;height:64px;border-radius:2px;object-fit:cover;flex-shrink:0" loading="lazy" />
+                {% else %}
+                  <div style="width:46px;height:64px;background:var(--bg2);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.2)"><i class="ti ti-movie" aria-hidden="true"></i></div>
+                {% endif %}
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">{{ rel.title }}</div>
+                  <div style="font-size:10px;color:var(--txd);font-family:'Bebas Neue',sans-serif;letter-spacing:1px">{{ rel.release_year }}</div>
+                  {% if rel.average_rating > 0 %}
+                    <div style="font-size:12px;color:var(--gold);font-family:'Bebas Neue',sans-serif;margin-top:4px">★ {{ rel.average_rating }}</div>
                   {% endif %}
-                </div>
-                <div style="padding:8px">
-                  <div style="font-size:11px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">{{ cast.person.full_name }}</div>
-                  {% if cast.character_name %}<div style="font-size:10px;color:var(--txd);font-family:'Bebas Neue',sans-serif;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ cast.character_name }}</div>{% endif %}
                 </div>
               </a>
             {% endfor %}
           </div>
-        {% else %}
-          <p style="color:var(--txd);font-size:13px;text-align:center;padding:32px 0">Aktyor ma'lumotlari yo'q</p>
-        {% endif %}
-      </div>
-
-      <!-- Reviews tab -->
-      <div x-show="tab==='reviews'" x-transition style="padding-top:8px">
-        {% if user.is_authenticated %}
-          {% if not user_review %}
-            <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:4px;padding:20px;margin-bottom:20px"
-                 x-data="reviewForm()">
-              <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:14px">Bahoyingizni qoldiring</div>
-              <div style="display:flex;align-items:center;gap:4px;margin-bottom:14px">
-                <template x-for="i in 10" :key="i">
-                  <button @click="rating=i"
-                          :class="i<=rating?'text-yellow-400 scale-110':'hover:text-yellow-300'"
-                          style="font-size:22px;background:none;border:none;cursor:pointer;color:var(--txm);transition:all 0.1s;padding:2px">★</button>
-                </template>
-                <span x-show="rating>0" x-text="rating+'/10'" style="font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--gold);margin-left:8px"></span>
-              </div>
-              <textarea x-model="text" placeholder="Fikringizni yozing... (ixtiyoriy)" rows="3"
-                        style="width:100%;background:var(--bg2);border:1px solid rgba(201,168,76,0.15);border-radius:3px;padding:10px 12px;font-size:13px;color:var(--tx);outline:none;resize:none;margin-bottom:12px;font-family:'Inter',sans-serif"
-                        onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(201,168,76,0.15)'"></textarea>
-              <button @click="submitReview('{{ movie.slug }}')" :disabled="rating===0||submitting" class="cs-btn-gold" style="padding:9px 20px;font-size:12px;opacity:1"
-                      :style="(rating===0||submitting)?'opacity:0.4;cursor:not-allowed':''">
-                <span x-show="!submitting">Yuborish</span>
-                <span x-show="submitting">Yuklanmoqda...</span>
-              </button>
-            </div>
-          {% else %}
-            <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:16px;margin-bottom:20px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <span class="badge-gold">Sizning bahoyingiz</span>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold)">★ {{ user_review.rating }}/10</div>
-              </div>
-              {% if user_review.text %}<p style="font-size:13px;color:var(--txd)">{{ user_review.text }}</p>{% endif %}
-            </div>
-          {% endif %}
-        {% else %}
-          <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:4px;padding:20px;margin-bottom:20px;text-align:center">
-            <p style="font-size:13px;color:var(--txd);margin-bottom:12px">Baho qoldirish uchun tizimga kiring</p>
-            <a href="{% url 'auth:login' %}?next={{ request.path }}" class="cs-btn-gold" style="padding:9px 20px;font-size:12px">Kirish</a>
-          </div>
-        {% endif %}
-
-        <!-- Reviews list via HTMX -->
-        <div id="reviews-list"
-             hx-get="{% url 'movie-reviews-html' slug=movie.slug %}"
-             hx-trigger="load"
-             hx-swap="innerHTML">
-          {% for i in "123" %}
-            <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.08);border-radius:3px;padding:14px;margin-bottom:10px">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                <div class="skeleton" style="width:36px;height:36px;border-radius:50%"></div>
-                <div style="flex:1"><div class="skeleton" style="height:12px;width:120px;border-radius:2px;margin-bottom:5px"></div><div class="skeleton" style="height:10px;width:80px;border-radius:2px"></div></div>
-              </div>
-              <div class="skeleton" style="height:12px;border-radius:2px;margin-bottom:5px"></div>
-              <div class="skeleton" style="height:12px;width:70%;border-radius:2px"></div>
-            </div>
-          {% endfor %}
         </div>
       </div>
     </div>
+
+    <!-- ===== AKTYORLAR ===== -->
+    <div x-show="tab==='cast'" x-transition style="padding-top:8px">
+      {% if movie.movie_cast.all %}
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-bottom:24px">
+          {% for cast in movie.movie_cast.all %}
+            <a href="{% url 'person-detail' cast.person.slug %}"
+               style="background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:3px;overflow:hidden;text-decoration:none;transition:all 0.2s"
+               onmouseover="this.style.borderColor='rgba(201,168,76,0.4)';this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.borderColor='rgba(201,168,76,0.1)';this.style.transform='translateY(0)'">
+              <div style="height:80px;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden">
+                {% if cast.person.photo %}
+                  <img src="{{ cast.person.photo.url }}" alt="{{ cast.person.full_name }}" style="width:100%;height:100%;object-fit:cover" />
+                {% else %}
+                  <i class="ti ti-user" style="font-size:28px;color:rgba(201,168,76,0.2)" aria-hidden="true"></i>
+                {% endif %}
+              </div>
+              <div style="padding:8px">
+                <div style="font-size:11px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">{{ cast.person.full_name }}</div>
+                {% if cast.character_name %}
+                  <div style="font-size:10px;color:var(--txd);font-family:'Bebas Neue',sans-serif;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ cast.character_name }}</div>
+                {% endif %}
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="color:var(--txd);font-size:13px;text-align:center;padding:32px 0">Aktyor ma'lumotlari yo'q</p>
+      {% endif %}
+    </div>
+
+    <!-- ===== SHARHLAR ===== -->
+    <div x-show="tab==='reviews'" x-transition style="padding-top:8px">
+      {% if user.is_authenticated %}
+        {% if not user_review %}
+          <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:4px;padding:20px;margin-bottom:20px"
+               x-data="reviewForm()">
+            <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:14px">Bahoyingizni qoldiring</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:14px">
+              <template x-for="i in 10" :key="i">
+                <button @click="rating=i"
+                        :style="i<=rating?'color:#f59e0b;transform:scale(1.1)':''"
+                        style="font-size:22px;background:none;border:none;cursor:pointer;color:var(--txm);transition:all 0.1s;padding:2px">★</button>
+              </template>
+              <span x-show="rating>0" x-text="rating+'/10'" style="font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--gold);margin-left:8px"></span>
+            </div>
+            <textarea x-model="text" placeholder="Fikringizni yozing... (ixtiyoriy)" rows="3"
+                      style="width:100%;background:var(--bg2);border:1px solid rgba(201,168,76,0.15);border-radius:3px;padding:10px 12px;font-size:13px;color:var(--tx);outline:none;resize:none;margin-bottom:12px;font-family:'Inter',sans-serif;box-sizing:border-box"
+                      onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(201,168,76,0.15)'"></textarea>
+            <button @click="submitReview('{{ movie.slug }}')"
+                    :disabled="rating===0||submitting"
+                    class="cs-btn-gold"
+                    style="padding:9px 20px;font-size:12px"
+                    :style="(rating===0||submitting)?'opacity:0.4;cursor:not-allowed;pointer-events:none':''">
+              <span x-show="!submitting">Yuborish</span>
+              <span x-show="submitting">Yuklanmoqda...</span>
+            </button>
+          </div>
+        {% else %}
+          <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:16px;margin-bottom:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span class="badge-gold">Sizning bahoyingiz</span>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold)">★ {{ user_review.rating }}/10</div>
+            </div>
+            {% if user_review.text %}<p style="font-size:13px;color:var(--txd)">{{ user_review.text }}</p>{% endif %}
+          </div>
+        {% endif %}
+      {% else %}
+        <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:4px;padding:20px;margin-bottom:20px;text-align:center">
+          <p style="font-size:13px;color:var(--txd);margin-bottom:12px">Baho qoldirish uchun tizimga kiring</p>
+          <a href="{% url 'auth:login' %}?next={{ request.path }}" class="cs-btn-gold" style="padding:9px 20px;font-size:12px">Kirish</a>
+        </div>
+      {% endif %}
+
+      <!-- Reviews list via HTMX -->
+      <div id="reviews-list"
+           hx-get="{% url 'movie-reviews-html' slug=movie.slug %}"
+           hx-trigger="load"
+           hx-swap="innerHTML">
+        {% for i in "123" %}
+          <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.08);border-radius:3px;padding:14px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <div class="skeleton" style="width:36px;height:36px;border-radius:50%"></div>
+              <div style="flex:1">
+                <div class="skeleton" style="height:12px;width:120px;border-radius:2px;margin-bottom:5px"></div>
+                <div class="skeleton" style="height:10px;width:80px;border-radius:2px"></div>
+              </div>
+            </div>
+            <div class="skeleton" style="height:12px;border-radius:2px;margin-bottom:5px"></div>
+            <div class="skeleton" style="height:12px;width:70%;border-radius:2px"></div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
   </div>
+  <!-- ==================== TABS END ==================== -->
+
 </div>
 
 {% endblock %}
