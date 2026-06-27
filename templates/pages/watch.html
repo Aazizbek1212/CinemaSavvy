@@ -39,8 +39,16 @@
 .ep-card.active { border-color: var(--gold); background: rgba(201,168,76,0.06); }
 
 /* 10s skip overlay */
-.skip-overlay { position: absolute; top: 50%; transform: translateY(-50%); width: 80px; height: 80px; border-radius: 50%; background: rgba(201,168,76,0.15); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 30; }
+.skip-overlay {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(201,168,76,0.2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  z-index: 60;
+}
 .skip-overlay.show { opacity: 1; }
+.skip-overlay i { font-size: 24px; color: #fff; }
 .skip-overlay span { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 1px; color: #fff; }
 </style>
 {% endblock %}
@@ -52,32 +60,32 @@
   <div style="max-width:1100px;margin:0 auto">
     <div class="player-wrap" id="player-container">
 
+      <!-- 10s skip overlaylar — hamma player uchun -->
+      <div id="skip-left" class="skip-overlay" style="left:10%">
+        <i class="ti ti-rewind"></i>
+        <span>-10s</span>
+      </div>
+      <div id="skip-right" class="skip-overlay" style="right:10%">
+        <i class="ti ti-fast-forward"></i>
+        <span>+10s</span>
+      </div>
+
       {% if youtube_url %}
-        <iframe id="yt-player" src="https://www.youtube.com/embed/{{ youtube_embed_id }}?autoplay=1&rel=0&modestbranding=1" style="width:100%;height:100%;position:absolute;inset:0;border:none;z-index:50" allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe>
+        <iframe id="yt-player"
+          src="https://www.youtube.com/embed/{{ youtube_embed_id }}?autoplay=1&rel=0&modestbranding=1"
+          style="width:100%;height:100%;position:absolute;inset:0;border:none;z-index:50"
+          allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe>
+
       {% elif video_url %}
-        <!-- 10s skip — oddiy video uchun -->
-        <div id="skip-left" class="skip-overlay" style="left:10%">
-          <i class="ti ti-rewind" style="font-size:24px;color:#fff"></i>
-          <span>-10s</span>
-        </div>
-        <div id="skip-right" class="skip-overlay" style="right:10%">
-          <i class="ti ti-fast-forward" style="font-size:24px;color:#fff"></i>
-          <span>+10s</span>
-        </div>
-        <video id="simple-player" style="width:100%;height:100%;position:absolute;inset:0;z-index:50" controls>
+        <video id="simple-player"
+          style="width:100%;height:100%;position:absolute;inset:0;z-index:50"
+          controls>
           <source src="{{ video_url }}" type="video/mp4">
         </video>
+
       {% else %}
-        <!-- 10s skip overlay — HLS player uchun -->
-        <div id="skip-left" class="skip-overlay" style="left:10%">
-          <i class="ti ti-rewind" style="font-size:24px;color:#fff"></i>
-          <span>-10s</span>
-        </div>
-        <div id="skip-right" class="skip-overlay" style="right:10%">
-          <i class="ti ti-fast-forward" style="font-size:24px;color:#fff"></i>
-          <span>+10s</span>
-        </div>
-        <video id="cinema-player" class="video-js vjs-default-skin" style="width:100%;height:100%" controls preload="auto" playsinline></video>
+        <video id="cinema-player" class="video-js vjs-default-skin"
+          style="width:100%;height:100%" controls preload="auto" playsinline></video>
       {% endif %}
 
       <!-- Loading overlay -->
@@ -86,10 +94,8 @@
         <div style="width:48px;height:48px;border-radius:50%;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);animation:spin 0.7s linear infinite"></div>
         <p style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--txd)">Video yuklanmoqda...</p>
       </div>
-      {% endif %}
 
       <!-- Error overlay -->
-      {% if not youtube_url and not video_url %}
       <div x-show="error" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.9);gap:16px;z-index:20">
         <i class="ti ti-alert-triangle" style="font-size:44px;color:#E07070" aria-hidden="true"></i>
         <p style="font-size:14px;color:var(--tx);font-weight:500" x-text="errorMsg"></p>
@@ -100,19 +106,18 @@
       <!-- Top bar -->
       <div class="player-top">
         <div style="display:flex;align-items:center;gap:10px">
-          <span class="qual-badge">4K HDR</span>
+          <span class="qual-badge">HD</span>
           <span style="font-size:13px;color:var(--tx);font-weight:500">{{ movie.title }}</span>
         </div>
         <div style="display:flex;gap:8px">
+          {% if subtitles %}
           <button style="width:34px;height:34px;background:rgba(0,0,0,0.5);border:1px solid rgba(201,168,76,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;font-size:15px;transition:all 0.2s"
-                  onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
-                  onmouseout="this.style.borderColor='rgba(201,168,76,0.2)';this.style.color='var(--txd)'"
                   aria-label="Subtitles">
             <i class="ti ti-subtitles" aria-hidden="true"></i>
           </button>
-          <button onclick="toggleFullscreen()" style="width:34px;height:34px;background:rgba(0,0,0,0.5);border:1px solid rgba(201,168,76,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;font-size:15px;transition:all 0.2s"
-                  onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
-                  onmouseout="this.style.borderColor='rgba(201,168,76,0.2)';this.style.color='var(--txd)'"
+          {% endif %}
+          <button onclick="toggleFullscreen()"
+                  style="width:34px;height:34px;background:rgba(0,0,0,0.5);border:1px solid rgba(201,168,76,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;font-size:15px;transition:all 0.2s"
                   aria-label="To'liq ekran">
             <i class="ti ti-arrows-maximize" aria-hidden="true"></i>
           </button>
@@ -122,15 +127,15 @@
       <!-- Controls (faqat HLS player uchun) -->
       {% if not youtube_url and not video_url %}
       <div class="player-controls">
-        <!-- Progress bar -->
         <div class="progress-wrap" @click="seekVideo($event)" @mousemove="showTip($event)" @mouseleave="hideTip()">
           <div class="progress-bg"></div>
           <div class="progress-buf" :style="`width:${buffered}%`"></div>
-          <div class="progress-fill" id="prog-fill" :style="`width:${progress}%`"></div>
+          <div class="progress-fill" :style="`width:${progress}%`"></div>
           <div class="progress-thumb" :style="`left:${progress}%`"></div>
-          <div x-show="tipVisible" :style="`position:absolute;top:-28px;left:${tipX}px;background:rgba(0,0,0,0.88);color:var(--tx);font-size:11px;padding:3px 8px;border-radius:2px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;border:1px solid var(--gdim);pointer-events:none`" x-text="tipTime"></div>
+          <div x-show="tipVisible"
+               :style="`position:absolute;top:-28px;left:${tipX}px;background:rgba(0,0,0,0.88);color:var(--tx);font-size:11px;padding:3px 8px;border-radius:2px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;border:1px solid var(--gdim);pointer-events:none`"
+               x-text="tipTime"></div>
         </div>
-        <!-- Buttons row -->
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="display:flex;align-items:center;gap:8px">
             <button class="ctrl-btn" @click="skipSec(-10)" aria-label="10 sekund orqaga">
@@ -146,26 +151,25 @@
               <button class="ctrl-btn" @click="toggleMute()" aria-label="Ovoz">
                 <i :class="muted?'ti ti-volume-off':vol<50?'ti ti-volume-2':'ti ti-volume'" aria-hidden="true"></i>
               </button>
-              <input type="range" class="vol-slider" min="0" max="100" x-model="vol" @input="setVolume()" aria-label="Ovoz balandligi" />
+              <input type="range" class="vol-slider" min="0" max="100" x-model="vol" @input="setVolume()" />
             </div>
             <span style="font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--tx);letter-spacing:1px;padding:0 6px" x-text="curTime+' / '+durTime"></span>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             {% if available_files %}
               <select x-model="quality" @change="changeQuality()"
-                      style="background:var(--bg3);border:1px solid rgba(201,168,76,0.2);border-radius:2px;padding:4px 8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--gold);outline:none;cursor:pointer"
-                      aria-label="Sifat tanlash">
+                      style="background:var(--bg3);border:1px solid rgba(201,168,76,0.2);border-radius:2px;padding:4px 8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--gold);outline:none;cursor:pointer">
                 {% for f in available_files %}
                   <option value="{{ f.quality }}">{{ f.quality }}</option>
                 {% endfor %}
               </select>
             {% endif %}
             {% if subtitles %}
-              <button class="ctrl-btn" :class="{gold:subtitlesOn}" @click="toggleSubtitles()" aria-label="Subtitles">
+              <button class="ctrl-btn" @click="toggleSubtitles()">
                 <i class="ti ti-subtitles" aria-hidden="true"></i>
               </button>
             {% endif %}
-            <button class="ctrl-btn" onclick="toggleFullscreen()" aria-label="To'liq ekran">
+            <button class="ctrl-btn" onclick="toggleFullscreen()">
               <i class="ti ti-arrows-maximize" aria-hidden="true"></i>
             </button>
           </div>
@@ -178,15 +182,17 @@
 
   <!-- INFO BAR -->
   <div style="max-width:1100px;margin:0 auto;padding:16px 0 0">
-    <div style="display:flex;gap:24px;padding:0 0 0">
-      <!-- Left: movie info -->
+    <div style="display:flex;gap:24px">
+      <!-- Left -->
       <div style="flex:1">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px">
           <div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--tx)">{{ movie.title }}</div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
               {% if movie.average_rating > 0 %}
-                <span style="display:flex;align-items:center;gap:4px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold)"><i class="ti ti-star" style="font-size:12px" aria-hidden="true"></i> {{ movie.average_rating }}</span>
+                <span style="display:flex;align-items:center;gap:4px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold)">
+                  <i class="ti ti-star" style="font-size:12px" aria-hidden="true"></i> {{ movie.average_rating }}
+                </span>
                 <span style="color:var(--txm)">·</span>
               {% endif %}
               <span style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--txd)">{{ movie.release_year }}</span>
@@ -200,11 +206,15 @@
             <button style="width:38px;height:38px;background:var(--bg3);border:1px solid rgba(201,168,76,0.12);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s"
                     onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
                     onmouseout="this.style.borderColor='rgba(201,168,76,0.12)';this.style.color='var(--txd)'"
-                    aria-label="Sevimlilar"><i class="ti ti-heart" style="font-size:16px" aria-hidden="true"></i></button>
+                    aria-label="Sevimlilar">
+              <i class="ti ti-heart" style="font-size:16px" aria-hidden="true"></i>
+            </button>
             <button style="width:38px;height:38px;background:var(--bg3);border:1px solid rgba(201,168,76,0.12);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s"
                     onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
                     onmouseout="this.style.borderColor='rgba(201,168,76,0.12)';this.style.color='var(--txd)'"
-                    aria-label="Ulashish"><i class="ti ti-share" style="font-size:16px" aria-hidden="true"></i></button>
+                    aria-label="Ulashish">
+              <i class="ti ti-share" style="font-size:16px" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
 
@@ -230,17 +240,25 @@
         <!-- Pills -->
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           {% if subtitles %}
-            <button class="cs-pill active"><i class="ti ti-subtitles" style="font-size:13px" aria-hidden="true"></i> Subtitr</button>
+            <button class="cs-pill active">
+              <i class="ti ti-subtitles" style="font-size:13px" aria-hidden="true"></i> Subtitr
+            </button>
           {% endif %}
           {% if available_files %}
-            <button class="cs-pill"><i class="ti ti-download" style="font-size:13px" aria-hidden="true"></i> Yuklab olish</button>
+            <button class="cs-pill">
+              <i class="ti ti-download" style="font-size:13px" aria-hidden="true"></i> Yuklab olish
+            </button>
           {% endif %}
-          <button class="cs-pill"><i class="ti ti-users" style="font-size:13px" aria-hidden="true"></i> Birga ko'rish</button>
-          <a href="{% url 'movie-detail' movie.slug %}" class="cs-pill" style="text-decoration:none"><i class="ti ti-info-circle" style="font-size:13px" aria-hidden="true"></i> Batafsil</a>
+          <button class="cs-pill">
+            <i class="ti ti-users" style="font-size:13px" aria-hidden="true"></i> Birga ko'rish
+          </button>
+          <a href="{% url 'movie-detail' movie.slug %}" class="cs-pill" style="text-decoration:none">
+            <i class="ti ti-info-circle" style="font-size:13px" aria-hidden="true"></i> Batafsil
+          </a>
         </div>
       </div>
 
-      <!-- Right: Keyingi filmlar -->
+      <!-- Right -->
       <div style="width:280px;flex-shrink:0">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">
           Keyingi filmlar<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span>
@@ -248,7 +266,11 @@
         <div style="display:flex;flex-direction:column;gap:8px">
           <a href="{% url 'movie-detail' movie.slug %}" class="ep-card active" style="text-decoration:none">
             <div style="width:68px;height:44px;background:var(--bg2);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative">
-              {% if movie.poster %}<img src="{{ movie.poster.url }}" alt="" style="width:100%;height:100%;object-fit:cover" />{% else %}<i class="ti ti-movie" style="font-size:16px;color:rgba(201,168,76,0.2)" aria-hidden="true"></i>{% endif %}
+              {% if movie.poster %}
+                <img src="{{ movie.poster.url }}" alt="" style="width:100%;height:100%;object-fit:cover" />
+              {% else %}
+                <i class="ti ti-movie" style="font-size:16px;color:rgba(201,168,76,0.2)" aria-hidden="true"></i>
+              {% endif %}
               <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold)"></div>
             </div>
             <div style="flex:1;min-width:0">
@@ -269,6 +291,66 @@
 {% endblock %}
 
 {% block extra_scripts %}
+
+<!-- ===== ODDIY VIDEO PLAYER (video_url) ===== -->
+{% if video_url %}
+<script>
+const simplePlayer = document.getElementById('simple-player');
+
+function showSkipAnim(side) {
+  const el = document.getElementById('skip-' + side);
+  if (!el) return;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 600);
+}
+
+function toggleFullscreen() {
+  const el = document.getElementById('player-container');
+  if (!document.fullscreenElement) {
+    el.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+if (simplePlayer) {
+  // Double-click bilan skip
+  simplePlayer.addEventListener('dblclick', (e) => {
+    const rect = simplePlayer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (x < rect.width / 2) {
+      simplePlayer.currentTime = Math.max(0, simplePlayer.currentTime - 10);
+      showSkipAnim('left');
+    } else {
+      simplePlayer.currentTime = Math.min(simplePlayer.duration, simplePlayer.currentTime + 10);
+      showSkipAnim('right');
+    }
+  });
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (!simplePlayer) return;
+  // Input ichida bo'lsa ishlamas
+  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    simplePlayer.currentTime = Math.max(0, simplePlayer.currentTime - 10);
+    showSkipAnim('left');
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    simplePlayer.currentTime = Math.min(simplePlayer.duration, simplePlayer.currentTime + 10);
+    showSkipAnim('right');
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    simplePlayer.paused ? simplePlayer.play() : simplePlayer.pause();
+  }
+});
+</script>
+{% endif %}
+
+<!-- ===== HLS VIDEO PLAYER (VideoJS) ===== -->
 {% if not youtube_url and not video_url %}
 <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
 <script>
@@ -281,8 +363,8 @@ function toggleFullscreen() {
   }
 }
 
-function showSkip(direction) {
-  const el = document.getElementById(direction === -1 ? 'skip-left' : 'skip-right');
+function showSkipAnim(side) {
+  const el = document.getElementById('skip-' + side);
   if (!el) return;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 600);
@@ -338,10 +420,8 @@ function videoPlayer(slug, resumePosition, defaultLang) {
           if (data.subtitles?.length) {
             data.subtitles.forEach(sub => {
               this.player.addRemoteTextTrack({
-                kind: 'subtitles',
-                label: sub.language_name,
-                srclang: sub.language_code,
-                src: sub.url,
+                kind: 'subtitles', label: sub.language_name,
+                srclang: sub.language_code, src: sub.url,
                 default: sub.language_code === 'uz',
               }, false);
             });
@@ -362,7 +442,6 @@ function videoPlayer(slug, resumePosition, defaultLang) {
           });
           this.player.on('play',  () => { this.playing = true; });
           this.player.on('pause', () => { this.playing = false; });
-
           this.startProgressTracking();
         }
         this.loading = false;
@@ -382,12 +461,11 @@ function videoPlayer(slug, resumePosition, defaultLang) {
     skipSec(s) {
       if (!this.player) return;
       this.player.currentTime(Math.max(0, (this.player.currentTime() || 0) + s));
-      showSkip(s);
+      showSkipAnim(s < 0 ? 'left' : 'right');
     },
 
     seekVideo(e) {
-      const wrap = e.currentTarget;
-      const rect = wrap.getBoundingClientRect();
+      const rect = e.currentTarget.getBoundingClientRect();
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       if (this.player && this.player.duration()) {
         this.player.currentTime(pct * this.player.duration());
@@ -395,12 +473,10 @@ function videoPlayer(slug, resumePosition, defaultLang) {
     },
 
     showTip(e) {
-      const wrap = e.currentTarget;
-      const rect = wrap.getBoundingClientRect();
+      const rect = e.currentTarget.getBoundingClientRect();
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      const dur = this.player?.duration() || 0;
       this.tipX = e.clientX - rect.left - 20;
-      this.tipTime = this.fmtTime(pct * dur);
+      this.tipTime = this.fmtTime(pct * (this.player?.duration() || 0));
       this.tipVisible = true;
     },
 
@@ -412,10 +488,7 @@ function videoPlayer(slug, resumePosition, defaultLang) {
     },
 
     setVolume() {
-      if (this.player) {
-        this.player.volume(this.vol / 100);
-        this.muted = this.vol == 0;
-      }
+      if (this.player) { this.player.volume(this.vol / 100); this.muted = this.vol == 0; }
     },
 
     changeQuality() {
@@ -451,10 +524,7 @@ function videoPlayer(slug, resumePosition, defaultLang) {
         if (pos < 5) return;
         await fetch(`/api/streaming/${slug}/progress/`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
-          },
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
           body: JSON.stringify({ position_seconds: pos, duration_seconds: dur || undefined }),
         }).catch(() => {});
       }, 10000);
@@ -465,40 +535,6 @@ function videoPlayer(slug, resumePosition, defaultLang) {
       this.player?.dispose();
     },
   };
-}
-</script>
-{% endif %}
-
-{% if video_url %}
-<script>
-// Oddiy <video> tegi uchun 10s skip
-const simplePlayer = document.getElementById('simple-player');
-if (simplePlayer) {
-  simplePlayer.addEventListener('dblclick', (e) => {
-    const rect = simplePlayer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    if (x < rect.width / 2) {
-      simplePlayer.currentTime = Math.max(0, simplePlayer.currentTime - 10);
-      showSkip(-1);
-    } else {
-      simplePlayer.currentTime = Math.min(simplePlayer.duration, simplePlayer.currentTime + 10);
-      showSkip(1);
-    }
-  });
-}
-function showSkip(direction) {
-  const el = document.getElementById(direction === -1 ? 'skip-left' : 'skip-right');
-  if (!el) return;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 600);
-}
-function toggleFullscreen() {
-  const el = document.getElementById('player-container');
-  if (!document.fullscreenElement) {
-    el.requestFullscreen().catch(() => {});
-  } else {
-    document.exitFullscreen();
-  }
 }
 </script>
 {% endif %}
