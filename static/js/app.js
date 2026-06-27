@@ -109,3 +109,24 @@ function getToken() {
 function toast(message, type = 'info') {
   window.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
 }
+
+// ─── Language switcher ───────────────────────────────
+function switchLanguage(langCode) {
+  // Barcha til tugmalarini reset
+  document.querySelectorAll('[id^="lang-btn-"]').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  // Tanlangan tilni faollashtirish
+  const btn = document.getElementById('lang-btn-' + langCode);
+  if (btn) btn.classList.add('active');
+
+  // Alpine.js videoPlayer ga xabar berish
+  const playerEl = document.querySelector('[x-data^="videoPlayer"]');
+  if (playerEl && playerEl._x_dataStack) {
+    const player = playerEl._x_dataStack[0];
+    if (player) {
+      player.selectedLang = langCode;
+      player.loadStream();
+    }
+  }
+}

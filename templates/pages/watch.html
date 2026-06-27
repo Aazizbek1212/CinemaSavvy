@@ -37,11 +37,16 @@
 .ep-card { display: flex; gap: 10px; padding: 10px; background: var(--bg3); border: 1px solid rgba(201,168,76,0.1); border-radius: 3px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
 .ep-card:hover { border-color: rgba(201,168,76,0.35); transform: translateX(3px); }
 .ep-card.active { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+
+/* 10s skip overlay */
+.skip-overlay { position: absolute; top: 50%; transform: translateY(-50%); width: 80px; height: 80px; border-radius: 50%; background: rgba(201,168,76,0.15); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 30; }
+.skip-overlay.show { opacity: 1; }
+.skip-overlay span { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 1px; color: #fff; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="watch-page" {% if not youtube_url and not video_url %}x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }})"{% endif %}>
+<div class="watch-page" {% if not youtube_url and not video_url %}x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }}, '{{ default_lang }}')"{% endif %}>
 
   <!-- PLAYER -->
   <div style="max-width:1100px;margin:0 auto">
@@ -50,10 +55,28 @@
       {% if youtube_url %}
         <iframe id="yt-player" src="https://www.youtube.com/embed/{{ youtube_embed_id }}?autoplay=1&rel=0&modestbranding=1" style="width:100%;height:100%;position:absolute;inset:0;border:none;z-index:50" allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe>
       {% elif video_url %}
+        <!-- 10s skip — oddiy video uchun -->
+        <div id="skip-left" class="skip-overlay" style="left:10%">
+          <i class="ti ti-rewind" style="font-size:24px;color:#fff"></i>
+          <span>-10s</span>
+        </div>
+        <div id="skip-right" class="skip-overlay" style="right:10%">
+          <i class="ti ti-fast-forward" style="font-size:24px;color:#fff"></i>
+          <span>+10s</span>
+        </div>
         <video id="simple-player" style="width:100%;height:100%;position:absolute;inset:0;z-index:50" controls>
           <source src="{{ video_url }}" type="video/mp4">
         </video>
       {% else %}
+        <!-- 10s skip overlay — HLS player uchun -->
+        <div id="skip-left" class="skip-overlay" style="left:10%">
+          <i class="ti ti-rewind" style="font-size:24px;color:#fff"></i>
+          <span>-10s</span>
+        </div>
+        <div id="skip-right" class="skip-overlay" style="right:10%">
+          <i class="ti ti-fast-forward" style="font-size:24px;color:#fff"></i>
+          <span>+10s</span>
+        </div>
         <video id="cinema-player" class="video-js vjs-default-skin" style="width:100%;height:100%" controls preload="auto" playsinline></video>
       {% endif %}
 
@@ -87,7 +110,7 @@
                   aria-label="Subtitles">
             <i class="ti ti-subtitles" aria-hidden="true"></i>
           </button>
-          <button style="width:34px;height:34px;background:rgba(0,0,0,0.5);border:1px solid rgba(201,168,76,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;font-size:15px;transition:all 0.2s"
+          <button onclick="toggleFullscreen()" style="width:34px;height:34px;background:rgba(0,0,0,0.5);border:1px solid rgba(201,168,76,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;font-size:15px;transition:all 0.2s"
                   onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
                   onmouseout="this.style.borderColor='rgba(201,168,76,0.2)';this.style.color='var(--txd)'"
                   aria-label="To'liq ekran">
@@ -96,7 +119,8 @@
         </div>
       </div>
 
-      <!-- Controls -->
+      <!-- Controls (faqat HLS player uchun) -->
+      {% if not youtube_url and not video_url %}
       <div class="player-controls">
         <!-- Progress bar -->
         <div class="progress-wrap" @click="seekVideo($event)" @mousemove="showTip($event)" @mouseleave="hideTip()">
@@ -109,11 +133,15 @@
         <!-- Buttons row -->
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="display:flex;align-items:center;gap:8px">
-            <button class="ctrl-btn" @click="skipSec(-10)" aria-label="10 sekund orqaga"><i class="ti ti-rewind" aria-hidden="true"></i></button>
+            <button class="ctrl-btn" @click="skipSec(-10)" aria-label="10 sekund orqaga">
+              <i class="ti ti-rewind" aria-hidden="true"></i>
+            </button>
             <button class="play-sm" @click="togglePlay()" aria-label="Play/Pause">
               <i :class="playing?'ti ti-player-pause':'ti ti-player-play'" :style="playing?'':'margin-left:3px'" aria-hidden="true"></i>
             </button>
-            <button class="ctrl-btn" @click="skipSec(10)" aria-label="10 sekund oldinga"><i class="ti ti-fast-forward" aria-hidden="true"></i></button>
+            <button class="ctrl-btn" @click="skipSec(10)" aria-label="10 sekund oldinga">
+              <i class="ti ti-fast-forward" aria-hidden="true"></i>
+            </button>
             <div style="display:flex;align-items:center;gap:7px">
               <button class="ctrl-btn" @click="toggleMute()" aria-label="Ovoz">
                 <i :class="muted?'ti ti-volume-off':vol<50?'ti ti-volume-2':'ti ti-volume'" aria-hidden="true"></i>
@@ -137,10 +165,14 @@
                 <i class="ti ti-subtitles" aria-hidden="true"></i>
               </button>
             {% endif %}
-            <button class="ctrl-btn" aria-label="To'liq ekran"><i class="ti ti-arrows-maximize" aria-hidden="true"></i></button>
+            <button class="ctrl-btn" onclick="toggleFullscreen()" aria-label="To'liq ekran">
+              <i class="ti ti-arrows-maximize" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
       </div>
+      {% endif %}
+
     </div>
   </div>
 
@@ -175,13 +207,30 @@
                     aria-label="Ulashish"><i class="ti ti-share" style="font-size:16px" aria-hidden="true"></i></button>
           </div>
         </div>
+
         {% if movie.description %}
           <p style="font-size:13px;color:var(--txd);line-height:1.7;max-width:600px;margin-bottom:14px;font-weight:300">{{ movie.description|truncatechars:200 }}</p>
         {% endif %}
+
+        <!-- Til tanlash -->
+        {% if available_languages %}
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txd)">Til:</span>
+          {% for lang in available_languages %}
+            <button class="cs-pill {% if lang.code == default_lang %}active{% endif %}"
+                    id="lang-btn-{{ lang.code }}"
+                    onclick="switchLanguage('{{ lang.code }}')">
+              <i class="ti ti-language" style="font-size:13px" aria-hidden="true"></i>
+              {{ lang.name }}
+            </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Pills -->
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           {% if subtitles %}
-            <button class="cs-pill active"><i class="ti ti-subtitles" style="font-size:13px" aria-hidden="true"></i> Subtitrl</button>
+            <button class="cs-pill active"><i class="ti ti-subtitles" style="font-size:13px" aria-hidden="true"></i> Subtitr</button>
           {% endif %}
           {% if available_files %}
             <button class="cs-pill"><i class="ti ti-download" style="font-size:13px" aria-hidden="true"></i> Yuklab olish</button>
@@ -196,7 +245,6 @@
         <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">
           Keyingi filmlar<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span>
         </div>
-        <!-- Watch history / related -->
         <div style="display:flex;flex-direction:column;gap:8px">
           <a href="{% url 'movie-detail' movie.slug %}" class="ep-card active" style="text-decoration:none">
             <div style="width:68px;height:44px;background:var(--bg2);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative">
@@ -224,22 +272,52 @@
 {% if not youtube_url and not video_url %}
 <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
 <script>
-function videoPlayer(slug, resumePosition) {
+function toggleFullscreen() {
+  const el = document.getElementById('player-container');
+  if (!document.fullscreenElement) {
+    el.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+function showSkip(direction) {
+  const el = document.getElementById(direction === -1 ? 'skip-left' : 'skip-right');
+  if (!el) return;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 600);
+}
+
+function videoPlayer(slug, resumePosition, defaultLang) {
   return {
-    loading: true, error: false, errorMsg: '',
-    playing: false, progress: 0, buffered: 0, vol: 80, muted: false,
-    curTime: '00:00', durTime: '00:00', quality: '{{ available_files.first.quality|default:"720p" }}',
-    subtitlesOn: true, player: null, progressInterval: null,
-    tipVisible: false, tipX: 0, tipTime: '00:00',
+    loading: true,
+    error: false,
+    errorMsg: '',
+    playing: false,
+    progress: 0,
+    buffered: 0,
+    vol: 80,
+    muted: false,
+    curTime: '00:00',
+    durTime: '00:00',
+    quality: '{{ available_files.first.quality|default:"720p" }}',
+    subtitlesOn: true,
+    player: null,
+    progressInterval: null,
+    tipVisible: false,
+    tipX: 0,
+    tipTime: '00:00',
+    selectedLang: defaultLang || '{{ default_lang }}',
 
     async init() { await this.loadStream(); },
 
     async loadStream() {
       this.loading = true; this.error = false;
       try {
-        const res = await fetch(`/api/streaming/${slug}/?quality=${this.quality}`, {
-          headers: { 'X-CSRFToken': getCsrfToken() }, credentials: 'include',
-        });
+        const res = await fetch(
+          `/api/streaming/${slug}/?quality=${this.quality}&lang=${this.selectedLang}`,
+          { headers: { 'X-CSRFToken': getCsrfToken() }, credentials: 'include' }
+        );
         if (!res.ok) { const d = await res.json(); throw new Error(d.detail || 'Video yuklanmadi'); }
         const data = await res.json();
 
@@ -259,7 +337,13 @@ function videoPlayer(slug, resumePosition) {
 
           if (data.subtitles?.length) {
             data.subtitles.forEach(sub => {
-              this.player.addRemoteTextTrack({ kind: 'subtitles', label: sub.language_name, srclang: sub.language_code, src: sub.url, default: sub.language_code === 'uz' }, false);
+              this.player.addRemoteTextTrack({
+                kind: 'subtitles',
+                label: sub.language_name,
+                srclang: sub.language_code,
+                src: sub.url,
+                default: sub.language_code === 'uz',
+              }, false);
             });
           }
 
@@ -276,7 +360,7 @@ function videoPlayer(slug, resumePosition) {
               this.buffered = (this.player.bufferedEnd(0) / dur) * 100;
             }
           });
-          this.player.on('play', () => { this.playing = true; });
+          this.player.on('play',  () => { this.playing = true; });
           this.player.on('pause', () => { this.playing = false; });
 
           this.startProgressTracking();
@@ -284,54 +368,137 @@ function videoPlayer(slug, resumePosition) {
         this.loading = false;
         this.player.play().catch(() => {});
       } catch (err) {
-        this.loading = false; this.error = true; this.errorMsg = err.message || 'Xato yuz berdi';
+        this.loading = false;
+        this.error = true;
+        this.errorMsg = err.message || 'Xato yuz berdi';
       }
     },
 
-    togglePlay() { if (!this.player) return; this.player.paused() ? this.player.play() : this.player.pause(); },
-    skipSec(s) { if (!this.player) return; this.player.currentTime(Math.max(0, (this.player.currentTime()||0)+s)); },
-    seekVideo(e) {
-      const wrap = e.currentTarget; const rect = wrap.getBoundingClientRect();
-      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      if (this.player && this.player.duration()) this.player.currentTime(pct * this.player.duration());
+    togglePlay() {
+      if (!this.player) return;
+      this.player.paused() ? this.player.play() : this.player.pause();
     },
+
+    skipSec(s) {
+      if (!this.player) return;
+      this.player.currentTime(Math.max(0, (this.player.currentTime() || 0) + s));
+      showSkip(s);
+    },
+
+    seekVideo(e) {
+      const wrap = e.currentTarget;
+      const rect = wrap.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      if (this.player && this.player.duration()) {
+        this.player.currentTime(pct * this.player.duration());
+      }
+    },
+
     showTip(e) {
-      const wrap = e.currentTarget; const rect = wrap.getBoundingClientRect();
+      const wrap = e.currentTarget;
+      const rect = wrap.getBoundingClientRect();
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       const dur = this.player?.duration() || 0;
       this.tipX = e.clientX - rect.left - 20;
       this.tipTime = this.fmtTime(pct * dur);
       this.tipVisible = true;
     },
+
     hideTip() { this.tipVisible = false; },
-    toggleMute() { this.muted = !this.muted; if (this.player) this.player.muted(this.muted); },
-    setVolume() { if (this.player) { this.player.volume(this.vol / 100); this.muted = this.vol == 0; } },
-    changeQuality() { const cur = this.player?.currentTime() || 0; this.loadStream().then(() => { this.player?.currentTime(cur); }); },
+
+    toggleMute() {
+      this.muted = !this.muted;
+      if (this.player) this.player.muted(this.muted);
+    },
+
+    setVolume() {
+      if (this.player) {
+        this.player.volume(this.vol / 100);
+        this.muted = this.vol == 0;
+      }
+    },
+
+    changeQuality() {
+      const cur = this.player?.currentTime() || 0;
+      this.loadStream().then(() => { this.player?.currentTime(cur); });
+    },
+
     toggleSubtitles() {
       this.subtitlesOn = !this.subtitlesOn;
       if (!this.player) return;
       const tracks = this.player.textTracks();
-      for (let i = 0; i < tracks.length; i++) tracks[i].mode = this.subtitlesOn ? 'showing' : 'hidden';
+      for (let i = 0; i < tracks.length; i++) {
+        tracks[i].mode = this.subtitlesOn ? 'showing' : 'hidden';
+      }
     },
+
     fmtTime(s) {
       s = Math.floor(s || 0);
-      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-      return h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      return h > 0
+        ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+        : `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
     },
+
     startProgressTracking() {
       clearInterval(this.progressInterval);
       this.progressInterval = setInterval(async () => {
         if (!this.player || this.player.paused()) return;
-        const pos = Math.floor(this.player.currentTime()); const dur = Math.floor(this.player.duration() || 0);
+        const pos = Math.floor(this.player.currentTime());
+        const dur = Math.floor(this.player.duration() || 0);
         if (pos < 5) return;
         await fetch(`/api/streaming/${slug}/progress/`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+          },
           body: JSON.stringify({ position_seconds: pos, duration_seconds: dur || undefined }),
         }).catch(() => {});
       }, 10000);
     },
-    destroy() { clearInterval(this.progressInterval); this.player?.dispose(); },
+
+    destroy() {
+      clearInterval(this.progressInterval);
+      this.player?.dispose();
+    },
   };
+}
+</script>
+{% endif %}
+
+{% if video_url %}
+<script>
+// Oddiy <video> tegi uchun 10s skip
+const simplePlayer = document.getElementById('simple-player');
+if (simplePlayer) {
+  simplePlayer.addEventListener('dblclick', (e) => {
+    const rect = simplePlayer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (x < rect.width / 2) {
+      simplePlayer.currentTime = Math.max(0, simplePlayer.currentTime - 10);
+      showSkip(-1);
+    } else {
+      simplePlayer.currentTime = Math.min(simplePlayer.duration, simplePlayer.currentTime + 10);
+      showSkip(1);
+    }
+  });
+}
+function showSkip(direction) {
+  const el = document.getElementById(direction === -1 ? 'skip-left' : 'skip-right');
+  if (!el) return;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 600);
+}
+function toggleFullscreen() {
+  const el = document.getElementById('player-container');
+  if (!document.fullscreenElement) {
+    el.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
 }
 </script>
 {% endif %}
