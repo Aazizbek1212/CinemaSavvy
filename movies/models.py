@@ -338,6 +338,14 @@ class MovieFile(TimeStampedModel):
         related_name="video_files",
         verbose_name=_("movie"),
     )
+    # ← QO'SHILDI
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="video_files",
+        verbose_name=_("language"),
+    )
     quality = models.CharField(
         _("quality"), max_length=10,
         choices=Quality.choices,
@@ -346,7 +354,6 @@ class MovieFile(TimeStampedModel):
         _("MinIO file key"), max_length=500,
         help_text="MinIO bucket ichidagi fayl yo'li",
     )
-    # Master playlist for HLS
     hls_playlist_key = models.CharField(
         _("HLS playlist key"), max_length=500,
         blank=True,
@@ -368,12 +375,13 @@ class MovieFile(TimeStampedModel):
     class Meta:
         verbose_name = _("movie file")
         verbose_name_plural = _("movie files")
-        unique_together = [("movie", "quality")]
+        # unique_together ← eski: (movie, quality) — yangi: (movie, quality, language)
+        unique_together = [("movie", "quality", "language")]
         ordering = ["quality"]
 
     def __str__(self) -> str:
-        return f"{self.movie.title} — {self.quality}"
-
+        lang = self.language.code if self.language else "—"
+        return f"{self.movie.title} — {self.quality} [{lang}]"
 
 # ──────────────────────────────────────────────
 # Subtitle
