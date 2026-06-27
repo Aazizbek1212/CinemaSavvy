@@ -9,8 +9,14 @@
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(201,168,76,0.12);
 }
-.cs-nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 4px; color: var(--gold); text-decoration: none; }
+.cs-nav-logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 24px;
+  letter-spacing: 4px; color: var(--gold); text-decoration: none;
+  flex-shrink: 0;
+}
 .cs-nav-logo span { color: var(--tx); }
+
+/* Desktop links */
 .cs-nav-links { display: flex; gap: 28px; }
 .cs-nav-links a {
   color: var(--txd); font-size: 12px; font-weight: 500;
@@ -18,11 +24,14 @@
   transition: color 0.2s; padding: 4px 0; border-bottom: 1px solid transparent;
 }
 .cs-nav-links a:hover, .cs-nav-links a.active { color: var(--gold); border-bottom-color: var(--gold); }
+
 .cs-nav-right { display: flex; align-items: center; gap: 14px; }
+
 .cs-nav-search {
   display: flex; align-items: center; gap: 8px;
   background: var(--bg3); border: 1px solid rgba(201,168,76,0.12);
   border-radius: 3px; padding: 6px 12px; transition: border-color 0.2s;
+  position: relative;
 }
 .cs-nav-search:focus-within { border-color: rgba(201,168,76,0.4); }
 .cs-nav-search input {
@@ -31,6 +40,7 @@
   font-family: 'Inter', sans-serif;
 }
 .cs-nav-search input::placeholder { color: var(--txd); }
+
 .cs-nav-icon {
   color: var(--txd); font-size: 18px; cursor: pointer;
   transition: color 0.2s; background: none; border: none;
@@ -38,6 +48,7 @@
   border-radius: 3px;
 }
 .cs-nav-icon:hover { color: var(--gold); }
+
 .cs-nav-avatar {
   width: 34px; height: 34px; border-radius: 50%;
   background: var(--gdim); border: 1px solid var(--gmid);
@@ -46,6 +57,7 @@
   cursor: pointer; font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 1px; overflow: hidden;
 }
+
 .cs-dropdown {
   position: absolute; right: 0; top: calc(100% + 8px);
   width: 220px; background: var(--bg2);
@@ -62,18 +74,86 @@
 .cs-dropdown-item.danger { color: #E07070; }
 .cs-dropdown-item.danger:hover { background: rgba(139,26,26,0.1); }
 .cs-dropdown-divider { height: 1px; background: rgba(201,168,76,0.08); }
+
+/* Hamburger */
+.cs-hamburger {
+  display: none; flex-direction: column; justify-content: center;
+  gap: 5px; width: 36px; height: 36px; cursor: pointer;
+  background: none; border: none; padding: 4px;
+}
+.cs-hamburger span {
+  display: block; height: 2px; background: var(--txd);
+  border-radius: 2px; transition: all 0.3s;
+}
+.cs-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); background: var(--gold); }
+.cs-hamburger.open span:nth-child(2) { opacity: 0; }
+.cs-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); background: var(--gold); }
+
+/* Mobile menu */
+.cs-mobile-menu {
+  display: none; position: fixed; top: 62px; left: 0; right: 0; bottom: 0;
+  background: rgba(10,10,15,0.98); backdrop-filter: blur(20px);
+  z-index: 99; overflow-y: auto; padding: 24px;
+  flex-direction: column; gap: 8px;
+}
+.cs-mobile-menu.open { display: flex; }
+.cs-mobile-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 3px;
+  color: var(--txd); font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px; letter-spacing: 2px; text-decoration: none;
+  border: 1px solid transparent; transition: all 0.2s;
+}
+.cs-mobile-link:hover, .cs-mobile-link.active {
+  color: var(--gold); border-color: rgba(201,168,76,0.15);
+  background: rgba(201,168,76,0.05);
+}
+.cs-mobile-search {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg3); border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 3px; padding: 10px 14px; margin-bottom: 8px;
+}
+.cs-mobile-search input {
+  background: none; border: none; outline: none;
+  color: var(--tx); font-size: 14px; width: 100%;
+  font-family: 'Inter', sans-serif;
+}
+.cs-mobile-search input::placeholder { color: var(--txd); }
+.cs-mobile-divider {
+  height: 1px; background: rgba(201,168,76,0.08); margin: 8px 0;
+}
+.cs-mobile-user {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; margin-bottom: 8px;
+  background: var(--bg3); border: 1px solid rgba(201,168,76,0.1);
+  border-radius: 3px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cs-nav { padding: 0 16px; }
+  .cs-nav-links { display: none; }
+  .cs-nav-search { display: none; }
+  .cs-nav-right .cs-btn-ghost,
+  .cs-nav-right .cs-btn-gold { display: none; }
+  .cs-nav-right button[aria-label="Bildirishnomalar"] { display: none; }
+  .cs-hamburger { display: flex; }
+}
 </style>
 
-<nav class="cs-nav">
+<nav class="cs-nav" x-data="{mobileOpen: false, userOpen: false}">
+  <!-- Logo -->
   <a href="{% url 'home' %}" class="cs-nav-logo">Cinema<span>Savvy</span></a>
 
+  <!-- Desktop links -->
   <div class="cs-nav-links">
     <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Asosiy</a>
     <a href="{% url 'catalog' %}" {% if request.resolver_match.url_name == 'catalog' %}class="active"{% endif %}>Filmlar</a>
-    <a href="{% url 'catalog' %}?content_type=series" >Seriallar</a>
+    <a href="{% url 'catalog' %}?content_type=series">Seriallar</a>
     <a href="{% url 'search' %}" {% if request.resolver_match.url_name == 'search' %}class="active"{% endif %}>Qidirish</a>
   </div>
 
+  <!-- Desktop right -->
   <div class="cs-nav-right">
     <!-- Search -->
     <div class="cs-nav-search" x-data="searchBar()">
@@ -86,21 +166,17 @@
              @keydown.escape="open=false"
              placeholder="Film qidirish..."
              aria-label="Film qidirish" />
-      <!-- Dropdown -->
       <div x-show="open && results.length > 0"
            style="position:absolute;top:calc(100% + 6px);left:0;right:0;
                   background:var(--bg2);border:1px solid rgba(201,168,76,0.15);
-                  border-radius:4px;overflow:hidden;z-index:200;max-height:280px;overflow-y:auto"
-           class="cs-nav-search">
+                  border-radius:4px;overflow:hidden;z-index:200;max-height:280px;overflow-y:auto">
         <template x-for="movie in results" :key="movie.id">
           <a :href="`/movies/${movie.slug}/`"
              style="display:flex;align-items:center;gap:10px;padding:10px 14px;
-                    text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.06);
-                    transition:background 0.15s"
+                    text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.06);transition:background 0.15s"
              onmouseover="this.style.background='rgba(201,168,76,0.06)'"
              onmouseout="this.style.background='none'">
-            <div style="width:30px;height:42px;background:var(--bg3);border-radius:2px;
-                        overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+            <div style="width:30px;height:42px;background:var(--bg3);border-radius:2px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">
               <img x-show="movie.poster" :src="movie.poster" style="width:100%;height:100%;object-fit:cover" />
               <i x-show="!movie.poster" class="ti ti-movie" style="font-size:14px;color:var(--txd)"></i>
             </div>
@@ -108,23 +184,19 @@
               <p style="font-size:12px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" x-text="movie.title"></p>
               <p style="font-size:11px;color:var(--txd);font-family:'Bebas Neue',sans-serif;letter-spacing:1px" x-text="movie.release_year"></p>
             </div>
-            <div x-show="movie.average_rating > 0"
-                 style="font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold)" x-text="movie.average_rating"></div>
+            <div x-show="movie.average_rating > 0" style="font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold)" x-text="movie.average_rating"></div>
           </a>
         </template>
       </div>
     </div>
 
     {% if user.is_authenticated %}
-      <!-- Notification -->
       <button class="cs-nav-icon" aria-label="Bildirishnomalar">
         <i class="ti ti-bell" aria-hidden="true"></i>
       </button>
-
       <!-- User menu -->
       <div style="position:relative" x-data="{open:false}">
-        <div @click="open=!open" @click.outside="open=false"
-             class="cs-nav-avatar" style="cursor:pointer">
+        <div @click="open=!open" @click.outside="open=false" class="cs-nav-avatar">
           {% if user.avatar %}
             <img src="{{ user.avatar.url }}" alt="{{ user.display_name }}" style="width:100%;height:100%;object-fit:cover" />
           {% else %}
@@ -163,10 +235,96 @@
           </form>
         </div>
       </div>
-
     {% else %}
       <a href="{% url 'auth:login' %}" class="cs-btn-ghost" style="padding:8px 18px;font-size:12px">Kirish</a>
       <a href="{% url 'auth:register' %}" class="cs-btn-gold" style="padding:8px 18px;font-size:12px">Ro'yxat</a>
     {% endif %}
+
+    <!-- Hamburger (mobile) -->
+    <button class="cs-hamburger" :class="mobileOpen ? 'open' : ''" @click="mobileOpen=!mobileOpen" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </div>
 </nav>
+
+<!-- Mobile menu -->
+<div class="cs-mobile-menu" :class="mobileOpen ? 'open' : ''" x-data>
+
+  <!-- Mobile search -->
+  <div class="cs-mobile-search" x-data="searchBar()">
+    <i class="ti ti-search" style="font-size:16px;color:var(--txd)" aria-hidden="true"></i>
+    <input type="text"
+           x-model="query"
+           @input.debounce.350ms="search()"
+           placeholder="Film qidirish..."
+           aria-label="Film qidirish" />
+  </div>
+
+  <!-- User info (mobile) -->
+  {% if user.is_authenticated %}
+  <div class="cs-mobile-user">
+    <div class="cs-nav-avatar" style="width:40px;height:40px;font-size:16px;flex-shrink:0">
+      {% if user.avatar %}
+        <img src="{{ user.avatar.url }}" alt="" style="width:100%;height:100%;object-fit:cover" />
+      {% else %}
+        {{ user.display_name|first|upper }}
+      {% endif %}
+    </div>
+    <div>
+      <p style="font-size:14px;font-weight:500;color:var(--tx)">{{ user.display_name }}</p>
+      <p style="font-size:11px;color:var(--txd)">{{ user.email }}</p>
+    </div>
+    {% if user.is_premium %}
+      <span class="badge-gold" style="margin-left:auto">Premium</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="cs-mobile-divider"></div>
+
+  <!-- Nav links -->
+  <a href="{% url 'home' %}" class="cs-mobile-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+    <i class="ti ti-home" style="font-size:18px" aria-hidden="true"></i> Asosiy
+  </a>
+  <a href="{% url 'catalog' %}" class="cs-mobile-link {% if request.resolver_match.url_name == 'catalog' %}active{% endif %}">
+    <i class="ti ti-movie" style="font-size:18px" aria-hidden="true"></i> Filmlar
+  </a>
+  <a href="{% url 'catalog' %}?content_type=series" class="cs-mobile-link">
+    <i class="ti ti-device-tv" style="font-size:18px" aria-hidden="true"></i> Seriallar
+  </a>
+  <a href="{% url 'search' %}" class="cs-mobile-link {% if request.resolver_match.url_name == 'search' %}active{% endif %}">
+    <i class="ti ti-search" style="font-size:18px" aria-hidden="true"></i> Qidirish
+  </a>
+
+  {% if user.is_authenticated %}
+    <div class="cs-mobile-divider"></div>
+    <a href="{% url 'auth:profile' %}" class="cs-mobile-link">
+      <i class="ti ti-user" style="font-size:18px" aria-hidden="true"></i> Profilim
+    </a>
+    <a href="{% url 'watch-history' %}" class="cs-mobile-link">
+      <i class="ti ti-clock" style="font-size:18px" aria-hidden="true"></i> Ko'rish tarixi
+    </a>
+    {% if not user.is_premium %}
+      <a href="{% url 'auth:subscription' %}" class="cs-mobile-link" style="color:var(--gold);border-color:rgba(201,168,76,0.2)">
+        <i class="ti ti-star" style="font-size:18px" aria-hidden="true"></i> Premium olish
+      </a>
+    {% endif %}
+    <div class="cs-mobile-divider"></div>
+    <form method="post" action="{% url 'auth:logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="cs-mobile-link" style="width:100%;color:#E07070">
+        <i class="ti ti-logout" style="font-size:18px" aria-hidden="true"></i> Chiqish
+      </button>
+    </form>
+  {% else %}
+    <div class="cs-mobile-divider"></div>
+    <a href="{% url 'auth:login' %}" class="cs-mobile-link">
+      <i class="ti ti-login" style="font-size:18px" aria-hidden="true"></i> Kirish
+    </a>
+    <a href="{% url 'auth:register' %}" class="cs-btn-gold" style="margin-top:8px;justify-content:center">
+      <i class="ti ti-user-plus" style="font-size:16px" aria-hidden="true"></i> Ro'yxatdan o'tish
+    </a>
+  {% endif %}
+</div>

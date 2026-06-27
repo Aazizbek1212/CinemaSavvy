@@ -161,8 +161,15 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 AWS_S3_VERIFY = False
 
-DEFAULT_FROM_EMAIL: str = config("DEFAULT_FROM_EMAIL", default="noreply@cinema.uz")
-FRONTEND_URL: str = config("FRONTEND_URL", default="http://localhost:8000")
+# Email sozlamalari
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default='True') == 'True'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@cinema.uz')
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:8000')
 
 CORS_ALLOWED_ORIGINS: list = config(
     "CORS_ALLOWED_ORIGINS",
