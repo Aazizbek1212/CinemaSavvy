@@ -5,34 +5,23 @@
 
 {% block content %}
 
-<!-- ═══════════════════════════════
-     HERO — Animatsiyali
-═══════════════════════════════ -->
+<!-- HERO -->
 <section style="position:relative;height:580px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg)">
   <canvas id="hero-stars" style="position:absolute;inset:0;z-index:1"></canvas>
-  <!-- Filmstrip top -->
   <div style="position:absolute;top:0;left:0;width:200%;height:32px;z-index:2;display:flex">
     <div style="display:flex;animation:fsLeft 22s linear infinite" id="fst"></div>
   </div>
-  <!-- Filmstrip bottom -->
   <div style="position:absolute;bottom:0;left:0;width:200%;height:32px;z-index:2;display:flex">
     <div style="display:flex;animation:fsRight 22s linear infinite" id="fsb"></div>
   </div>
-  <!-- Scan line -->
   <div class="cs-scan"></div>
-  <!-- Glow -->
   <div style="position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%);z-index:1;animation:glow 4s ease-in-out infinite"></div>
-  <!-- Corners -->
   <div style="position:absolute;top:40px;left:36px;width:18px;height:18px;border-top:1px solid var(--gmid);border-left:1px solid var(--gmid);z-index:4"></div>
   <div style="position:absolute;top:40px;right:36px;width:18px;height:18px;border-top:1px solid var(--gmid);border-right:1px solid var(--gmid);z-index:4"></div>
   <div style="position:absolute;bottom:40px;left:36px;width:18px;height:18px;border-bottom:1px solid var(--gmid);border-left:1px solid var(--gmid);z-index:4"></div>
   <div style="position:absolute;bottom:40px;right:36px;width:18px;height:18px;border-bottom:1px solid var(--gmid);border-right:1px solid var(--gmid);z-index:4"></div>
-  <div style="position:absolute;top:46px;left:60px;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:rgba(201,168,76,0.2);z-index:4">CS · 001</div>
-  <div style="position:absolute;top:46px;right:60px;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:rgba(201,168,76,0.2);z-index:4">4K · HDR</div>
 
-  <!-- Hero center -->
-  <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center">
-    <!-- Logo ring -->
+  <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;padding:0 16px;text-align:center">
     <div style="position:relative;width:180px;height:180px;display:flex;align-items:center;justify-content:center">
       <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 180 180" fill="none">
         <circle cx="90" cy="90" r="82" stroke="rgba(201,168,76,0.1)" stroke-width="1"/>
@@ -58,7 +47,7 @@
     <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:7px;color:rgba(201,168,76,0.45);opacity:0;animation:fadeUp 1s ease forwards;animation-delay:2.2s">
       PREMIUM · CINEMA · STREAMING
     </div>
-    <div style="display:flex;gap:14px;margin-top:28px;opacity:0;animation:fadeUp 1s ease forwards;animation-delay:2.8s">
+    <div style="display:flex;gap:10px;margin-top:28px;opacity:0;animation:fadeUp 1s ease forwards;animation-delay:2.8s;flex-wrap:wrap;justify-content:center">
       {% if featured_movie %}
         <a href="{% url 'watch' featured_movie.slug %}" class="cs-btn-gold">
           <i class="ti ti-player-play" style="font-size:14px" aria-hidden="true"></i> Ko'rishni boshlash
@@ -73,8 +62,7 @@
         {% endif %}
       {% endif %}
     </div>
-    <!-- Stats -->
-    <div style="display:flex;gap:32px;margin-top:28px;opacity:0;animation:fadeUp 1s ease forwards;animation-delay:3.2s">
+    <div class="cs-hero-stats" style="margin-top:28px;opacity:0;animation:fadeUp 1s ease forwards;animation-delay:3.2s">
       <div style="text-align:center">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--gold)">12K+</div>
         <div style="font-size:10px;color:var(--txd);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Film</div>
@@ -95,13 +83,11 @@
   </div>
 </section>
 
-<!-- ═══════════════════════════════
-     JANR TEGLARI
-═══════════════════════════════ -->
-<div style="padding:18px 32px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid rgba(201,168,76,0.1)" class="anim-2">
+<!-- JANR TEGLARI -->
+<div class="cs-genre-tags anim-2">
   <a href="{% url 'catalog' %}" style="padding:5px 14px;background:var(--gdim);border:1px solid var(--gmid);color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;border-radius:2px;text-decoration:none">Barcha</a>
   {% for genre in genres %}
-    <a href="{% url 'catalog' %}?genre={{ genre.slug }}"
+    <a href="{% url 'catalog' %}?genre={{ genre.slug %}"
        style="padding:5px 14px;background:transparent;border:1px solid rgba(201,168,76,0.18);color:var(--txd);font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;border-radius:2px;text-decoration:none;transition:all 0.2s"
        onmouseover="this.style.background='var(--gdim)';this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
        onmouseout="this.style.background='transparent';this.style.borderColor='rgba(201,168,76,0.18)';this.style.color='var(--txd)'">
@@ -110,24 +96,19 @@
   {% endfor %}
 </div>
 
-<!-- ═══════════════════════════════
-     ASOSIY KONTENT
-═══════════════════════════════ -->
-<div style="max-width:1280px;margin:0 auto;padding:32px 32px 60px">
-  <div style="display:grid;grid-template-columns:1fr 268px;gap:32px" class="anim-3">
+<!-- ASOSIY KONTENT -->
+<div class="cs-container cs-page-pad">
+  <div class="cs-main-grid anim-3">
 
     <!-- CHAP: Asosiy kontent -->
     <div>
-
       <!-- Yangi filmlar -->
       <section style="margin-bottom:40px">
         <div class="section-header">
           <div class="section-title">
             <div><small style="display:block;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:4px">Yangi qo'shildi</small>Bu hafta</div>
           </div>
-          <a href="{% url 'catalog' %}?ordering=-published_at" class="section-link">
-            Barchasi <i class="ti ti-arrow-right" style="font-size:13px" aria-hidden="true"></i>
-          </a>
+          <a href="{% url 'catalog' %}?ordering=-published_at" class="section-link">Barchasi <i class="ti ti-arrow-right" style="font-size:13px" aria-hidden="true"></i></a>
         </div>
         {% if new_movies %}
           <div class="movies-row">
@@ -148,9 +129,7 @@
                   <div class="title">{{ movie.title }}</div>
                   <div class="meta">
                     <span>{{ movie.release_year }}</span>
-                    {% if movie.average_rating > 0 %}
-                      <div class="rating"><i class="ti ti-star" style="font-size:10px" aria-hidden="true"></i> {{ movie.average_rating }}</div>
-                    {% endif %}
+                    {% if movie.average_rating > 0 %}<div class="rating"><i class="ti ti-star" style="font-size:10px" aria-hidden="true"></i> {{ movie.average_rating }}</div>{% endif %}
                   </div>
                 </div>
               </a>
@@ -171,9 +150,7 @@
           <div class="section-title">
             <div><small style="display:block;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:4px">Eng yuqori baho</small>Top filmlar</div>
           </div>
-          <a href="{% url 'catalog' %}?ordering=-average_rating" class="section-link">
-            Barchasi <i class="ti ti-arrow-right" style="font-size:13px" aria-hidden="true"></i>
-          </a>
+          <a href="{% url 'catalog' %}?ordering=-average_rating" class="section-link">Barchasi <i class="ti ti-arrow-right" style="font-size:13px" aria-hidden="true"></i></a>
         </div>
         {% if top_movies %}
           <div class="movies-row">
@@ -186,17 +163,10 @@
                 {% else %}
                   <div class="no-poster"><i class="ti ti-movie" style="font-size:28px" aria-hidden="true"></i><span>Poster yo'q</span></div>
                 {% endif %}
-                <div class="overlay">
-                  <div class="play-btn"><i class="ti ti-player-play" style="font-size:16px;color:var(--gold)" aria-hidden="true"></i></div>
-                </div>
+                <div class="overlay"><div class="play-btn"><i class="ti ti-player-play" style="font-size:16px;color:var(--gold)" aria-hidden="true"></i></div></div>
                 <div class="info">
                   <div class="title">{{ movie.title }}</div>
-                  <div class="meta">
-                    <span>{{ movie.release_year }}</span>
-                    {% if movie.average_rating > 0 %}
-                      <div class="rating"><i class="ti ti-star" style="font-size:10px" aria-hidden="true"></i> {{ movie.average_rating }}</div>
-                    {% endif %}
-                  </div>
+                  <div class="meta"><span>{{ movie.release_year }}</span>{% if movie.average_rating > 0 %}<div class="rating"><i class="ti ti-star" style="font-size:10px" aria-hidden="true"></i> {{ movie.average_rating }}</div>{% endif %}</div>
                 </div>
               </a>
             {% endfor %}
@@ -213,24 +183,15 @@
           <div class="section-title">
             <div><small style="display:block;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:4px">Mahalliy kontent</small>O'zbek filmlar</div>
           </div>
-          <a href="{% url 'catalog' %}?language=uz" class="section-link">
-            Barchasi <i class="ti ti-arrow-right" style="font-size:13px" aria-hidden="true"></i>
-          </a>
+          <a href="{% url 'catalog' %}?language=uz" class="section-link">Barchasi <i class="ti ti-arrow-right" style="font-size:13px" aria-hidden="true"></i></a>
         </div>
         <div class="movies-row">
           {% for movie in uzbek_movies|slice:":12" %}
             <a href="{% url 'movie-detail' movie.slug %}" class="movie-card" style="display:block;text-decoration:none">
               {% if movie.is_premium %}<span class="badge-premium">PRO</span>{% endif %}
-              {% if movie.poster %}
-                <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="poster" loading="lazy" />
-              {% else %}
-                <div class="no-poster"><i class="ti ti-movie" style="font-size:28px" aria-hidden="true"></i></div>
-              {% endif %}
+              {% if movie.poster %}<img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="poster" loading="lazy" />{% else %}<div class="no-poster"><i class="ti ti-movie" style="font-size:28px" aria-hidden="true"></i></div>{% endif %}
               <div class="overlay"><div class="play-btn"><i class="ti ti-player-play" style="font-size:16px;color:var(--gold)" aria-hidden="true"></i></div></div>
-              <div class="info">
-                <div class="title">{{ movie.title }}</div>
-                <div class="meta"><span>{{ movie.release_year }}</span></div>
-              </div>
+              <div class="info"><div class="title">{{ movie.title }}</div><div class="meta"><span>{{ movie.release_year }}</span></div></div>
             </a>
           {% endfor %}
         </div>
@@ -239,8 +200,7 @@
 
       <!-- Premium banner -->
       {% if not user.is_premium %}
-      <div style="background:linear-gradient(135deg,rgba(201,168,76,0.07) 0%,var(--bg3) 50%,rgba(26,92,46,0.04) 100%);border:1px solid rgba(201,168,76,0.15);border-radius:4px;padding:32px;position:relative;overflow:hidden">
-        <div style="position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(201,168,76,0.04);filter:blur(40px)"></div>
+      <div style="background:linear-gradient(135deg,rgba(201,168,76,0.07) 0%,var(--bg3) 50%,rgba(26,92,46,0.04) 100%);border:1px solid rgba(201,168,76,0.15);border-radius:4px;padding:24px;position:relative;overflow:hidden">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;z-index:1">
           <div>
             <span class="badge-gold" style="margin-bottom:12px;display:inline-flex">⭐ CinemaSavvy Premium</span>
@@ -256,12 +216,10 @@
         </div>
       </div>
       {% endif %}
-
     </div>
 
     <!-- O'NG: Sidebar -->
     <aside style="display:flex;flex-direction:column;gap:20px">
-
       <!-- Top 10 -->
       <div style="background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:4px;padding:18px">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px">
@@ -313,18 +271,15 @@
         <i class="ti ti-star" style="font-size:28px;color:var(--gold);margin-bottom:8px;display:block" aria-hidden="true"></i>
         <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--tx);margin-bottom:5px">Premium obuna</div>
         <p style="font-size:12px;color:var(--txd);line-height:1.5;margin-bottom:14px">4K sifat, reklama yo'q, cheksiz kontent</p>
-        <a href="{% url 'auth:subscription' %}" class="cs-btn-gold" style="display:block;padding:10px;font-size:12px">
-          29 900 so'm / oy
-        </a>
+        <a href="{% url 'auth:subscription' %}" class="cs-btn-gold" style="display:block;padding:10px;font-size:12px">29 900 so'm / oy</a>
       </div>
       {% endif %}
-
     </aside>
   </div>
 </div>
 
 <!-- Stats bar -->
-<div style="border-top:1px solid rgba(201,168,76,0.1);border-bottom:1px solid rgba(201,168,76,0.1);display:flex;margin-bottom:0">
+<div class="cs-stats-bar">
   <div style="flex:1;padding:20px;text-align:center;border-right:1px solid rgba(201,168,76,0.1)">
     <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--gold)">12,000+</div>
     <div style="font-size:10px;color:var(--txd);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Film va serial</div>
@@ -354,10 +309,8 @@
 </style>
 
 <script>
-// Filmstrip
 const fst=document.getElementById('fst'),fsb=document.getElementById('fsb');
 for(let i=0;i<90;i++){const s=document.createElement('div');s.className='fs-seg';fst.appendChild(s.cloneNode());fsb.appendChild(s.cloneNode());}
-// Particles
 const canvas=document.getElementById('hero-stars');
 const ctx=canvas.getContext('2d');
 function resize(){canvas.width=canvas.parentElement.offsetWidth;canvas.height=canvas.parentElement.offsetHeight;}
