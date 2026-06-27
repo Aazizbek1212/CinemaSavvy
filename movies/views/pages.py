@@ -285,8 +285,27 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
         ctx   = super().get_context_data(**kwargs)
         movie = self.object
 
+        # Barcha tayyor fayllar
+        available_files = movie.video_files.filter(status="ready").select_related("language")
+        
+        # Tillar ro'yxati (takrorsiz)
+        languages = []
+        seen = set()
+        for f in available_files:
+            if f.language and f.language.code not in seen:
+                languages.append(f.language)
+                seen.add(f.language.code)
+
+        # Default til — birinchi mavjud til yoki primary_language
+        default_lang = (
+            movie.primary_language.code if movie.primary_language 
+            else (languages[0].code if languages else "")
+        )
+
         ctx.update({
-            "available_files": movie.video_files.filter(status="ready"),
+            "available_files": available_files,
+            "available_languages": languages,
+            "default_lang": default_lang,
             "resume_position": WatchHistoryService.get_resume_position(
                 self.request.user, movie
             ),
