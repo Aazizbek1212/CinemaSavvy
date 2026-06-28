@@ -44,6 +44,8 @@ LOCAL_APPS = [
     "reviews.apps.ReviewsConfig",
     "search.apps.SearchConfig",
     "pages",
+    "watchlist",
+    "toplamlar",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
