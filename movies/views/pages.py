@@ -231,12 +231,10 @@ class MovieDetailPageView(SeoMixin, DetailView):
         user_review = None
         is_watchlisted = False
         if self.request.user.is_authenticated:
-            from reviews.models import Review
-            user_review = Review.objects.filter(
-                user=self.request.user,
-                movie=movie,
-                is_active=True,
-            ).first()
+            from watchlist.models import Watchlist
+            is_watchlisted = Watchlist.objects.filter(
+                user=self.request.user, movie=movie
+            ).exists()
 
         # Related movies (same genre)
         related = (

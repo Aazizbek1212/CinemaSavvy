@@ -125,8 +125,10 @@
         </div>
       {% endif %}
 
-      <!-- CTA buttons -->
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      <!-- CTA buttons + Watchlist + Share -->
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px"
+           x-data="movieActions('{{ movie.slug }}', {{ is_watchlisted|yesno:'true,false' }})">
+
         {% if movie.is_premium and not user.is_premium %}
           <a href="{% url 'auth:subscription' %}" class="cs-btn-gold">⭐ Premium olish</a>
         {% else %}
@@ -134,24 +136,25 @@
             <i class="ti ti-player-play" style="font-size:14px" aria-hidden="true"></i> Tomosha qilish
           </a>
         {% endif %}
+
         {% if movie.trailer_url %}
           <a href="{{ movie.trailer_url }}" target="_blank" class="cs-btn-ghost">
             <i class="ti ti-brand-youtube" style="font-size:14px" aria-hidden="true"></i> Treyler
           </a>
         {% endif %}
-        <button style="width:42px;height:42px;border:1px solid rgba(201,168,76,0.18);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s;background:transparent"
-                onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
-                onmouseout="this.style.borderColor='rgba(201,168,76,0.18)';this.style.color='var(--txd)'"
-                aria-label="Sevimlilar">
-          <i class="ti ti-heart" style="font-size:17px" aria-hidden="true"></i>
+
+        <!-- Watchlist (saqlash) -->
+        <button @click="toggleWatchlist()"
+                :style="saved ? 'border-color:var(--gold);color:var(--gold);background:var(--gdim)' : 'border-color:rgba(201,168,76,0.18);color:var(--txd);background:transparent'"
+                style="width:42px;height:42px;border:1px solid;border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s"
+                :title="saved ? 'Ro\'yxatdan olib tashlash' : 'Ro\'yxatga qo\'shish'"
+                aria-label="Saqlash">
+          <i :class="saved ? 'ti ti-bookmark-filled' : 'ti ti-bookmark'" style="font-size:17px" aria-hidden="true"></i>
         </button>
-        <button style="width:42px;height:42px;border:1px solid rgba(201,168,76,0.18);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s;background:transparent"
-                onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
-                onmouseout="this.style.borderColor='rgba(201,168,76,0.18)';this.style.color='var(--txd)'"
-                aria-label="Ro'yxatga qo'shish">
-          <i class="ti ti-bookmark" style="font-size:17px" aria-hidden="true"></i>
-        </button>
-        <button style="width:42px;height:42px;border:1px solid rgba(201,168,76,0.18);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s;background:transparent"
+
+        <!-- Ulashish -->
+        <button @click="shareMovie()"
+                style="width:42px;height:42px;border:1px solid rgba(201,168,76,0.18);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s;background:transparent"
                 onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
                 onmouseout="this.style.borderColor='rgba(201,168,76,0.18)';this.style.color='var(--txd)'"
                 aria-label="Ulashish">
@@ -172,11 +175,10 @@
   </div>
 
   <!-- ==================== TABS ==================== -->
-  <!-- FIX: x-data wrapper divda, buttons va contentlar ALOHIDA divlarda -->
   <div style="margin-top:40px" x-data="{tab:'about'}">
 
     <!-- Tab buttons -->
-   <div style="display:flex;gap:4px;border-bottom:1px solid rgba(201,168,76,0.1);margin-bottom:24px">
+    <div style="display:flex;gap:4px;border-bottom:1px solid rgba(201,168,76,0.1);margin-bottom:24px">
       <button @click="tab='about'"
               :style="tab==='about'?'color:var(--gold);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:var(--gold)':'color:var(--txd);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:transparent'"
               style="padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;background:none;cursor:pointer;margin-bottom:-1px;transition:all 0.2s;border:none">
@@ -361,4 +363,85 @@
 
 </div>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function movieActions(slug, initialSaved) {
+  return {
+    saved: initialSaved,
+
+    async toggleWatchlist() {
+      {% if not user.is_authenticated %}
+        window.location.href = '/auth/login/?next=' + window.location.pathname;
+        return;
+      {% endif %}
+
+      try {
+        if (this.saved) {
+          // Ro'yxatdan olib tashlash
+          const listRes = await fetch('/api/watchlist/', {
+            headers: { 'X-CSRFToken': getCsrfToken() },
+            credentials: 'include',
+          });
+          const listData = await listRes.json();
+          const item = (listData.results || listData).find(w => w.movie_slug === slug);
+          if (item) {
+            await fetch(`/api/watchlist/${item.id}/`, {
+              method: 'DELETE',
+              headers: { 'X-CSRFToken': getCsrfToken() },
+              credentials: 'include',
+            });
+            this.saved = false;
+            toast("Ro'yxatdan olib tashlandi", 'info');
+          }
+        } else {
+          // Ro'yxatga qo'shish
+          const movieRes = await fetch(`/api/movies/?slug=${slug}`, {
+            credentials: 'include',
+          });
+          const movieData = await movieRes.json();
+          const movieId = (movieData.results || movieData)[0]?.id;
+          if (!movieId) { toast("Xato yuz berdi", 'error'); return; }
+
+          const res = await fetch('/api/watchlist/', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': getCsrfToken(),
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ movie: movieId }),
+          });
+          if (res.ok) {
+            this.saved = true;
+            toast("Ro'yxatga qo'shildi!", 'success');
+          } else {
+            const err = await res.json();
+            toast(err.detail || "Xato yuz berdi", 'error');
+          }
+        }
+      } catch(e) {
+        toast("Tarmoq xatosi", 'error');
+      }
+    },
+
+    shareMovie() {
+      if (navigator.share) {
+        navigator.share({
+          title: document.title,
+          text: '{{ movie.title }} — CinemaSavvy da tomosha qiling!',
+          url: window.location.href,
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          toast("Havola nusxa olindi!", 'success');
+        }).catch(() => {
+          toast("Havolani nusxa ololmadi", 'error');
+        });
+      }
+    },
+  };
+}
+</script>
 {% endblock %}
