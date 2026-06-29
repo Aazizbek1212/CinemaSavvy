@@ -1,8 +1,25 @@
 {% load static %}
-<footer style="margin-top:60px;border-top:1px solid rgba(201,168,76,0.12);background:var(--bg2);position:relative">
+<style>
+.cs-footer { margin-top:60px; border-top:1px solid rgba(201,168,76,0.12); background:var(--bg2); position:relative; }
+.cs-footer-inner { max-width:1280px; margin:0 auto; padding:40px 32px 24px; }
+.cs-footer-grid { display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; gap:32px; margin-bottom:36px; }
+.cs-footer-bottom { padding-top:20px; border-top:1px solid rgba(201,168,76,0.08); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+
+@media (max-width: 768px) {
+  .cs-footer-inner { padding: 32px 16px 20px; }
+  .cs-footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .cs-footer-bottom { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+@media (max-width: 480px) {
+  .cs-footer-grid { grid-template-columns: 1fr; gap: 20px; }
+}
+</style>
+
+<footer class="cs-footer">
   <div style="height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,0.3),transparent);position:absolute;top:0;left:0;right:0"></div>
-  <div style="max-width:1280px;margin:0 auto;padding:40px 32px 24px">
-    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:32px;margin-bottom:36px">
+  <div class="cs-footer-inner">
+    <div class="cs-footer-grid">
+
       <!-- Brand -->
       <div>
         <a href="{% url 'home' %}" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:14px">
@@ -24,6 +41,7 @@
           </a>
         </div>
       </div>
+
       <!-- Filmlar -->
       <div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:14px">Filmlar</div>
@@ -32,9 +50,10 @@
           <li><a href="{% url 'catalog' %}?ordering=-average_rating" style="font-size:13px;color:var(--txd);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--txd)'">Top reytingli</a></li>
           <li><a href="{% url 'catalog' %}?ordering=-published_at" style="font-size:13px;color:var(--txd);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--txd)'">Yangi qo'shildi</a></li>
           <li><a href="{% url 'catalog' %}?language=uz" style="font-size:13px;color:var(--txd);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--txd)'">O'zbek filmlar</a></li>
-          <li><a href="{% url 'catalog' %}?is_premium=true" style="font-size:13px;color:var(--gold);text-decoration:none">⭐ Premium</a></li>
+          <li><a href="{% url 'auth:subscription' %}" style="font-size:13px;color:var(--gold);text-decoration:none">⭐ Premium</a></li>
         </ul>
       </div>
+
       <!-- Kompaniya -->
       <div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:14px">Kompaniya</div>
@@ -44,6 +63,7 @@
           <li><a href="/blog/" style="font-size:13px;color:var(--txd);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--txd)'">Blog</a></li>
         </ul>
       </div>
+
       <!-- Yordam -->
       <div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:14px">Yordam</div>
@@ -54,9 +74,11 @@
           <li><a href="{% url 'auth:subscription' %}" style="font-size:13px;color:var(--gold);text-decoration:none">Premium obuna</a></li>
         </ul>
       </div>
+
     </div>
+
     <!-- Bottom -->
-    <div style="padding-top:20px;border-top:1px solid rgba(201,168,76,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div class="cs-footer-bottom">
       <p style="font-size:11px;color:var(--txm);font-family:'Bebas Neue',sans-serif;letter-spacing:1px">© 2025 CINEMASAVVY — BARCHA HUQUQLAR HIMOYALANGAN</p>
       <div style="display:flex;align-items:center;gap:16px">
         <span style="font-size:11px;color:var(--txm);font-family:'Bebas Neue',sans-serif;letter-spacing:1px">TIL:</span>

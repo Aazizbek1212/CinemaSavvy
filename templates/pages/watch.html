@@ -37,6 +37,67 @@
 .ep-card { display: flex; gap: 10px; padding: 10px; background: var(--bg3); border: 1px solid rgba(201,168,76,0.1); border-radius: 3px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
 .ep-card:hover { border-color: rgba(201,168,76,0.35); transform: translateX(3px); }
 .ep-card.active { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+@media (max-width: 768px) {
+  /* Player to'liq ekran kengligi */
+  .watch-page [style*="max-width:1100px"] {
+    padding: 0 !important;
+  }
+  .player-wrap {
+    max-height: 240px !important;
+    aspect-ratio: 16/9 !important;
+  }
+
+  /* Info bar — ustma-ust */
+  .watch-page > div:last-child > div {
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 12px 14px 0 !important;
+  }
+
+  /* Sidebar to'liq kenglik */
+  div[style*="width:280px;flex-shrink:0"] {
+    width: 100% !important;
+  }
+
+  /* Controls tugmalari kattaroq */
+  .ctrl-btn {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 22px !important;
+  }
+  .play-sm {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 22px !important;
+  }
+
+  /* Film nomi kichikroq */
+  div[style*="font-size:20px"][style*="letter-spacing:3px"] {
+    font-size: 16px !important;
+  }
+
+  /* Pills wrap */
+  div[style*="display:flex;gap:8px;flex-wrap:wrap"] {
+    gap: 6px !important;
+  }
+  .cs-pill {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+
+  /* Til tugmalari */
+  div[style*="display:flex;align-items:center;gap:8px;margin-bottom:12px"] {
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-wrap {
+    max-height: 200px !important;
+  }
+  .ctrl-btn { width: 38px !important; height: 38px !important; }
+  .play-sm { width: 44px !important; height: 44px !important; }
+}
 
 /* 10s skip overlay */
 .skip-overlay {
