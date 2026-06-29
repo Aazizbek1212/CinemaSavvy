@@ -152,6 +152,26 @@
       </p>
     </div>
   </div>
+  <style>
+    @media (max-width: 768px) {
+      div[style*="display:flex;min-height:calc(100vh - 62px)"] {
+        flex-direction: column !important;
+      }
+      div[style*="flex:1;position:relative;overflow:hidden"] {
+        display: none !important;
+      }
+      div[style*="width:440px"] {
+        width: 100% !important;
+        padding: 28px 20px !important;
+        border-left: none !important;
+        min-height: calc(100vh - 62px) !important;
+      }
+      div[style*="width:100%;max-width:368px"] {
+        max-width: 100% !important;
+      }
+    }
+    
+  </style>
 </div>
 
 <script>
