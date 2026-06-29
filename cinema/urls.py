@@ -23,6 +23,8 @@ urlpatterns = [
         path("api/reviews/", include(("reviews.urls", "reviews"), namespace="reviews")),
         path("api/streaming/", include(("streaming.urls", "streaming"), namespace="streaming")),
         path("social/", include("social_django.urls", namespace="social")),
+        path("api/watchlist/", include(("watchlist.urls", "watchlist"), namespace="watchlist")),
+        path("api/watchlist/", include(("watchlist.urls", "watchlist"), namespace="watchlist")),
 
 
     # Search
