@@ -313,11 +313,20 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
             "resume_position": WatchHistoryService.get_resume_position(
                 self.request.user, movie
             ),
+        available_files = movie.video_files.filter(status="ready").select_related("language")
+        first_file = available_files.first()
+        "video_url": (f"/media/{available_files.first().file_key}" if available_files.first() else "") if not movie.youtube_url else "",
+        ctx.update({
+            "available_files": available_files,
+            "available_languages": languages,
+            "default_lang": default_lang,
+            "resume_position": WatchHistoryService.get_resume_position(
+                self.request.user, movie
+            ),
             "subtitles": movie.subtitles.select_related("language").all(),
             "youtube_url": movie.youtube_url,
-            "video_url": f"/media/videos/{movie.slug}.mp4" if not movie.youtube_url else "",
+            "video_url": video_url if not movie.youtube_url else "",
             "youtube_embed_id": movie.youtube_url.split("v=")[-1].split("&")[0] if movie.youtube_url and "v=" in movie.youtube_url else "",
-        })
         return ctx
 from django import template
 
