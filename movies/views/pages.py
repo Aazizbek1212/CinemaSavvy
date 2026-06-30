@@ -227,29 +227,35 @@ class MovieDetailPageView(SeoMixin, DetailView):
         ctx   = super().get_context_data(**kwargs)
         movie = self.object
 
-        # User-specific
-        user_review = None
-        is_watchlisted = False
-        if self.request.user.is_authenticated:
-            from watchlist.models import Watchlist
-            is_watchlisted = Watchlist.objects.filter(
-                user=self.request.user, movie=movie
-            ).exists()
+        available_files = movie.video_files.filter(status="ready").select_related("language")
 
-        # Related movies (same genre)
-        related = (
-            Movie.objects.published()
-            .filter(genres__in=movie.genres.all())
-            .exclude(pk=movie.pk)
-            .distinct()
-            .order_by("-average_rating")[:6]
+        languages = []
+        seen = set()
+        for f in available_files:
+            if f.language and f.language.code not in seen:
+                languages.append(f.language)
+                seen.add(f.language.code)
+
+        default_lang = (
+            movie.primary_language.code if movie.primary_language
+            else (languages[0].code if languages else "")
         )
 
+        # Birinchi mavjud fayldan video_url olish
+        first_file = available_files.first()
+        video_url = f"/media/{first_file.file_key}" if first_file else ""
+
         ctx.update({
-            "user_review":      user_review,
-            "is_watchlisted":   is_watchlisted,
-            "related_movies":   related,
-            "available_files":  movie.video_files.filter(status="ready"),
+            "available_files":     available_files,
+            "available_languages": languages,
+            "default_lang":        default_lang,
+            "resume_position":     WatchHistoryService.get_resume_position(
+                self.request.user, movie
+            ),
+            "subtitles":       movie.subtitles.select_related("language").all(),
+            "youtube_url":     movie.youtube_url,
+            "video_url":       video_url if not movie.youtube_url else "",
+            "youtube_embed_id": movie.youtube_url.split("v=")[-1].split("&")[0] if movie.youtube_url and "v=" in movie.youtube_url else "",
         })
         return ctx
 
