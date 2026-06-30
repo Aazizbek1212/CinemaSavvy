@@ -277,22 +277,17 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
         movie = self.get_object()
-
-        # Premium check
         if movie.is_premium and not request.user.is_premium:
             from django.shortcuts import redirect
             return redirect("auth:subscription")
-
         return response
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         ctx   = super().get_context_data(**kwargs)
         movie = self.object
 
-        # Barcha tayyor fayllar
         available_files = movie.video_files.filter(status="ready").select_related("language")
-        
-        # Tillar ro'yxati (takrorsiz)
+
         languages = []
         seen = set()
         for f in available_files:
@@ -300,22 +295,14 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
                 languages.append(f.language)
                 seen.add(f.language.code)
 
-        # Default til — birinchi mavjud til yoki primary_language
         default_lang = (
-            movie.primary_language.code if movie.primary_language 
+            movie.primary_language.code if movie.primary_language
             else (languages[0].code if languages else "")
         )
 
-        ctx.update({
-            "available_files": available_files,
-            "available_languages": languages,
-            "default_lang": default_lang,
-            "resume_position": WatchHistoryService.get_resume_position(
-                self.request.user, movie
-            ),
-        available_files = movie.video_files.filter(status="ready").select_related("language")
         first_file = available_files.first()
-        "video_url": (f"/media/{available_files.first().file_key}" if available_files.first() else "") if not movie.youtube_url else "",
+        video_url = f"/media/{first_file.file_key}" if first_file else ""
+
         ctx.update({
             "available_files": available_files,
             "available_languages": languages,
@@ -327,19 +314,8 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
             "youtube_url": movie.youtube_url,
             "video_url": video_url if not movie.youtube_url else "",
             "youtube_embed_id": movie.youtube_url.split("v=")[-1].split("&")[0] if movie.youtube_url and "v=" in movie.youtube_url else "",
+        })
         return ctx
-from django import template
-
-register = template.Library()
-
-@register.filter
-def split(value, delimiter=","):
-    return value.split(delimiter)
-
-
-# ─────────────────────────────────────────────
-# Person Detail
-# ─────────────────────────────────────────────
 
 class PersonDetailPageView(SeoMixin, DetailView):
     template_name       = "pages/person_detail.html"
