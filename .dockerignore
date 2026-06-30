@@ -1,0 +1,14 @@
+.git
+.gitignore
+media/
+staticfiles/
+*.pyc
+__pycache__/
+.env
+.env.production
+.venv
+venv/
+*.log
+.pytest_cache
+.vscode
+.idea
