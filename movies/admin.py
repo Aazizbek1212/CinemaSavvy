@@ -33,7 +33,7 @@ class MovieCastInline(admin.TabularInline):
 class MovieFileInline(admin.TabularInline):
     model = MovieFile
     extra = 0
-    readonly_fields = ("status", "file_size_bytes", "duration_seconds")
+    # readonly_fields olib tashlandi — status endi tahrirlanadi
 
 
 class SubtitleInline(admin.TabularInline):
@@ -55,7 +55,6 @@ class MovieAdmin(admin.ModelAdmin):
     readonly_fields = ("average_rating", "rating_count", "view_count", "published_at")
     inlines = [MovieCastInline, MovieFileInline, SubtitleInline]
     list_per_page = 25
-
     fieldsets = (
         ("Asosiy", {"fields": ("title", "title_original", "slug", "tagline", "description")}),
         ("Media", {"fields": ("poster", "backdrop", "trailer_url")}),
@@ -69,3 +68,12 @@ class MovieAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" height="40" />', obj.poster.url)
         return "—"
     poster_preview.short_description = "Poster"
+
+
+# MovieFile ni alohida admin ro'yxatiga ham qo'shamiz
+@admin.register(MovieFile)
+class MovieFileAdmin(admin.ModelAdmin):
+    list_display = ("movie", "language", "quality", "status", "file_key")
+    list_filter = ("status", "quality", "language")
+    search_fields = ("movie__title", "file_key")
+    list_editable = ("status",)
