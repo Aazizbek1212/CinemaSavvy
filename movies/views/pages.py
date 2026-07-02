@@ -65,27 +65,27 @@ class HomePageView(SeoMixin, TemplateView):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         ctx = super().get_context_data(**kwargs)
+
         base_qs = Movie.objects.published().with_relations()
 
         ctx.update({
-            "featured_movie": (
-                base_qs
-                .filter(backdrop__isnull=False)
-                .order_by("-view_count", "-average_rating")
-                .first()
-            ),
-            "new_movies": list(
-                base_qs.order_by("-published_at")[:18]
-            ),
-            "top_movies": list(
-                base_qs.top_rated()[:18]
-            ),
-            "uzbek_movies": list(
-                base_qs.filter(
-                    languages__code="uz"
-                ).distinct().order_by("-published_at")[:18]
-            ),
-            "genres": Genre.objects.all()[:12],
+            # Mavjud
+            "new_movies":    base_qs.order_by("-published_at")[:12],
+            "top_movies":    base_qs.order_by("-average_rating")[:12],
+            "genres":        Genre.objects.all()[:20],
+
+            # Yangi kategoriyalar
+            "uzbek_movies":   base_qs.filter(primary_language__code="uz").order_by("-published_at")[:8],
+            "turkish_movies": base_qs.filter(primary_language__code="tr").order_by("-published_at")[:8],
+            "korean_movies":  base_qs.filter(primary_language__code="ko").order_by("-published_at")[:8],
+            "indian_movies":  base_qs.filter(primary_language__code="hi").order_by("-published_at")[:8],
+            "cartoon_movies": base_qs.filter(content_type="animation").order_by("-published_at")[:8],
+            "retro_movies":   base_qs.filter(release_year__lte=1999).order_by("-release_year")[:8],
+            "anime_movies":   base_qs.filter(genres__slug="anime").order_by("-published_at")[:8],
+            "oscar_movies":   base_qs.filter(imdb_rating__gte=8.0).order_by("-imdb_rating")[:8],
+
+            # Featured
+            "featured_movie": base_qs.order_by("-average_rating").first(),
         })
         return ctx
 
