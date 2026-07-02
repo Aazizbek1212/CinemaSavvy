@@ -165,133 +165,114 @@ class MovieManager(models.Manager):
 # ──────────────────────────────────────────────
 # Movie
 # ──────────────────────────────────────────────
-
-class Movie(TimeStampedModel):
+class Movie(models.Model):
     class Status(models.TextChoices):
-        DRAFT = "draft", _("Draft")
+        DRAFT     = "draft",     _("Draft")
         PUBLISHED = "published", _("Published")
-        ARCHIVED = "archived", _("Archived")
-
+        ARCHIVED  = "archived",  _("Archived")
+ 
     class AgeRating(models.TextChoices):
-        ALL = "all", _("Umumiy")
-        PG_12 = "12+", _("12+")
-        PG_16 = "16+", _("16+")
-        PG_18 = "18+", _("18+")
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(_("title"), max_length=255)
-    title_original = models.CharField(_("original title"), max_length=255, blank=True)
-    slug = models.SlugField(_("slug"), max_length=280, unique=True, blank=True)
-    description = models.TextField(_("description"), blank=True)
-    tagline = models.CharField(_("tagline"), max_length=300, blank=True)
-
-    # Classification
-    genres = models.ManyToManyField(Genre, verbose_name=_("genres"), blank=True)
-    cast = models.ManyToManyField(
-        Person,
-        through="MovieCast",
-        verbose_name=_("cast"),
-        blank=True,
-    )
-    languages = models.ManyToManyField(Language, verbose_name=_("languages"), blank=True)
-    primary_language = models.ForeignKey(
-        Language,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name="primary_movies",
-        verbose_name=_("primary language"),
-    )
-
-    # Media
-    poster = models.ImageField(
-        _("poster"), upload_to=movie_poster_path,
-        null=True, blank=True,
-    )
-    backdrop = models.ImageField(
-        _("backdrop"), upload_to=movie_poster_path,
-        null=True, blank=True,
-    )
+        ALL = "all", _("Barcha yoshlar uchun")
+        R12 = "12+", _("12+")
+        R16 = "16+", _("16+")
+        R18 = "18+", _("18+")
+ 
+    class ContentType(models.TextChoices):
+        MOVIE     = "movie",     _("Film")
+        SERIES    = "series",    _("Serial")
+        ANIMATION = "animation", _("Multfilm/Anime")
+ 
+    # ── Core ──────────────────────────────────
+    id             = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title          = models.CharField(_("title"), max_length=300)
+    title_original = models.CharField(_("original title"), max_length=300, blank=True)
+    slug           = models.SlugField(_("slug"), max_length=320, unique=True)
+    tagline        = models.CharField(_("tagline"), max_length=300, blank=True)
+    description    = models.TextField(_("description"), blank=True)
+ 
+    # ── Media ─────────────────────────────────
+    poster      = models.ImageField(_("poster"),   upload_to="posters/%Y/",   null=True, blank=True)
+    backdrop    = models.ImageField(_("backdrop"), upload_to="backdrops/%Y/", null=True, blank=True)
     trailer_url = models.URLField(_("trailer URL"), blank=True)
-    youtube_url = models.URLField(_("YouTube URL"), blank=True, help_text="YouTube video URL (embed uchun)")
-
-    # Details
-    release_year = models.PositiveSmallIntegerField(
-        _("release year"),
-        validators=[MinValueValidator(1888), MaxValueValidator(2100)],
+    youtube_url = models.URLField(_("YouTube URL"), blank=True)
+ 
+    # ── Classification ────────────────────────
+    genres           = models.ManyToManyField(Genre,    blank=True, related_name="movies",         verbose_name=_("genres"))
+    primary_language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True, related_name="primary_movies", verbose_name=_("primary language"))
+    languages        = models.ManyToManyField(Language, blank=True, related_name="movies",         verbose_name=_("available languages"))
+    cast             = models.ManyToManyField(Person,   blank=True, through="MovieCast", related_name="movies", verbose_name=_("cast"))
+    country          = models.CharField(_("country"), max_length=100, blank=True)
+    age_rating       = models.CharField(_("age rating"), max_length=5, choices=AgeRating.choices, default=AgeRating.ALL)
+ 
+    # ── Details ───────────────────────────────
+    release_year     = models.PositiveSmallIntegerField(_("release year"), null=True, blank=True)
+    duration_minutes = models.PositiveSmallIntegerField(_("duration (minutes)"), null=True, blank=True)
+ 
+    # ── IMDb ──────────────────────────────────
+    imdb_rating = models.DecimalField(
+        _("IMDb rating"),
+        max_digits=3,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        help_text="IMDb reytingi (0.0 — 10.0)",
+    )
+ 
+    # ── Content type ──────────────────────────
+    content_type = models.CharField(
+        _("content type"),
+        max_length=20,
+        choices=ContentType.choices,
+        default=ContentType.MOVIE,
         db_index=True,
     )
-    duration_minutes = models.PositiveSmallIntegerField(
-        _("duration (minutes)"),
-        null=True, blank=True,
-    )
-    country = models.CharField(_("country"), max_length=100, blank=True)
-    age_rating = models.CharField(
-        _("age rating"),
-        max_length=5,
-        choices=AgeRating.choices,
-        default=AgeRating.ALL,
-    )
-
-    # Monetization
-    is_premium = models.BooleanField(_("premium content"), default=False, db_index=True)
-
-    # Status
-    status = models.CharField(
-        _("status"),
-        max_length=10,
-        choices=Status.choices,
-        default=Status.DRAFT,
-        db_index=True,
-    )
+ 
+    # ── Flags ─────────────────────────────────
+    is_premium = models.BooleanField(_("is premium"), default=False)
+    status     = models.CharField(_("status"), max_length=20, choices=Status.choices, default=Status.DRAFT, db_index=True)
     published_at = models.DateTimeField(_("published at"), null=True, blank=True)
-
-    # Denormalized stats — updated via signals
-    average_rating = models.DecimalField(
-        _("average rating"),
-        max_digits=3, decimal_places=1,
-        default=0.0,
-        db_index=True,
-    )
-    rating_count = models.PositiveIntegerField(_("rating count"), default=0)
-    view_count = models.PositiveIntegerField(_("view count"), default=0)
-
-    objects = MovieManager()
-
+ 
+    # ── Denormalized stats ────────────────────
+    average_rating = models.DecimalField(_("average rating"), max_digits=3, decimal_places=1, default=0)
+    rating_count   = models.PositiveIntegerField(_("rating count"), default=0)
+    view_count     = models.PositiveIntegerField(_("view count"), default=0)
+ 
+    # ── Timestamps ────────────────────────────
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+ 
+    objects = MovieQuerySet.as_manager()
+ 
     class Meta:
         verbose_name = _("movie")
         verbose_name_plural = _("movies")
-        ordering = ["-published_at", "-created_at"]
-        indexes = [
-            models.Index(fields=["status", "is_premium"]),
-            models.Index(fields=["release_year", "status"]),
-            models.Index(fields=["average_rating", "rating_count"]),
-            models.Index(fields=["slug"]),
-        ]
-
+        ordering = ["-published_at"]
+ 
     def __str__(self) -> str:
         return f"{self.title} ({self.release_year})"
-
+ 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            base_slug = slugify(f"{self.title}-{self.release_year}")
-            slug = base_slug
-            counter = 1
-            while Movie.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
-            self.slug = slug
-
         if self.status == self.Status.PUBLISHED and not self.published_at:
             self.published_at = timezone.now()
-
         super().save(*args, **kwargs)
-
+ 
     @property
     def duration_display(self) -> str:
         if not self.duration_minutes:
             return ""
-        hours, minutes = divmod(self.duration_minutes, 60)
-        return f"{hours}h {minutes}m" if hours else f"{minutes}m"
+        h = self.duration_minutes // 60
+        m = self.duration_minutes % 60
+        if h:
+            return f"{h}h {m}m"
+        return f"{m}m"
+ 
+    @property
+    def is_series(self) -> bool:
+        return self.content_type == self.ContentType.SERIES
+ 
+    @property
+    def is_animation(self) -> bool:
+        return self.content_type == self.ContentType.ANIMATION
 
 
 # ──────────────────────────────────────────────
