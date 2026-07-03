@@ -367,6 +367,75 @@
 
 {% block extra_scripts %}
 <script>
+// 🛠️ UTILITY FUNCTIONS
+function getCsrfToken() {
+  return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+         document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+
+function toast(message, type = 'info') {
+  const toast = document.createElement('div');
+  const bgColor = type === 'success' ? '#70C085' : type === 'error' ? '#E07070' : '#C9A84C';
+  toast.style.cssText = `
+    position: fixed; top: 20px; right: 20px; 
+    background: ${bgColor}; color: white; 
+    padding: 12px 20px; border-radius: 4px;
+    font-size: 13px; z-index: 9999;
+    animation: slideIn 0.3s ease;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// 📝 REVIEW FORM FUNCTION
+function reviewForm() {
+  return {
+    rating: 0,
+    text: '',
+    submitting: false,
+
+    async submitReview(slug) {
+      if (!this.rating) {
+        toast('Baho berish majbur!', 'error');
+        return;
+      }
+
+      this.submitting = true;
+      try {
+        const res = await fetch(`/api/movies/${slug}/reviews/create/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            rating: this.rating,
+            text: this.text,
+          }),
+        });
+
+        if (res.ok) {
+          toast('Baho qo\'shildi!', 'success');
+          this.rating = 0;
+          this.text = '';
+          // Refresh reviews list
+          document.getElementById('reviews-list')?.dispatchEvent(new Event('htmx:trigger'));
+        } else {
+          const err = await res.json();
+          toast(err.detail || 'Xato yuz berdi', 'error');
+        }
+      } catch(e) {
+        toast('Tarmoq xatosi', 'error');
+      } finally {
+        this.submitting = false;
+      }
+    }
+  };
+}
+
+// 🎬 MOVIE ACTIONS
 function movieActions(slug, initialSaved) {
   return {
     saved: initialSaved,
@@ -426,19 +495,66 @@ function movieActions(slug, initialSaved) {
       }
     },
 
-    shareMovie() {
-      if (navigator.share) {
-        navigator.share({
-          title: document.title,
-          text: '{{ movie.title }} — CinemaSavvy da tomosha qiling!',
-          url: window.location.href,
-        }).catch(() => {});
-      } else {
+    async shareMovie() {
+      try {
+        // Get share URLs from backend
+        const res = await fetch(`/api/movies/{{ movie.slug }}/share/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+          },
+          credentials: 'include',
+          body: JSON.stringify({ platform: 'url' }),
+        });
+
+        if (!res.ok) throw new Error('Share API failed');
+
+        const data = await res.json();
+        const shareUrl = data.share_urls?.url || window.location.href;
+
+        if (navigator.share) {
+          navigator.share({
+            title: document.title,
+            text: '{{ movie.title }} — CinemaSavvy da tomosha qiling!',
+            url: shareUrl,
+          }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(shareUrl).then(() => {
+            toast("Havola nusxa olindi!", 'success');
+          }).catch(() => {
+            toast("Havolani nusxa ololmadi", 'error');
+          });
+        }
+      } catch(e) {
+        // Fallback to native share
         navigator.clipboard.writeText(window.location.href).then(() => {
           toast("Havola nusxa olindi!", 'success');
-        }).catch(() => {
-          toast("Havolani nusxa ololmadi", 'error');
         });
+      }
+    },
+
+    async toggleLike(reviewId) {
+      try {
+        const res = await fetch(`/api/reviews/${reviewId}/like/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+          },
+          credentials: 'include',
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          toast(data.liked ? 'Yoqdi!' : 'Yoqdi belgisidan olib tashlandi', 'success');
+          // Refresh reviews list
+          document.getElementById('reviews-list')?.dispatchEvent(new Event('htmx:trigger'));
+        } else {
+          toast('Xato yuz berdi', 'error');
+        }
+      } catch(e) {
+        toast('Tarmoq xatosi', 'error');
       }
     },
   };
