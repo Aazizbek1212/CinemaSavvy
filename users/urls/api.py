@@ -9,6 +9,8 @@ from ..views import (
     ChangePasswordView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    AccountDeleteView,
+    AccountHistoryView,
 )
 
 app_name = "users-api"
@@ -26,6 +28,8 @@ urlpatterns = [
     # Profile
     path("profile/", ProfileView.as_view(), name="profile"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("account/delete/", AccountDeleteView.as_view(), name="account-delete"),
+    path("account/history/", AccountHistoryView.as_view(), name="account-history"),
 
     # Password reset
     path("password-reset/", PasswordResetRequestView.as_view(), name="password-reset"),

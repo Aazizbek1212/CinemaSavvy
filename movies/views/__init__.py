@@ -4,7 +4,9 @@ from django.shortcuts import get_object_or_404
 import logging
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from rest_framework import generics, filters
+from rest_framework import generics, filters, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
@@ -15,6 +17,8 @@ from ..serializers import (
     MovieDetailSerializer,
     GenreSerializer,
     PersonSerializer,
+    MovieComparisonSerializer,
+    MovieShareSerializer,
 )
 from ..filters import MovieFilter
 
@@ -88,6 +92,78 @@ class PersonDetailView(generics.RetrieveAPIView):
     permission_classes = (AllowAny,)
     lookup_field = "slug"
     queryset = Person.objects.all()
+
+
+class MovieComparisonView(APIView):
+    """
+    GET /api/movies/compare/?ids=id1,id2,id3
+    Compare multiple movies side by side
+    """
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        ids_param = request.query_params.get("ids", "")
+        if not ids_param:
+            return Response(
+                {"detail": "ids parametri zarur: ?ids=id1,id2,id3"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        ids = [id.strip() for id in ids_param.split(",")]
+        movies = Movie.objects.filter(id__in=ids, status=Movie.Status.PUBLISHED)
+        
+        if not movies.exists():
+            return Response(
+                {"detail": "Topilgan filmlar yo'q."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        serializer = MovieComparisonSerializer(movies, many=True)
+        return Response({
+            "comparison": serializer.data,
+            "count": len(serializer.data),
+        })
+
+
+class MovieShareView(APIView):
+    """
+    POST /api/movies/<slug>/share/
+    Generate share links for social media
+    """
+    permission_classes = (AllowAny,)
+
+    def post(self, request, slug):
+        from django.conf import settings
+        
+        try:
+            movie = Movie.objects.get(slug=slug, status=Movie.Status.PUBLISHED)
+        except Movie.DoesNotExist:
+            return Response(
+                {"detail": "Film topilmadi."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        # Generate share URLs for different platforms
+        base_url = f"{settings.FRONTEND_URL}/movies/{slug}/"
+        
+        share_links = {
+            "facebook": f"https://www.facebook.com/sharer/sharer.php?u={base_url}",
+            "twitter": f"https://twitter.com/intent/tweet?url={base_url}&text={movie.title}",
+            "linkedin": f"https://www.linkedin.com/sharing/share-offsite/?url={base_url}",
+            "whatsapp": f"https://wa.me/?text={movie.title} {base_url}",
+            "email": f"mailto:?subject={movie.title}&body={base_url}",
+        }
+        
+        logger.info("Movie shared: %s", movie.slug)
+        
+        return Response({
+            "movie": {
+                "title": movie.title,
+                "slug": movie.slug,
+                "poster": str(movie.poster) if movie.poster else None,
+            },
+            "share_links": share_links,
+        })
 
 
 class HomePageView(TemplateView):
