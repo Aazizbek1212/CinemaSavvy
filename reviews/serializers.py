@@ -79,3 +79,12 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         instance.text = validated_data.get("text", instance.text)
         instance.save(update_fields=["rating", "text", "updated_at"])
         return instance
+
+
+class ReviewLikeSerializer(serializers.ModelSerializer):
+    user = ReviewAuthorSerializer(read_only=True)
+    
+    class Meta:
+        model = ReviewLike
+        fields = ("id", "user", "review", "created_at")
+        read_only_fields = ("id", "user", "created_at")

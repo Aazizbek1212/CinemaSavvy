@@ -87,3 +87,29 @@ class MovieDetailSerializer(serializers.ModelSerializer):
                 status=MovieFile.Status.READY
             ).values_list("quality", flat=True)
         )
+
+
+class MovieComparisonSerializer(serializers.ModelSerializer):
+    """Lightweight comparison view with key metrics"""
+    genres = GenreSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Movie
+        fields = (
+            "id", "title", "slug", "poster",
+            "release_year", "duration_minutes", "country",
+            "average_rating", "rating_count",
+            "age_rating", "genres", "imdb_rating",
+        )
+
+
+class MovieShareSerializer(serializers.Serializer):
+    """For sharing movies via social media"""
+    movie_id = serializers.UUIDField()
+    platform = serializers.ChoiceField(
+        choices=["facebook", "twitter", "linkedin", "whatsapp", "email"],
+        required=False
+    )
+    
+    class Meta:
+        fields = ("movie_id", "platform")

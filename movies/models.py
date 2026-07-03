@@ -240,9 +240,9 @@ class Movie(models.Model):
     # ── Timestamps ────────────────────────────
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
- 
-    objects = MovieQuerySet.as_manager()
- 
+
+    objects = MovieManager()
+
     class Meta:
         verbose_name = _("movie")
         verbose_name_plural = _("movies")

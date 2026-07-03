@@ -189,3 +189,52 @@ class PasswordResetConfirmView(APIView):
             )
 
         return Response({"detail": "Parol muvaffaqiyatli tiklandi."}, status=status.HTTP_200_OK)
+
+
+class AccountDeleteView(APIView):
+    """DELETE /api/auth/account/delete/"""
+    permission_classes = (IsAuthenticated,)
+
+    def delete(self, request: Request) -> Response:
+        """Soft delete user account"""
+        user = request.user
+        user.deactivate()
+        logger.info("User account deleted: %s", user.email)
+        
+        return Response(
+            {"detail": "Hisob o'chirildi."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+
+class AccountHistoryView(generics.ListAPIView):
+    """GET /api/auth/account/history/"""
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request: Request) -> Response:
+        """User's recent activities and watch history"""
+        from streaming.models import WatchHistory
+        
+        watch_history = (
+            WatchHistory.objects
+            .filter(user=request.user)
+            .select_related("movie")
+            .order_by("-updated_at")[:20]
+        )
+        
+        data = []
+        for record in watch_history:
+            data.append({
+                "type": "watch",
+                "movie": {
+                    "id": str(record.movie.id),
+                    "title": record.movie.title,
+                    "slug": record.movie.slug,
+                    "poster": str(record.movie.poster) if record.movie.poster else None,
+                },
+                "watched_at": record.updated_at,
+                "progress_percent": record.progress_percent,
+                "completed": record.completed,
+            })
+        
+        return Response(data, status=status.HTTP_200_OK)
