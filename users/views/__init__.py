@@ -7,6 +7,8 @@ from .api import (
     ChangePasswordView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    AccountDeleteView,
+    AccountHistoryView,
 )
 
 __all__ = [
@@ -18,4 +20,6 @@ __all__ = [
     "ChangePasswordView",
     "PasswordResetRequestView",
     "PasswordResetConfirmView",
+    "AccountDeleteView",
+    "AccountHistoryView",
 ]
