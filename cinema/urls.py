@@ -18,14 +18,14 @@ urlpatterns = [
     path("auth/", include(("users.urls.pages", "auth"), namespace="auth")),
 
     # API URLs
-        path("api/auth/", include(("users.urls", "users"), namespace="users")),
-        path("api/movies/", include(("movies.urls", "movies"), namespace="movies")),
-        path("api/reviews/", include(("reviews.urls", "reviews"), namespace="reviews")),
-        path("api/streaming/", include(("streaming.urls", "streaming"), namespace="streaming")),
-        path("social/", include("social_django.urls", namespace="social")),
-        path("api/watchlist/", include(("watchlist.urls", "watchlist"), namespace="watchlist")),
-        path("api/watchlist/", include(("watchlist.urls", "watchlist"), namespace="watchlist")),
+    path("api/auth/", include(("users.urls", "users"), namespace="users")),
+    path("api/movies/", include(("movies.urls", "movies"), namespace="movies")),
+    path("api/reviews/", include(("reviews.urls", "reviews"), namespace="reviews")),
+    path("api/streaming/", include(("streaming.urls", "streaming"), namespace="streaming")),
+    path("api/watchlist/", include(("watchlist.urls", "watchlist"), namespace="watchlist")),
 
+    # Social auth
+    path("social/", include("social_django.urls", namespace="social")),
 
     # Search
     path("", include("search.urls", namespace="search")),
