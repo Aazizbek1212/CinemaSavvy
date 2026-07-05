@@ -22,10 +22,13 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to server
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
             set -e
             cd /home/ubuntu/CinemaSavvy
+            git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/Aazizbek1212/CinemaSavvy.git"
             git pull origin main
             docker compose pull
             docker compose up -d --build
