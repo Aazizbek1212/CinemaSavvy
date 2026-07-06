@@ -2,20 +2,16 @@
 document.addEventListener('alpine:init', () => {
 
   Alpine.data('appState', () => ({
-  mobileMenu: false,   // ← navbar uchun
-  scrolled: false,     // ← navbar scroll uchun
-
-  init() {
-    document.documentElement.classList.add('dark');
-    document.body.style.backgroundColor = '#0A0A0A';
-
-    // Scroll listener
-    window.addEventListener('scroll', () => {
-      this.scrolled = window.scrollY > 20;
-    }, { passive: true });
-  }
-}));
-
+    mobileMenu: false,
+    scrolled: false,
+    init() {
+      document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = '#0A0A0A';
+      window.addEventListener('scroll', () => {
+        this.scrolled = window.scrollY > 20;
+      }, { passive: true });
+    }
+  }));
 
   Alpine.data('navbar', () => ({
     scrolled: false,
@@ -61,6 +57,13 @@ document.addEventListener('alpine:init', () => {
     submitting: false,
     async submitReview(slug) {
       if (!this.rating || this.submitting) return;
+
+      const token = getToken(); // ✅ token tekshirish
+      if (!token) {
+        toast('Iltimos, tizimga kiring', 'error');
+        return;
+      }
+
       this.submitting = true;
       try {
         const res = await fetch(`/api/reviews/movies/${slug}/reviews/create/`, {
@@ -68,7 +71,7 @@ document.addEventListener('alpine:init', () => {
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken(),
-            'Authorization': `Bearer ${getToken()}`,
+            'Authorization': `Bearer ${token}`, // ✅ faqat token bor bo'lsa
           },
           body: JSON.stringify({ rating: this.rating, text: this.text }),
         });
@@ -92,7 +95,7 @@ document.addEventListener('alpine:init', () => {
 document.addEventListener('htmx:configRequest', e => {
   e.detail.headers['X-CSRFToken'] = getCsrfToken();
   const token = getToken();
-  if (token) e.detail.headers['Authorization'] = `Bearer ${token}`;
+  if (token) e.detail.headers['Authorization'] = `Bearer ${token}`; // ✅ faqat bor bo'lsa
 });
 
 document.addEventListener('htmx:responseError', () => {
@@ -103,24 +106,43 @@ document.addEventListener('htmx:responseError', () => {
 function getCsrfToken() {
   return document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
 }
+
 function getToken() {
-  return localStorage.getItem('access_token') ?? '';
+  return localStorage.getItem('access_token') || null; // ✅ null qaytaradi
 }
+
 function toast(message, type = 'info') {
   window.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
 }
 
+// ─── Share Movie ─────────────────────────────────────  ✅ YANGI
+async function shareMovie() {
+  const url = window.location.href;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      const el = document.createElement('textarea');
+      el.value = url;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
+    toast('Havola nusxalandi! 🔗', 'success');
+  } catch {
+    toast('Nusxalash muvaffaqiyatsiz', 'error');
+  }
+}
+
 // ─── Language switcher ───────────────────────────────
 function switchLanguage(langCode) {
-  // Barcha til tugmalarini reset
   document.querySelectorAll('[id^="lang-btn-"]').forEach(btn => {
     btn.classList.remove('active');
   });
-  // Tanlangan tilni faollashtirish
   const btn = document.getElementById('lang-btn-' + langCode);
   if (btn) btn.classList.add('active');
 
-  // Alpine.js videoPlayer ga xabar berish
   const playerEl = document.querySelector('[x-data^="videoPlayer"]');
   if (playerEl && playerEl._x_dataStack) {
     const player = playerEl._x_dataStack[0];
