@@ -22,7 +22,6 @@
   {% else %}
     <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a1020,#0d1020)"></div>
   {% endif %}
-  <div style="position:absolute;inset:0;opacity:0.03;background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,var(--gold) 40px,var(--gold) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,var(--gold) 40px,var(--gold) 41px)"></div>
   <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,15,0.97) 35%,rgba(10,10,15,0.6) 65%,rgba(10,10,15,0.2) 100%)"></div>
   <div style="position:absolute;bottom:0;left:0;right:0;height:140px;background:linear-gradient(to top,var(--bg),transparent)"></div>
   <div class="cs-scan"></div>
@@ -57,10 +56,14 @@
         {% else %}
           <span class="badge-emerald">✓ Bepul</span>
         {% endif %}
+        {% if movie.content_type == 'series' %}
+          <span class="badge-gold" style="background:rgba(100,149,237,0.15);border-color:rgba(100,149,237,0.4);color:#6495ED">📺 Serial</span>
+        {% elif movie.content_type == 'animation' %}
+          <span class="badge-gold" style="background:rgba(50,205,50,0.1);border-color:rgba(50,205,50,0.3);color:#32CD32">🎬 Multfilm</span>
+        {% endif %}
         {% if movie.age_rating != 'all' %}
           <span class="badge-crimson">{{ movie.age_rating }}</span>
         {% endif %}
-        <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txd);padding:3px 10px;border:1px solid rgba(201,168,76,0.12);border-radius:2px">{{ movie.status|upper }}</span>
       </div>
 
       <!-- Title -->
@@ -79,6 +82,10 @@
         {% if movie.country %}
           <span style="color:var(--txm)">·</span>
           <span>{{ movie.country }}</span>
+        {% endif %}
+        {% if movie.imdb_rating %}
+          <span style="color:var(--txm)">·</span>
+          <span style="display:flex;align-items:center;gap:5px;color:#f5c518"><i class="ti ti-brand-imdb" style="font-size:14px"></i> {{ movie.imdb_rating }}/10</span>
         {% endif %}
       </div>
 
@@ -107,11 +114,6 @@
         {% endfor %}
       </div>
 
-      <!-- Tagline -->
-      {% if movie.tagline %}
-        <p style="font-size:14px;color:rgba(201,168,76,0.7);font-style:italic;border-left:2px solid rgba(201,168,76,0.4);padding-left:12px;margin-bottom:12px">"{{ movie.tagline }}"</p>
-      {% endif %}
-
       <!-- Description -->
       {% if movie.description %}
         <div x-data="{exp:false}" style="margin-bottom:22px">
@@ -125,10 +127,9 @@
         </div>
       {% endif %}
 
-      <!-- CTA buttons + Watchlist + Share -->
+      <!-- CTA buttons -->
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px"
            x-data="movieActions('{{ movie.slug }}', {{ is_watchlisted|yesno:'true,false' }})">
-
         {% if movie.is_premium and not user.is_premium %}
           <a href="{% url 'auth:subscription' %}" class="cs-btn-gold">⭐ Premium olish</a>
         {% else %}
@@ -136,14 +137,13 @@
             <i class="ti ti-player-play" style="font-size:14px" aria-hidden="true"></i> Tomosha qilish
           </a>
         {% endif %}
-
         {% if movie.trailer_url %}
           <a href="{{ movie.trailer_url }}" target="_blank" class="cs-btn-ghost">
             <i class="ti ti-brand-youtube" style="font-size:14px" aria-hidden="true"></i> Treyler
           </a>
         {% endif %}
 
-        <!-- Watchlist (saqlash) -->
+        <!-- Watchlist -->
         <button @click="toggleWatchlist()"
                 :style="saved ? 'border-color:var(--gold);color:var(--gold);background:var(--gdim)' : 'border-color:rgba(201,168,76,0.18);color:var(--txd);background:transparent'"
                 style="width:42px;height:42px;border:1px solid;border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s"
@@ -152,7 +152,7 @@
           <i :class="saved ? 'ti ti-bookmark-filled' : 'ti ti-bookmark'" style="font-size:17px" aria-hidden="true"></i>
         </button>
 
-        <!-- Ulashish -->
+        <!-- Share -->
         <button @click="shareMovie()"
                 style="width:42px;height:42px;border:1px solid rgba(201,168,76,0.18);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--txd);cursor:pointer;transition:all 0.2s;background:transparent"
                 onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
@@ -174,10 +174,8 @@
     </div>
   </div>
 
-  <!-- ==================== TABS ==================== -->
+  <!-- TABS -->
   <div style="margin-top:40px" x-data="{tab:'about'}">
-
-    <!-- Tab buttons -->
     <div style="display:flex;gap:4px;border-bottom:1px solid rgba(201,168,76,0.1);margin-bottom:24px">
       <button @click="tab='about'"
               :style="tab==='about'?'color:var(--gold);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:var(--gold)':'color:var(--txd);border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:transparent'"
@@ -196,7 +194,7 @@
       </button>
     </div>
 
-    <!-- ===== HAQIDA ===== -->
+    <!-- HAQIDA -->
     <div x-show="tab==='about'" x-transition style="padding-top:8px">
       <div style="display:grid;grid-template-columns:1fr 280px;gap:32px">
         <div>
@@ -209,7 +207,7 @@
           <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px">
             Ma'lumotlar<span style="flex:1;height:1px;background:rgba(201,168,76,0.15)"></span>
           </div>
-          <div style="display:flex;flex-direction:column;gap:0">
+          <div>
             {% if movie.director %}
               <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)">
                 <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Rejissyor</span>
@@ -224,6 +222,12 @@
               <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)">
                 <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">Davomiyligi</span>
                 <span style="font-size:13px;color:var(--tx)">{{ movie.duration_display }}</span>
+              </div>
+            {% endif %}
+            {% if movie.imdb_rating %}
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.07)">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--txm)">IMDb</span>
+                <span style="font-size:13px;color:#f5c518">⭐ {{ movie.imdb_rating }}/10</span>
               </div>
             {% endif %}
             {% if movie.country %}
@@ -264,10 +268,10 @@
       </div>
     </div>
 
-    <!-- ===== AKTYORLAR ===== -->
+    <!-- AKTYORLAR -->
     <div x-show="tab==='cast'" x-transition style="padding-top:8px">
       {% if movie.movie_cast.all %}
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-bottom:24px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px">
           {% for cast in movie.movie_cast.all %}
             <a href="{% url 'person-detail' cast.person.slug %}"
                style="background:var(--bg3);border:1px solid rgba(201,168,76,0.1);border-radius:3px;overflow:hidden;text-decoration:none;transition:all 0.2s"
@@ -294,7 +298,7 @@
       {% endif %}
     </div>
 
-    <!-- ===== SHARHLAR ===== -->
+    <!-- SHARHLAR -->
     <div x-show="tab==='reviews'" x-transition style="padding-top:8px">
       {% if user.is_authenticated %}
         {% if not user_review %}
@@ -337,7 +341,6 @@
         </div>
       {% endif %}
 
-      <!-- Reviews list via HTMX -->
       <div id="reviews-list"
            hx-get="{% url 'movie-reviews-html' slug=movie.slug %}"
            hx-trigger="load"
@@ -357,85 +360,27 @@
         {% endfor %}
       </div>
     </div>
-
   </div>
-  <!-- ==================== TABS END ==================== -->
-
 </div>
+
+<style>
+@media (max-width: 768px) {
+  div[style*="height:420px"] { height: 220px !important; }
+  div[style*="right:5%"][style*="top:50%"] { display: none !important; }
+  div[style*="max-width:1280px"][style*="padding:0 32px"] { padding: 0 14px 40px !important; }
+  div[style*="display:flex;gap:32px"] { flex-direction: column !important; gap: 0 !important; }
+  div[style*="margin-top:-120px"] { margin-top: -60px !important; align-self: center !important; }
+  div[style*="width:200px"] { width: 130px !important; }
+  h1[style*="font-size:40px"] { font-size: 26px !important; }
+  div[style*="grid-template-columns:1fr 280px"] { grid-template-columns: 1fr !important; }
+  button[style*="padding:10px 20px"] { padding: 8px 12px !important; font-size: 12px !important; }
+}
+</style>
 
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-// 🛠️ UTILITY FUNCTIONS
-function getCsrfToken() {
-  return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-         document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
-}
-
-function toast(message, type = 'info') {
-  const toast = document.createElement('div');
-  const bgColor = type === 'success' ? '#70C085' : type === 'error' ? '#E07070' : '#C9A84C';
-  toast.style.cssText = `
-    position: fixed; top: 20px; right: 20px; 
-    background: ${bgColor}; color: white; 
-    padding: 12px 20px; border-radius: 4px;
-    font-size: 13px; z-index: 9999;
-    animation: slideIn 0.3s ease;
-  `;
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
-
-// 📝 REVIEW FORM FUNCTION
-function reviewForm() {
-  return {
-    rating: 0,
-    text: '',
-    submitting: false,
-
-    async submitReview(slug) {
-      if (!this.rating) {
-        toast('Baho berish majbur!', 'error');
-        return;
-      }
-
-      this.submitting = true;
-      try {
-        const res = await fetch(`/api/movies/${slug}/reviews/create/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            rating: this.rating,
-            text: this.text,
-          }),
-        });
-
-        if (res.ok) {
-          toast('Baho qo\'shildi!', 'success');
-          this.rating = 0;
-          this.text = '';
-          // Refresh reviews list
-          document.getElementById('reviews-list')?.dispatchEvent(new Event('htmx:trigger'));
-        } else {
-          const err = await res.json();
-          toast(err.detail || 'Xato yuz berdi', 'error');
-        }
-      } catch(e) {
-        toast('Tarmoq xatosi', 'error');
-      } finally {
-        this.submitting = false;
-      }
-    }
-  };
-}
-
-// 🎬 MOVIE ACTIONS
 function movieActions(slug, initialSaved) {
   return {
     saved: initialSaved,
@@ -448,13 +393,13 @@ function movieActions(slug, initialSaved) {
 
       try {
         if (this.saved) {
-          // Ro'yxatdan olib tashlash
           const listRes = await fetch('/api/watchlist/', {
             headers: { 'X-CSRFToken': getCsrfToken() },
             credentials: 'include',
           });
           const listData = await listRes.json();
-          const item = (listData.results || listData).find(w => w.movie_slug === slug);
+          const items = listData.results || listData;
+          const item = items.find(w => w.movie_slug === slug);
           if (item) {
             await fetch(`/api/watchlist/${item.id}/`, {
               method: 'DELETE',
@@ -465,12 +410,12 @@ function movieActions(slug, initialSaved) {
             toast("Ro'yxatdan olib tashlandi", 'info');
           }
         } else {
-          // Ro'yxatga qo'shish
           const movieRes = await fetch(`/api/movies/?slug=${slug}`, {
             credentials: 'include',
           });
           const movieData = await movieRes.json();
-          const movieId = (movieData.results || movieData)[0]?.id;
+          const items = movieData.results || movieData;
+          const movieId = items[0]?.id;
           if (!movieId) { toast("Xato yuz berdi", 'error'); return; }
 
           const res = await fetch('/api/watchlist/', {
@@ -495,115 +440,22 @@ function movieActions(slug, initialSaved) {
       }
     },
 
-    async shareMovie() {
-      try {
-        // Get share URLs from backend
-        const res = await fetch(`/api/movies/{{ movie.slug }}/share/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
-          },
-          credentials: 'include',
-          body: JSON.stringify({ platform: 'url' }),
-        });
-
-        if (!res.ok) throw new Error('Share API failed');
-
-        const data = await res.json();
-        const shareUrl = data.share_urls?.url || window.location.href;
-
-        if (navigator.share) {
-          navigator.share({
-            title: document.title,
-            text: '{{ movie.title }} — CinemaSavvy da tomosha qiling!',
-            url: shareUrl,
-          }).catch(() => {});
-        } else {
-          navigator.clipboard.writeText(shareUrl).then(() => {
-            toast("Havola nusxa olindi!", 'success');
-          }).catch(() => {
-            toast("Havolani nusxa ololmadi", 'error');
-          });
-        }
-      } catch(e) {
-        // Fallback to native share
+    shareMovie() {
+      if (navigator.share) {
+        navigator.share({
+          title: document.title,
+          text: '{{ movie.title }} — CinemaSavvy da tomosha qiling!',
+          url: window.location.href,
+        }).catch(() => {});
+      } else {
         navigator.clipboard.writeText(window.location.href).then(() => {
           toast("Havola nusxa olindi!", 'success');
+        }).catch(() => {
+          toast("Havolani nusxa ololmadi", 'error');
         });
-      }
-    },
-
-    async toggleLike(reviewId) {
-      try {
-        const res = await fetch(`/api/reviews/${reviewId}/like/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
-          },
-          credentials: 'include',
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          toast(data.liked ? 'Yoqdi!' : 'Yoqdi belgisidan olib tashlandi', 'success');
-          // Refresh reviews list
-          document.getElementById('reviews-list')?.dispatchEvent(new Event('htmx:trigger'));
-        } else {
-          toast('Xato yuz berdi', 'error');
-        }
-      } catch(e) {
-        toast('Tarmoq xatosi', 'error');
       }
     },
   };
 }
 </script>
-<style>
-@media (max-width: 768px) {
-  /* Banner balandligi */
-  div[style*="height:420px"] {
-    height: 220px !important;
-  }
-  /* Poster yashiriladi banner ichida */
-  div[style*="right:5%"][style*="top:50%"] {
-    display: none !important;
-  }
-  /* Main content padding */
-  div[style*="max-width:1280px"][style*="padding:0 32px"] {
-    padding: 0 14px 40px !important;
-  }
-  /* Poster + info: ustma-ust */
-  div[style*="display:flex;gap:32px"] {
-    flex-direction: column !important;
-    gap: 0 !important;
-  }
-  /* Poster kichikroq, markazda */
-  div[style*="margin-top:-120px"] {
-    margin-top: -60px !important;
-    align-self: center !important;
-  }
-  div[style*="width:200px"] {
-    width: 130px !important;
-  }
-  /* Info padding */
-  div[style*="flex:1;padding-top:20px"] {
-    padding-top: 12px !important;
-  }
-  /* Title kichikroq */
-  h1[style*="font-size:40px"] {
-    font-size: 26px !important;
-  }
-  /* About grid: 1 ustun */
-  div[style*="grid-template-columns:1fr 280px"] {
-    grid-template-columns: 1fr !important;
-  }
-  /* Tab buttons kichikroq */
-  button[style*="padding:10px 20px"] {
-    padding: 8px 12px !important;
-    font-size: 12px !important;
-  }
-}
-</style>
 {% endblock %}
