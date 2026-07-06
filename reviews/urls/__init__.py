@@ -1,8 +1,8 @@
-from django.urls import path, include
-from .api import urlpatterns as api_patterns
-from views.movie_review_views import MovieReviewListView, MovieReviewCreateView
+from .movie_review_views import MovieReviewListView, MovieReviewCreateView
+from .review_detail_views import ReviewDetailView
 
 __all__ = [
     'MovieReviewListView',
     'MovieReviewCreateView',
+    'ReviewDetailView',
 ]
