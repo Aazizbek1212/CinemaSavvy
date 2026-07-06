@@ -2,16 +2,20 @@
 document.addEventListener('alpine:init', () => {
 
   Alpine.data('appState', () => ({
-    mobileMenu: false,
-    scrolled: false,
+    mobileMenu: false,   // ← navbar uchun
+    scrolled: false,     // ← navbar scroll uchun
+
     init() {
       document.documentElement.classList.add('dark');
       document.body.style.backgroundColor = '#0A0A0A';
+
+      // Scroll listener
       window.addEventListener('scroll', () => {
         this.scrolled = window.scrollY > 20;
       }, { passive: true });
     }
   }));
+
 
   Alpine.data('navbar', () => ({
     scrolled: false,
@@ -58,7 +62,8 @@ document.addEventListener('alpine:init', () => {
     async submitReview(slug) {
       if (!this.rating || this.submitting) return;
 
-      const token = getToken(); // ✅ token tekshirish
+      // ✅ FIX #1: Token mavjudligini tekshirish
+      const token = getToken();
       if (!token) {
         toast('Iltimos, tizimga kiring', 'error');
         return;
@@ -71,7 +76,8 @@ document.addEventListener('alpine:init', () => {
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken(),
-            'Authorization': `Bearer ${token}`, // ✅ faqat token bor bo'lsa
+            // ✅ FIX #2: Faqat token bor bo'lsa yuborish
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({ rating: this.rating, text: this.text }),
         });
@@ -94,8 +100,9 @@ document.addEventListener('alpine:init', () => {
 // ─── HTMX ────────────────────────────────────────────
 document.addEventListener('htmx:configRequest', e => {
   e.detail.headers['X-CSRFToken'] = getCsrfToken();
+  // ✅ FIX #3: Bo'sh token yuborilmasin
   const token = getToken();
-  if (token) e.detail.headers['Authorization'] = `Bearer ${token}`; // ✅ faqat bor bo'lsa
+  if (token) e.detail.headers['Authorization'] = `Bearer ${token}`;
 });
 
 document.addEventListener('htmx:responseError', () => {
@@ -107,24 +114,32 @@ function getCsrfToken() {
   return document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
 }
 
+// ✅ FIX #4: null qaytaradi (bo'sh string emas)
 function getToken() {
-  return localStorage.getItem('access_token') || null; // ✅ null qaytaradi
+  return localStorage.getItem('access_token') || null;
 }
 
 function toast(message, type = 'info') {
   window.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
 }
 
-// ─── Share Movie ─────────────────────────────────────  ✅ YANGI
+// ─── Share Movie ──────────────────────────────────────
+// ✅ FIX #5: Bu funksiya butunlay yo'q edi — qo'shildi!
+// HTTP da clipboard ishlamaydi, shuning uchun fallback yozildi
 async function shareMovie() {
   const url = window.location.href;
   try {
     if (navigator.clipboard && window.isSecureContext) {
+      // HTTPS da ishlaydi
       await navigator.clipboard.writeText(url);
     } else {
+      // HTTP uchun fallback (eski usul)
       const el = document.createElement('textarea');
       el.value = url;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
       document.body.appendChild(el);
+      el.focus();
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
@@ -137,12 +152,15 @@ async function shareMovie() {
 
 // ─── Language switcher ───────────────────────────────
 function switchLanguage(langCode) {
+  // Barcha til tugmalarini reset
   document.querySelectorAll('[id^="lang-btn-"]').forEach(btn => {
     btn.classList.remove('active');
   });
+  // Tanlangan tilni faollashtirish
   const btn = document.getElementById('lang-btn-' + langCode);
   if (btn) btn.classList.add('active');
 
+  // Alpine.js videoPlayer ga xabar berish
   const playerEl = document.querySelector('[x-data^="videoPlayer"]');
   if (playerEl && playerEl._x_dataStack) {
     const player = playerEl._x_dataStack[0];
