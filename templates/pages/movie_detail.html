@@ -448,11 +448,19 @@ function movieActions(slug, initialSaved) {
           url: window.location.href,
         }).catch(() => {});
       } else {
-        navigator.clipboard.writeText(window.location.href).then(() => {
+        try {
+          const el = document.createElement('textarea');
+          el.value = window.location.href;
+          el.style.position = 'fixed';
+          el.style.opacity = '0';
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
           toast("Havola nusxa olindi!", 'success');
-        }).catch(() => {
-          toast("Havolani nusxa ololmadi", 'error');
-        });
+        } catch(e) {
+          toast("Havola: " + window.location.href, 'info');
+        }
       }
     },
   };
