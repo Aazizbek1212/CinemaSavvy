@@ -1,70 +1,72 @@
 import logging
 from typing import Any
-from django.contrib.auth import login, logout, authenticate
+
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
-from django.views.generic import TemplateView, FormView
-from django.urls import reverse_lazy
-from django.contrib import messages
+from django.views.generic import TemplateView
 
-from users.services import AuthService
-from movies.views.pages import SeoMixin
+from users.models import CustomUser
+from users.tasks import send_verification_email, send_password_reset_email
 
 logger = logging.getLogger(__name__)
 
 
-class LoginPageView(SeoMixin, TemplateView):
+class LoginPageView(TemplateView):
     template_name = "auth/login.html"
-    seo_title = "Kirish — Cinema.uz"
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect("home")
         return super().dispatch(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        email    = request.POST.get("email", "").lower().strip()
-        password = request.POST.get("password", "")
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        ctx["next"] = self.request.GET.get("next", "/")
+        return ctx
 
-        user = authenticate(request, username=email, password=password)
+    def post(self, request, *args, **kwargs):
+        email    = request.POST.get("email", "").strip().lower()
+        password = request.POST.get("password", "")
+        next_url = request.POST.get("next", "/")
+
+        if not email or not password:
+            return self.render_to_response(
+                self.get_context_data(error="Email va parol kiritish majburiy")
+            )
+
+        user = authenticate(request, email=email, password=password)
 
         if user is None:
             return self.render_to_response(
-                self.get_context_data(error="Email yoki parol noto'g'ri.")
-            )
-
-        if not user.is_active:
-            return self.render_to_response(
-                self.get_context_data(error="Hisob faolsizlantirilgan.")
+                self.get_context_data(error="Email yoki parol noto'g'ri")
             )
 
         if not user.is_verified:
             return self.render_to_response(
                 self.get_context_data(
-                    error="Email tasdiqlanmagan. Emailingizni tekshiring."
+                    error="Email tasdiqlanmagan. Emailingizni tekshiring.",
+                    unverified_email=email,
                 )
             )
 
-        # Update last login IP
-        ip = self._get_ip(request)
-        user.last_login_ip = ip
-        user.save(update_fields=["last_login_ip"])
+        if not user.is_active:
+            return self.render_to_response(
+                self.get_context_data(error="Hisobingiz faol emas")
+            )
 
+        # Django session login
         login(request, user)
-        logger.info("User logged in via web: %s", user.email)
 
-        next_url = request.GET.get("next", "/")
-        return redirect(next_url)
+        logger.info("User logged in: %s", user.email)
 
-    @staticmethod
-    def _get_ip(request) -> str | None:
-        xff = request.META.get("HTTP_X_FORWARDED_FOR")
-        return xff.split(",")[0].strip() if xff else request.META.get("REMOTE_ADDR")
+        if next_url and next_url.startswith("/"):
+            return redirect(next_url)
+        return redirect("home")
 
 
-class RegisterPageView(SeoMixin, TemplateView):
+class RegisterPageView(TemplateView):
     template_name = "auth/register.html"
-    seo_title = "Ro'yxatdan o'tish — Cinema.uz"
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -72,168 +74,174 @@ class RegisterPageView(SeoMixin, TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        email    = request.POST.get("email", "").lower().strip()
-        password = request.POST.get("password", "")
-        confirm  = request.POST.get("password_confirm", "")
-        fullname = request.POST.get("full_name", "").strip()
+        display_name     = request.POST.get("display_name", "").strip()
+        email            = request.POST.get("email", "").strip().lower()
+        password         = request.POST.get("password", "")
+        password_confirm = request.POST.get("password_confirm", "")
 
-        # Validations
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-
-        if password != confirm:
+        # Validatsiya
+        if not display_name or not email or not password:
             return self.render_to_response(
-                self.get_context_data(
-                    error="Parollar mos kelmaydi.",
-                    form_data={"email": email, "full_name": fullname},
-                )
+                self.get_context_data(error="Barcha maydonlarni to'ldiring")
             )
 
-        if User.objects.filter(email=email).exists():
+        if password != password_confirm:
             return self.render_to_response(
-                self.get_context_data(
-                    error="Bu ma'lumotlar bilan ro'yxatdan o'tib bo'lmaydi.",
-                    form_data={"email": email, "full_name": fullname},
-                )
+                self.get_context_data(error="Parollar mos kelmaydi")
             )
 
+        if len(password) < 8:
+            return self.render_to_response(
+                self.get_context_data(error="Parol kamida 8 ta belgidan iborat bo'lishi kerak")
+            )
+
+        if CustomUser.objects.filter(email=email).exists():
+            return self.render_to_response(
+                self.get_context_data(error="Bu email allaqachon ro'yxatdan o'tgan")
+            )
+
+        # Foydalanuvchi yaratish
+        import uuid
+        from django.conf import settings
+
+        token = str(uuid.uuid4())
+        user = CustomUser.objects.create_user(
+            email=email,
+            password=password,
+            display_name=display_name,
+            verification_token=token,
+            is_verified=False,
+        )
+
+        # Verification email
+        verification_url = f"{settings.FRONTEND_URL}/auth/verify/{token}/"
         try:
-            AuthService.register_user(
-                {"email": email, "password": password, "full_name": fullname},
-                request,
-            )
-            return redirect("auth:register-success")
-        except Exception as exc:
-            logger.error("Registration error: %s", exc)
-            return self.render_to_response(
-                self.get_context_data(error="Ro'yxatdan o'tishda xato yuz berdi.")
-            )
+            send_verification_email(user.email, user.display_name, verification_url)
+        except Exception as e:
+            logger.error("Failed to send verification email: %s", e)
+
+        logger.info("User registered: %s", user.email)
+        return redirect("auth:register_success")
 
 
-class LogoutView(LoginRequiredMixin, TemplateView):
+class LogoutView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        return redirect("home")
+
     def post(self, request, *args, **kwargs):
-        logger.info("User logged out: %s", request.user.email)
         logout(request)
         return redirect("home")
 
 
-class ProfilePageView(LoginRequiredMixin, SeoMixin, TemplateView):
-    template_name = "auth/profile.html"
-    seo_title     = "Profilim — Cinema.uz"
-    login_url     = "/auth/login/"
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-        from reviews.models import Review
-        from streaming.models import WatchHistory
-
-        ctx.update({
-            "reviews_count": Review.objects.filter(
-                user=self.request.user, is_active=True
-            ).count(),
-            "watch_count": WatchHistory.objects.filter(
-                user=self.request.user, completed=True
-            ).count(),
-        })
-        return ctx
-
-
-class SubscriptionPageView(SeoMixin, TemplateView):
-    template_name = "pages/subscription.html"
-    seo_title     = "Premium obuna — Cinema.uz"
-
-    PLANS = [
-        {
-            "name":     "Oylik",
-            "price":    "29 900",
-            "period":   "oy",
-            "features": ["Barcha filmlar", "HD/4K sifat", "Reklama yo'q", "1 qurilma"],
-            "popular":  False,
-        },
-        {
-            "name":     "Yillik",
-            "price":    "249 900",
-            "period":   "yil",
-            "save":     "30% tejash",
-            "features": ["Barcha filmlar", "4K Ultra HD", "Reklama yo'q",
-                         "3 qurilma", "Offline ko'rish"],
-            "popular":  True,
-        },
-    ]
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-        ctx["plans"] = self.PLANS
-        return ctx
-
-
-class EmailVerificationRequiredView(SeoMixin, TemplateView):
-    template_name = "auth/email_verification_required.html"
-    seo_title     = "Email tasdiqlash — Cinema.uz"
-
-    def post(self, request, *args, **kwargs):
-        """Resend verification email."""
-        if request.user.is_authenticated:
-            AuthService._send_verification_email(request.user, request)
-            return self.render_to_response(
-                self.get_context_data(resent=True)
-            )
-        return redirect("auth:login")
-
-
-class VerifyEmailPageView(TemplateView):
+class EmailVerificationView(TemplateView):
     template_name = "auth/email_verified.html"
 
-    def get(self, request, uid, token, *args, **kwargs):
-        success = AuthService.verify_email(uid, token)
-        return self.render_to_response(
-            self.get_context_data(success=success)
-        )
+    def get(self, request, token, *args, **kwargs):
+        try:
+            user = CustomUser.objects.get(verification_token=token)
+            if not user.is_verified:
+                user.is_verified = True
+                user.verification_token = ""
+                user.save()
+                login(request, user)
+                logger.info("Email verified: %s", user.email)
+            return self.render_to_response(self.get_context_data(success=True))
+        except CustomUser.DoesNotExist:
+            return self.render_to_response(self.get_context_data(success=False))
 
 
-class PasswordResetPageView(SeoMixin, TemplateView):
-    template_name = "auth/password_reset.html"
-    seo_title     = "Parolni tiklash — Cinema.uz"
-
-    def post(self, request, *args, **kwargs):
-        email = request.POST.get("email", "").lower().strip()
-        AuthService.request_password_reset(email, request)
-        return self.render_to_response(
-            self.get_context_data(sent=True, email=email)
-        )
+class EmailVerificationRequiredView(TemplateView):
+    template_name = "auth/email_verification_required.html"
 
 
-class PasswordResetConfirmPageView(SeoMixin, TemplateView):
-    template_name = "auth/password_reset_confirm.html"
-    seo_title     = "Yangi parol — Cinema.uz"
+class RegisterSuccessView(TemplateView):
+    template_name = "auth/register_success.html"
+
+
+class ProfilePageView(LoginRequiredMixin, TemplateView):
+    template_name = "auth/profile.html"
+    login_url = "/auth/login/"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         ctx = super().get_context_data(**kwargs)
-        ctx.update({
-            "uid":   kwargs.get("uid", self.kwargs.get("uid")),
-            "token": kwargs.get("token", self.kwargs.get("token")),
-        })
+        from watchlist.models import Watchlist
+        from streaming.models import WatchHistory
+        try:
+            ctx["watchlist_count"] = Watchlist.objects.filter(user=self.request.user).count()
+        except Exception:
+            ctx["watchlist_count"] = 0
+        try:
+            ctx["history_count"] = WatchHistory.objects.filter(user=self.request.user).count()
+        except Exception:
+            ctx["history_count"] = 0
         return ctx
 
-    def post(self, request, uid, token, *args, **kwargs):
-        new_password = request.POST.get("new_password", "")
-        confirm      = request.POST.get("new_password_confirm", "")
+    def post(self, request, *args, **kwargs):
+        display_name = request.POST.get("display_name", "").strip()
+        if display_name:
+            request.user.display_name = display_name
+            request.user.save()
+        return redirect("auth:profile")
 
-        if new_password != confirm:
+
+class PasswordResetView(TemplateView):
+    template_name = "auth/password_reset.html"
+
+    def post(self, request, *args, **kwargs):
+        from django.conf import settings
+        import uuid
+
+        email = request.POST.get("email", "").strip().lower()
+        try:
+            user = CustomUser.objects.get(email=email)
+            token = str(uuid.uuid4())
+            user.reset_token = token
+            user.save()
+            reset_url = f"{settings.FRONTEND_URL}/auth/password-reset-confirm/{token}/"
+            send_password_reset_email(user.email, user.display_name, reset_url)
+        except CustomUser.DoesNotExist:
+            pass
+        return redirect("auth:password_reset_done")
+
+
+class PasswordResetDoneView(TemplateView):
+    template_name = "auth/password_reset_done.html"
+
+
+class PasswordResetConfirmView(TemplateView):
+    template_name = "auth/password_reset_confirm.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        ctx["token"] = self.kwargs.get("token")
+        return ctx
+
+    def post(self, request, token, *args, **kwargs):
+        password         = request.POST.get("password", "")
+        password_confirm = request.POST.get("password_confirm", "")
+
+        if password != password_confirm:
             return self.render_to_response(
-                self.get_context_data(
-                    uid=uid, token=token,
-                    error="Parollar mos kelmaydi."
-                )
+                self.get_context_data(error="Parollar mos kelmaydi", token=token)
+            )
+        if len(password) < 8:
+            return self.render_to_response(
+                self.get_context_data(error="Parol kamida 8 ta belgidan iborat bo'lishi kerak", token=token)
+            )
+        try:
+            user = CustomUser.objects.get(reset_token=token)
+            user.set_password(password)
+            user.reset_token = ""
+            user.save()
+            login(request, user)
+            return redirect("home")
+        except CustomUser.DoesNotExist:
+            return self.render_to_response(
+                self.get_context_data(error="Havola yaroqsiz", token=token)
             )
 
-        success = AuthService.confirm_password_reset(uid, token, new_password)
-        if success:
-            return redirect("auth:password-reset-done")
 
-        return self.render_to_response(
-            self.get_context_data(
-                uid=uid, token=token,
-                error="Havola noto'g'ri yoki muddati o'tgan."
-            )
-        )
+class SubscriptionPageView(LoginRequiredMixin, TemplateView):
+    template_name = "pages/subscription.html"
+    login_url = "/auth/login/"
