@@ -1,8 +1,5 @@
-from reviews.views.movie_review_views import MovieReviewListView, MovieReviewCreateView
-from reviews.views.review_detail_views import ReviewDetailView
+from django.urls import path, include
 
-__all__ = [
-    'MovieReviewListView',
-    'MovieReviewCreateView',
-    'ReviewDetailView',
+urlpatterns = [
+    path('', include('reviews.urls.api')),
 ]
