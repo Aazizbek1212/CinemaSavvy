@@ -1,4 +1,5 @@
 from django.urls import path
+from users.views.pages import VerifyEmailPageView
 from users.views.pages import (
     LoginPageView,
     RegisterPageView,
@@ -6,7 +7,6 @@ from users.views.pages import (
     ProfilePageView,
     SubscriptionPageView,
     EmailVerificationRequiredView,
-    VerifyEmailPageView,
     PasswordResetPageView,
     PasswordResetConfirmPageView,
 )
