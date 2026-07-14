@@ -1,5 +1,5 @@
 from django.urls import path
-from users.views.pages import VerifyEmailPageView
+from users.views.api import VerifyEmailView
 from users.views.pages import (
     LoginPageView,
     RegisterPageView,
