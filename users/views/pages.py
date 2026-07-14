@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
+from users.views.api import VerifyEmailView
 
 from users.models import CustomUser
 from users.tasks import send_verification_email, send_password_reset_email
