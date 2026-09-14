@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Recommendation
 from .serializers import RecommendationSerializer
 
+
 class RecommendationViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = RecommendationSerializer

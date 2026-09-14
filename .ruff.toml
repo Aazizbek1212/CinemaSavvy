@@ -1,0 +1,14 @@
+# Exclude migrations and static files from linting
+exclude = ["migrations", "**/migrations/**", "static", "node_modules"]
+# Ignore warnings about mutable defaults in Django Meta and migrations
+ignore = ["RUF012"]
+
+# Enable popular fixes
+select = ["E", "F", "I", "T", "SIM", "RUF"]
+fix = true
+
+# Increase max line length to reduce false-positive long-line warnings
+line-length = 120
+
+# Per-file ignores for settings where wildcard imports are intentional
+per-file-ignores = { "cinema/settings/*.py" = ["F403"] }

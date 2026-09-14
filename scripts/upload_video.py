@@ -1,6 +1,9 @@
-import boto3
+import logging
 import sys
+
+import boto3
 from botocore.config import Config
+
 
 def upload_video(file_path: str, movie_id: str, quality: str = "720p"):
     """
@@ -21,7 +24,7 @@ def upload_video(file_path: str, movie_id: str, quality: str = "720p"):
     bucket = "cinema"
     file_key = f"videos/{movie_id}/original_{quality}.mp4"
 
-    print(f"Yuklanmoqda: {file_path} → {bucket}/{file_key}")
+    logging.info("Yuklanmoqda: %s → %s/%s", file_path, bucket, file_key)
 
     with open(file_path, "rb") as f:
         client.upload_fileobj(
@@ -29,22 +32,22 @@ def upload_video(file_path: str, movie_id: str, quality: str = "720p"):
             bucket,
             file_key,
             ExtraArgs={"ContentType": "video/mp4"},
-            Callback=lambda bytes_transferred: print(
-                f"\r{bytes_transferred / 1024 / 1024:.1f} MB yuklandi",
-                end="",
+            Callback=lambda bytes_transferred: sys.stdout.write(
+                f"\r{bytes_transferred / 1024 / 1024:.1f} MB yuklandi"
             ),
         )
 
-    print(f"\n✅ Yuklandi: {file_key}")
+    logging.info("\n✅ Yuklandi: %s", file_key)
     return file_key
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Ishlatish: python scripts/upload_video.py <video_fayl> <movie_id> [quality]")
+        logging.error("Ishlatish: python scripts/upload_video.py <video_fayl> <movie_id> [quality]")
         sys.exit(1)
 
     file_path = sys.argv[1]
     movie_id  = sys.argv[2]
     quality   = sys.argv[3] if len(sys.argv) > 3 else "720p"
 
+    logging.basicConfig(level=logging.INFO)
     upload_video(file_path, movie_id, quality)

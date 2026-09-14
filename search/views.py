@@ -1,19 +1,19 @@
-from django.shortcuts import render
 
 # Create your views here.
 import logging
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.generic import TemplateView
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.views.generic import TemplateView
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
+
+from movies.views.pages import SeoMixin
 
 from .services import ElasticsearchService
-from .serializers import SearchResponseSerializer
-from movies.views.pages import SeoMixin
 
 logger = logging.getLogger(__name__)
 

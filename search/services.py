@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, field
-from elasticsearch_dsl import Q, Search
-from elasticsearch_dsl import response
+
+from elasticsearch_dsl import Q
 
 from .documents import MovieDocument, PersonDocument
 
@@ -162,8 +162,10 @@ class ElasticsearchService:
 
         if year_min or year_max:
             year_range = {}
-            if year_min: year_range["gte"] = year_min
-            if year_max: year_range["lte"] = year_max
+            if year_min:
+                year_range["gte"] = year_min
+            if year_max:
+                year_range["lte"] = year_max
             s = s.filter("range", release_year=year_range)
 
         if is_premium is not None:

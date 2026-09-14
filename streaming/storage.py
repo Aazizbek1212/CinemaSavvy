@@ -1,9 +1,9 @@
 import logging
-from datetime import timedelta
-from django.conf import settings
+
 import boto3
-from botocore.exceptions import ClientError
 from botocore.config import Config
+from botocore.exceptions import ClientError
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 

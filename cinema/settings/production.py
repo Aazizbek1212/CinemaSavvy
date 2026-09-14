@@ -1,5 +1,4 @@
-from .base import *  # noqa
-from decouple import config
+from .base import *
 
 SECURE_PROXY_SSL_HEADER = None
 SECURE_SSL_REDIRECT = False

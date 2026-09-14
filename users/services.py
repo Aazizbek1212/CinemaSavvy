@@ -1,13 +1,14 @@
 import logging
 from typing import Any
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.conf import settings
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .tasks import send_password_reset_email, send_verification_email
 from .tokens import email_verification_token, password_reset_token
-from .tasks import send_verification_email, send_password_reset_email
 
 logger = logging.getLogger(__name__)
 User = get_user_model()

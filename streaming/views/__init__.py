@@ -1,4 +1,5 @@
 from logging import getLogger
+
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -7,8 +8,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from movies.models import Movie
+
 from ..models import WatchHistory
-from ..serializers import StreamURLSerializer, WatchProgressSerializer, WatchHistorySerializer
+from ..serializers import (
+    WatchHistorySerializer,
+    WatchProgressSerializer,
+)
 from ..services import VideoStreamingService, WatchHistoryService
 
 logger = getLogger(__name__)
@@ -26,12 +31,11 @@ class StreamURLView(APIView):
         movie = get_object_or_404(Movie.objects.published(), slug=slug)
 
         # Premium gating — AnonymousUser uchun xavfsiz tekshiruv
-        if movie.is_premium:
-            if not request.user.is_authenticated or not getattr(request.user, "is_premium", False):
-                return Response(
-                    {"detail": "Bu kontent premium obuna talab qiladi."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+        if movie.is_premium and (not request.user.is_authenticated or not getattr(request.user, "is_premium", False)):
+            return Response(
+                {"detail": "Bu kontent premium obuna talab qiladi."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         quality = request.query_params.get("quality")
         movie_file = VideoStreamingService.get_best_quality_file(movie, quality)

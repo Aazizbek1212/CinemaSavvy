@@ -1,13 +1,14 @@
 from django.urls import path
+
 from movies.views.pages import (
-    HomePageView,
     CatalogPageView,
+    HomePageView,
     MovieDetailPageView,
     MovieReviewsPartialView,
-    WatchPageView,
     PersonDetailPageView,
     SearchView,
     WatchHistoryPageView,
+    WatchPageView,
 )
 
 urlpatterns = [

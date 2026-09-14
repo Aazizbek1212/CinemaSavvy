@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny
 from .models import Collection
 from .serializers import CollectionSerializer
 
+
 class CollectionViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = CollectionSerializer

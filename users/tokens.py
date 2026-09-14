@@ -1,7 +1,6 @@
 import logging
+
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.crypto import constant_time_compare
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 

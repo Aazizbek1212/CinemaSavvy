@@ -1,12 +1,13 @@
 import logging
 from typing import Any
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView, DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 
-from movies.models import Movie, Genre, Language, Person
+from movies.models import Genre, Language, Movie, Person
 from streaming.services import WatchHistoryService
 
 logger = logging.getLogger(__name__)
@@ -286,13 +287,13 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
         first_file = available_files.first()
         video_url = f"/media/{first_file.file_key}" if first_file else ""
 
+        import contextlib
+
         resume_position = 0
-        try:
+        with contextlib.suppress(Exception):
             resume_position = WatchHistoryService.get_resume_position(
                 self.request.user, movie
             )
-        except Exception:
-            pass
 
         ctx.update({
             "available_files":     available_files,

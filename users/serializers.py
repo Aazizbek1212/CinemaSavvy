@@ -1,10 +1,10 @@
 import logging
 from typing import Any
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
 
 logger = logging.getLogger(__name__)
 User = get_user_model()

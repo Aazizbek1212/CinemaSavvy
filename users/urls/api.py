@@ -1,16 +1,17 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
+
 from ..views import (
-    RegisterView,
-    LoginView,
-    LogoutView,
-    VerifyEmailView,
-    ProfileView,
-    ChangePasswordView,
-    PasswordResetRequestView,
-    PasswordResetConfirmView,
     AccountDeleteView,
     AccountHistoryView,
+    ChangePasswordView,
+    LoginView,
+    LogoutView,
+    PasswordResetConfirmView,
+    PasswordResetRequestView,
+    ProfileView,
+    RegisterView,
+    VerifyEmailView,
 )
 
 app_name = "users-api"

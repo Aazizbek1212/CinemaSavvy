@@ -1,6 +1,8 @@
 import logging
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
+
 from movies.models import Movie, Person
 
 logger = logging.getLogger(__name__)

@@ -1,10 +1,10 @@
-import uuid
 import logging
+import uuid
+
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -197,10 +197,33 @@ class Movie(models.Model):
     youtube_url = models.URLField(_("YouTube URL"), blank=True)
  
     # ── Classification ────────────────────────
-    genres           = models.ManyToManyField(Genre,    blank=True, related_name="movies",         verbose_name=_("genres"))
-    primary_language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True, related_name="primary_movies", verbose_name=_("primary language"))
-    languages        = models.ManyToManyField(Language, blank=True, related_name="movies",         verbose_name=_("available languages"))
-    cast             = models.ManyToManyField(Person,   blank=True, through="MovieCast", related_name="movies", verbose_name=_("cast"))
+    genres = models.ManyToManyField(
+        Genre,
+        blank=True,
+        related_name="movies",
+        verbose_name=_("genres"),
+    )
+    primary_language = models.ForeignKey(
+        Language,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="primary_movies",
+        verbose_name=_("primary language"),
+    )
+    languages = models.ManyToManyField(
+        Language,
+        blank=True,
+        related_name="movies",
+        verbose_name=_("available languages"),
+    )
+    cast = models.ManyToManyField(
+        Person,
+        blank=True,
+        through="MovieCast",
+        related_name="movies",
+        verbose_name=_("cast"),
+    )
     country          = models.CharField(_("country"), max_length=100, blank=True)
     age_rating       = models.CharField(_("age rating"), max_length=5, choices=AgeRating.choices, default=AgeRating.ALL)
  
@@ -229,7 +252,13 @@ class Movie(models.Model):
  
     # ── Flags ─────────────────────────────────
     is_premium = models.BooleanField(_("is premium"), default=False)
-    status     = models.CharField(_("status"), max_length=20, choices=Status.choices, default=Status.DRAFT, db_index=True)
+    status = models.CharField(
+        _("status"),
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        db_index=True,
+    )
     published_at = models.DateTimeField(_("published at"), null=True, blank=True)
  
     # ── Denormalized stats ────────────────────

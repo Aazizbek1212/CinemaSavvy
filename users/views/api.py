@@ -1,20 +1,20 @@
 import logging
-from django.utils import timezone
-from rest_framework import status, generics
-from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from rest_framework import generics, status
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..serializers import (
-    UserRegisterSerializer,
+    ChangePasswordSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
-    ChangePasswordSerializer,
-    PasswordResetRequestSerializer,
-    PasswordResetConfirmSerializer,
+    UserRegisterSerializer,
 )
 from ..services import AuthService
 
@@ -92,7 +92,7 @@ class LogoutView(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
             logger.info("User logged out: %s", request.user.email)
-        except TokenError as exc:
+        except TokenError:
             return Response(
                 {"detail": "Token noto'g'ri yoki muddati o'tgan."},
                 status=status.HTTP_400_BAD_REQUEST,

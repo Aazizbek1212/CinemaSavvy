@@ -1,13 +1,13 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-from django.shortcuts import get_object_or_404
 
 from movies.models import Movie
-from reviews.serializers import ReviewSerializer
 from reviews.models import Review
+from reviews.serializers import ReviewSerializer
 
 
 class MovieReviewListView(generics.ListAPIView):

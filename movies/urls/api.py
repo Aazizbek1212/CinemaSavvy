@@ -1,11 +1,12 @@
 from django.urls import path
+
 from ..views import (
-    MovieListView, 
-    MovieDetailView, 
-    GenreListView, 
-    PersonDetailView,
+    GenreListView,
     MovieComparisonView,
+    MovieDetailView,
+    MovieListView,
     MovieShareView,
+    PersonDetailView,
 )
 
 app_name = "movies-api"

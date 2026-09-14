@@ -1,6 +1,4 @@
-from django.urls import path, include
-from .api import urlpatterns as api_patterns
-
+from django.urls import include, path
 
 urlpatterns = [
     path("", include("users.urls.api")),

@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from .models import Collection, CollectionMovie
+
 
 class CollectionMovieSerializer(serializers.ModelSerializer):
 
@@ -24,12 +26,13 @@ class CollectionMovieSerializer(serializers.ModelSerializer):
             "order",
         ]
 
-    class CollectionSerializer(serializers.ModelSerializer):
+
+class CollectionSerializer(serializers.ModelSerializer):
 
     movies = CollectionMovieSerializer(
         source="collection_movies",
         many=True,
-        read_only=True
+        read_only=True,
     )
 
     class Meta:

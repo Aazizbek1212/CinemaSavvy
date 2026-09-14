@@ -7,15 +7,15 @@ Ishlatish:
 Misol:
     python manage.py transcode_movie avatar-1 /app/media/videos/film2.mp4 --language=uz
 """
+import logging
 import os
 import subprocess
-import logging
 from pathlib import Path
 
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 
-from movies.models import Movie, MovieFile, Language
+from movies.models import Language, Movie, MovieFile
 
 logger = logging.getLogger(__name__)
 
@@ -82,11 +82,20 @@ class Command(BaseCommand):
             playlist_path = quality_dir / "playlist.m3u8"
             segment_pattern = quality_dir / "segment_%03d.ts"
 
+            vf_filter = (
+                f"scale=w={width}:h={height}:force_original_aspect_ratio=decrease,"
+                f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2"
+            )
+
             cmd = [
-                "ffmpeg", "-y",
-                "-i", input_path,
-                "-vf", f"scale=w={width}:h={height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2",
-                "-c:v", "libx264",
+                "ffmpeg",
+                "-y",
+                "-i",
+                input_path,
+                "-vf",
+                vf_filter,
+                "-c:v",
+                "libx264",
                 "-preset", "fast",
                 "-crf", "23",
                 "-b:v", v_bitrate,
@@ -115,7 +124,7 @@ class Command(BaseCommand):
             # MovieFile yaratish/yangilash
             relative_playlist = f"hls/{movie_slug}/{lang_code}/{quality_name}/playlist.m3u8"
 
-            movie_file, created = MovieFile.objects.update_or_create(
+            _movie_file, _created = MovieFile.objects.update_or_create(
                 movie=movie,
                 quality=quality_name,
                 language=language,

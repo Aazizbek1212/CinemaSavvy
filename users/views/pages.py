@@ -5,10 +5,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
-from users.views.api import VerifyEmailView
 
 from users.models import CustomUser
-from users.tasks import send_verification_email, send_password_reset_email
+from users.tasks import send_password_reset_email, send_verification_email
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +102,7 @@ class RegisterPageView(TemplateView):
 
         # Foydalanuvchi yaratish
         import uuid
+
         from django.conf import settings
 
         token = str(uuid.uuid4())
@@ -166,8 +166,8 @@ class ProfilePageView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         ctx = super().get_context_data(**kwargs)
-        from watchlist.models import Watchlist
         from streaming.models import WatchHistory
+        from watchlist.models import Watchlist
         try:
             ctx["watchlist_count"] = Watchlist.objects.filter(user=self.request.user).count()
         except Exception:
@@ -190,8 +190,9 @@ class PasswordResetView(TemplateView):
     template_name = "auth/password_reset.html"
 
     def post(self, request, *args, **kwargs):
-        from django.conf import settings
         import uuid
+
+        from django.conf import settings
 
         email = request.POST.get("email", "").strip().lower()
         try:

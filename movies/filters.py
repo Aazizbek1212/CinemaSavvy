@@ -1,5 +1,6 @@
 import django_filters
-from .models import Movie, Genre, Language
+
+from .models import Movie
 
 
 class MovieFilter(django_filters.FilterSet):

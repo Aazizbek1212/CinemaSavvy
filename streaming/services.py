@@ -1,13 +1,15 @@
-import os
 import logging
+import os
 import tempfile
 from pathlib import Path
+
 from django.utils import timezone
 
 from movies.models import MovieFile
+
+from .ffmpeg import ffmpeg_processor
 from .models import VideoProcessingJob, WatchHistory
 from .storage import minio_storage
-from .ffmpeg import ffmpeg_processor
 
 logger = logging.getLogger(__name__)
 

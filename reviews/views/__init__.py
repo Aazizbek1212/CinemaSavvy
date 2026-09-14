@@ -1,8 +1,8 @@
-from .movie_review_views import MovieReviewListView, MovieReviewCreateView
+from .movie_review_views import MovieReviewCreateView, MovieReviewListView
 from .review_detail_views import ReviewDetailView
 
 __all__ = [
-    'MovieReviewListView',
     'MovieReviewCreateView',
+    'MovieReviewListView',
     'ReviewDetailView',
 ]

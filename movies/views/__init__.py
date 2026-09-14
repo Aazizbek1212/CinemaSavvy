@@ -1,21 +1,21 @@
 import logging
-from rest_framework import generics, filters
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics
 from rest_framework.authentication import SessionAuthentication
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from movies.models import Movie, Genre, Person
+from movies.models import Genre, Movie, Person
 from movies.serializers import (
-    MovieListSerializer,
-    MovieDetailSerializer,
     GenreSerializer,
-    PersonSerializer,
     MovieComparisonSerializer,
-    MovieShareSerializer,
+    MovieDetailSerializer,
+    MovieListSerializer,
+    PersonSerializer,
 )
 
 logger = logging.getLogger(__name__)

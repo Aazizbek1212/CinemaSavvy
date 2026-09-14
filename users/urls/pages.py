@@ -1,18 +1,18 @@
 from django.urls import path
+
 from users.views.pages import (
-    LoginPageView,
-    RegisterPageView,
-    LogoutView,
-    ProfilePageView,
-    SubscriptionPageView,
     EmailVerificationRequiredView,
     EmailVerificationView,
-    RegisterSuccessView,
-    PasswordResetView,
-    PasswordResetDoneView,
+    LoginPageView,
+    LogoutView,
     PasswordResetConfirmView,
+    PasswordResetDoneView,
+    PasswordResetView,
+    ProfilePageView,
+    RegisterPageView,
+    RegisterSuccessView,
+    SubscriptionPageView,
 )
-from django.views.generic import TemplateView
 
 app_name = "auth"
 

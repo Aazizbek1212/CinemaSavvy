@@ -1,5 +1,6 @@
 from django.urls import path
-from ..views import StreamURLView, WatchProgressView, WatchHistoryView
+
+from ..views import StreamURLView, WatchHistoryView, WatchProgressView
 
 app_name = "streaming"
 

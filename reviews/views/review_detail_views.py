@@ -1,7 +1,7 @@
 from rest_framework import generics
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.authentication import SessionAuthentication
 
 from reviews.models import Review
 from reviews.serializers import ReviewSerializer
