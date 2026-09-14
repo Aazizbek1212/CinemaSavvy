@@ -1,0 +1,6 @@
+# replace these literal strings with a safe placeholder for dry-run
+literal:salom123==>***REMOVED***
+literal:minioadmin123==>***REMOVED***
+literal:minioadmin==>***REMOVED***
+# secret-like env keys (careful: may be noisy)
+literal:SECRET_KEY==>***REMOVED***

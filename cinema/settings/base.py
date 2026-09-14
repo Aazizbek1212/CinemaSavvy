@@ -5,7 +5,7 @@ from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY: str = config("SECRET_KEY", default="django-insecure-6*8z(tqz5bjz$$g-yb1!=4upi7*g8rb8sm__1q9fki@b@fdg4c")
+SECRET_KEY: str = config("SECRET_KEY", default="")
 DEBUG = config("DEBUG", default="True") == "True"
 ALLOWED_HOSTS: list = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
@@ -83,7 +83,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": config("POSTGRES_DB", default="cinemadb"),
         "USER": config("POSTGRES_USER", default="myuser"),
-        "PASSWORD": config("POSTGRES_PASSWORD", default="salom123"),
+        "PASSWORD": config("POSTGRES_PASSWORD", default=""),
         "HOST": config("DB_HOST", default="localhost"),
         "PORT": config("DB_PORT", default=5432, cast=int),
         "CONN_MAX_AGE": 60,
@@ -155,8 +155,8 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-AWS_ACCESS_KEY_ID: str = config("MINIO_ACCESS_KEY", default="minioadmin")
-AWS_SECRET_ACCESS_KEY: str = config("MINIO_SECRET_KEY", default="minioadmin123")
+AWS_ACCESS_KEY_ID: str = config("MINIO_ACCESS_KEY", default="")
+AWS_SECRET_ACCESS_KEY: str = config("MINIO_SECRET_KEY", default="")
 AWS_STORAGE_BUCKET_NAME: str = config("MINIO_BUCKET_NAME", default="cinema")
 AWS_S3_ENDPOINT_URL: str = config("MINIO_ENDPOINT", default="http://localhost:9000")
 AWS_S3_FILE_OVERWRITE = False
