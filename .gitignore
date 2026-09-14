@@ -221,3 +221,7 @@ __marimo__/
 venv/
 node_modules/
 
+# Local generated secrets (do NOT commit)
+secrets/
+secrets/.env.generated
+
