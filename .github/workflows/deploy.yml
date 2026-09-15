@@ -29,7 +29,10 @@ jobs:
             set -e
             cd /home/ubuntu/CinemaSavvy
             git remote set-url origin https://${{ secrets.GIT_TOKEN }}@github.com/Aazizbek1212/CinemaSavvy.git
-            git pull origin ${{ github.ref_name }}
+            DEPLOY_BRANCH='${{ github.ref_name }}'
+            git fetch --prune origin "$DEPLOY_BRANCH"
+            git checkout -B "$DEPLOY_BRANCH" "origin/$DEPLOY_BRANCH"
+            git reset --hard "origin/$DEPLOY_BRANCH"
             docker compose up -d --build
             docker compose exec -T web python manage.py migrate --noinput
             docker compose exec -T web python manage.py collectstatic --noinput
