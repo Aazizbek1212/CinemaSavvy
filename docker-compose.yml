@@ -29,6 +29,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
       DB_HOST: db
       DB_PORT: 5432
+      SECURE_SSL_REDIRECT: "False"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
