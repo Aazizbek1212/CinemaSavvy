@@ -30,6 +30,8 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       SECURE_SSL_REDIRECT: "False"
+      ALLOWED_HOSTS: "3.125.45.192,localhost,127.0.0.1"
+      CSRF_TRUSTED_ORIGINS: "http://3.125.45.192"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
