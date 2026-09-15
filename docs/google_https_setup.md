@@ -25,6 +25,7 @@ DEBUG=False
 ALLOWED_HOSTS=YOUR_DOMAIN,www.YOUR_DOMAIN
 CSRF_TRUSTED_ORIGINS=https://YOUR_DOMAIN,https://www.YOUR_DOMAIN
 FRONTEND_URL=https://YOUR_DOMAIN
+SECURE_SSL_REDIRECT=True
 ```
 
 Terminate TLS at Nginx and proxy requests to the Django container. Nginx must send
@@ -33,3 +34,6 @@ Terminate TLS at Nginx and proxy requests to the Django container. Nginx must se
 The repository Nginx file currently provides the HTTP proxy and forwarded headers. Add
 the certificate paths and a `listen 443 ssl` server block on the deployment host before
 enabling `SECURE_SSL_REDIRECT` in production.
+
+Until those certificate paths exist, keep `SECURE_SSL_REDIRECT=False` so HTTP does not
+redirect users to an unavailable TLS endpoint.
