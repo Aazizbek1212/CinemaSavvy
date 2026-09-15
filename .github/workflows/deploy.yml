@@ -34,6 +34,11 @@ jobs:
             git checkout -B "$DEPLOY_BRANCH" "origin/$DEPLOY_BRANCH"
             git reset --hard "origin/$DEPLOY_BRANCH"
             docker compose up -d --build
+            DB_USER="$(docker compose exec -T db printenv POSTGRES_USER | tr -d '\r\n')"
+            DB_PASSWORD="$(docker compose exec -T db printenv POSTGRES_PASSWORD | tr -d '\r\n')"
+            docker compose exec -T -u postgres db psql -v ON_ERROR_STOP=1 -d postgres \
+              -v db_user="$DB_USER" -v db_password="$DB_PASSWORD" \
+              -c "SELECT format('ALTER ROLE %I PASSWORD %L', :'db_user', :'db_password') \\gexec"
             docker compose exec -T web python manage.py migrate --noinput
             docker compose exec -T web python manage.py collectstatic --noinput
             docker image prune -f
