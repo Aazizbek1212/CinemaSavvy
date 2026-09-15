@@ -42,6 +42,15 @@ jobs:
               -c "SELECT format('ALTER ROLE %I PASSWORD %L', :'db_user', :'db_password') \\gexec"
             docker compose exec -T web python manage.py migrate --noinput
             docker compose exec -T web python manage.py collectstatic --noinput
+            echo "--- Docker services ---"
+            docker compose ps
+            echo "--- Listening ports ---"
+            ss -ltn | grep -E ':(80|8000)\b' || true
+            echo "--- Local HTTP smoke test ---"
+            if ! curl --fail --silent --show-error --max-time 15 http://127.0.0.1/ >/dev/null; then
+              docker compose logs --tail=80 nginx web
+              exit 1
+            fi
             docker image prune -f
             echo "Deploy muvaffaqiyatli!"
           ENDSSH
