@@ -13,6 +13,29 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 WSGI_APPLICATION = "cinema.wsgi.application"
 ROOT_URLCONF = "cinema.urls"
 AUTH_USER_MODEL = "users.CustomUser"
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "social_core.backends.google.GoogleOAuth2",
+]
+SOCIAL_AUTH_USER_MODEL = "users.CustomUser"
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", default="")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", default="")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["openid", "email", "profile"]
+SOCIAL_AUTH_PIPELINE = [
+    "social_core.pipeline.social_auth.social_details",
+    "social_core.pipeline.social_auth.social_uid",
+    "social_core.pipeline.social_auth.auth_allowed",
+    "social_core.pipeline.social_auth.social_user",
+    "social_core.pipeline.social_auth.associate_by_email",
+    "users.social_pipeline.create_or_update_social_user",
+    "social_core.pipeline.social_auth.load_extra_data",
+    "social_core.pipeline.user.user_details",
+]
+SOCIAL_AUTH_PROTECTED_USER_FIELDS = ["email"]
+SOCIAL_AUTH_URL_NAMESPACE = "social"
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/"
+SOCIAL_AUTH_NEW_USER_REDIRECT_URL = "/"
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 LANGUAGE_CODE = "uz"
 TIME_ZONE = "Asia/Tashkent"
 USE_I18N = True
@@ -43,6 +66,7 @@ LOCAL_APPS = [
     "streaming.apps.StreamingConfig",
     "reviews.apps.ReviewsConfig",
     "search.apps.SearchConfig",
+    "payments.apps.PaymentsConfig",
     "pages",
     "watchlist",
     "toplamlar",
@@ -57,6 +81,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "social_django.middleware.SocialAuthExceptionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -173,6 +198,15 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@cinema.uz')
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:8000')
 
+PAYMENT_PROVIDER = config('PAYMENT_PROVIDER', default='manual')
+PAYMENT_WEBHOOK_SECRET = config('PAYMENT_WEBHOOK_SECRET', default='')
+STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', default='')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
+PAYME_MERCHANT_ID = config('PAYME_MERCHANT_ID', default='')
+PAYME_SECRET_KEY = config('PAYME_SECRET_KEY', default='')
+PAYME_BASE_URL = config('PAYME_BASE_URL', default='https://checkout.paycom.uz')
+
 CORS_ALLOWED_ORIGINS: list = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:3000,http://localhost:8000",
@@ -229,7 +263,11 @@ LOGGING = {
         "movies": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
 }
-CSRF_TRUSTED_ORIGINS = ['http://63.180.177.136']
+CSRF_TRUSTED_ORIGINS: list = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="",
+    cast=Csv(),
+)
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = None

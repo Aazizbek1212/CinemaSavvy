@@ -121,6 +121,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         default=False,
         help_text=_("User cannot log in until email is verified."),
     )
+    verification_token = models.CharField(
+        _("verification token"),
+        max_length=255,
+        blank=True,
+        default="",
+    )
+    reset_token = models.CharField(
+        _("reset token"),
+        max_length=255,
+        blank=True,
+        default="",
+    )
 
     # Subscription
     subscription_tier = models.CharField(

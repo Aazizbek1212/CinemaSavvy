@@ -109,7 +109,7 @@ class RegisterPageView(TemplateView):
         user = CustomUser.objects.create_user(
             email=email,
             password=password,
-            display_name=display_name,
+            full_name=display_name,
             verification_token=token,
             is_verified=False,
         )
@@ -181,8 +181,8 @@ class ProfilePageView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         display_name = request.POST.get("display_name", "").strip()
         if display_name:
-            request.user.display_name = display_name
-            request.user.save()
+            request.user.full_name = display_name
+            request.user.save(update_fields=["full_name"])
         return redirect("auth:profile")
 
 
@@ -247,3 +247,51 @@ class PasswordResetConfirmView(TemplateView):
 class SubscriptionPageView(LoginRequiredMixin, TemplateView):
     template_name = "pages/subscription.html"
     login_url = "/auth/login/"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        plans = [
+            {
+                "name": "Free",
+                "price": "0",
+                "period": "oy",
+                "save": "",
+                "popular": False,
+                "features": [
+                    "Asosiy katalogga kirish",
+                    "Maqsadli cheklangan kontent",
+                    "Reklamalar bilan tomosha",
+                ],
+            },
+            {
+                "name": "Premium",
+                "price": "199000",
+                "period": "oy",
+                "save": "-20%",
+                "popular": True,
+                "features": [
+                    "Barcha premium film va seriallar",
+                    "4K/Ultra HD sifat",
+                    "Reklamasiz tomosha",
+                    "Offline yuklab olish",
+                ],
+            },
+        ]
+
+        ctx["plans"] = plans
+        ctx["feature_items"] = [
+            {"icon": "🎬", "title": "Keng katalog", "desc": "Yillik eng ko'p ko'rilgan filmlar va seriallar."},
+            {"icon": "⚡", "title": "Tezlik", "desc": "Minimal kechikish va yuqori sifatli streaming."},
+            {"icon": "🔒", "title": "Xavfsizlik", "desc": "Foydalanuvchi ma'lumotlari va hisob himoyasi."},
+        ]
+        ctx["faqs"] = [
+            {"q": "Premium obuna qancha davom etadi?", "a": "Obuna har oy avtomatik yangilanadi. Istalgan vaqtda bekor qilishingiz mumkin."},
+            {"q": "To'lov qanday amalga oshiriladi?", "a": "Texnik tayyorgarlik bosqichi davom etmoqda. Mahsulotda to'lov provayderi uchun model va webhooklar tayyorlanmoqda."},
+            {"q": "Bepul rejadan Premiumga o'tish mumkinmi?", "a": "Ha, mavjud rejadan premiumga oson o'tishingiz mumkin. To'lovdan keyin imkoniyatlar darhol ochiladi."},
+        ]
+        ctx["is_premium"] = bool(getattr(user, "is_premium", False))
+        ctx["current_plan"] = "Premium" if ctx["is_premium"] else "Free"
+        ctx["subscription_expires_at"] = getattr(user, "subscription_expires_at", None)
+        return ctx
