@@ -264,10 +264,12 @@ LOGGING = {
     },
 }
 CSRF_TRUSTED_ORIGINS = [
-    "https://3.125.45.192.sslip.io",
-    "http://localhost",
-    "http://127.0.0.1"
+    "https://3.125.45.192.sslip.io"
 ]
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 
 
 USE_X_FORWARDED_HOST = True
