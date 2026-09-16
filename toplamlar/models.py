@@ -22,14 +22,22 @@ class Collection(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def save(self,*args,**kwargs):
+    def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while Collection.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                counter += 1
+                slug = f"{base_slug}-{counter}"
+            self.slug = slug
 
-        super().save(*args,**kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
+
+
 class CollectionMovie(models.Model):
 
     collection = models.ForeignKey(
@@ -47,7 +55,7 @@ class CollectionMovie(models.Model):
 
     class Meta:
         unique_together = [
-            ("collection","movie")
+            ("collection", "movie")
         ]
 
         ordering = ["order"]

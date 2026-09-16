@@ -7,7 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from movies.models import Movie
 from reviews.models import Review
-from reviews.serializers import ReviewSerializer
+from reviews.serializers import ReviewSerializer,ReviewCreateSerializer
 
 
 class MovieReviewListView(generics.ListAPIView):
@@ -28,20 +28,17 @@ class MovieReviewListView(generics.ListAPIView):
 class MovieReviewCreateView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = ReviewSerializer
+    serializer_class = ReviewCreateSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['movie'] = get_object_or_404(Movie, slug=self.kwargs['slug'])
+        return context
 
     def create(self, request, *args, **kwargs):
-        movie = get_object_or_404(Movie, slug=self.kwargs['slug'])
-
-        # Foydalanuvchi bu filmga avval baho berganmi?
-        if Review.objects.filter(movie=movie, user=request.user, is_active=True).exists():
-            return Response(
-                {'error': {'non_field_errors': ['Siz bu filmga allaqachon baho bergansiz']}},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user, movie=movie)
+        review = serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        output_serializer = ReviewSerializer(review, context=self.get_serializer_context())
+        return Response(output_serializer.data, status=status.HTTP_201_CREATED)

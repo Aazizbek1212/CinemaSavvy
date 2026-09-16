@@ -115,7 +115,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="watch-page" {% if not youtube_url and not video_url %}x-data="videoPlayer('{{ movie.slug }}', {{ resume_position }}, '{{ default_lang }}')"{% endif %}>
+<div class="watch-page" {% if not youtube_url and not video_url %}x-data="videoPlayer('{{ movie.slug }}', {{ resume_position|default:'0' }}, '{{ default_lang }}')"{% endif %}>
 
   <!-- PLAYER -->
   <div style="max-width:1100px;margin:0 auto">

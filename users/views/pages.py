@@ -104,6 +104,7 @@ class RegisterPageView(TemplateView):
         import uuid
 
         from django.conf import settings
+        from django.urls import reverse
 
         token = str(uuid.uuid4())
         user = CustomUser.objects.create_user(
@@ -115,7 +116,8 @@ class RegisterPageView(TemplateView):
         )
 
         # Verification email
-        verification_url = f"{settings.FRONTEND_URL}/auth/verify/{token}/"
+        verification_path = reverse("auth:verify-email", kwargs={"token": token})
+        verification_url = f"{settings.FRONTEND_URL}{verification_path}"
         try:
             send_verification_email(user.email, user.display_name, verification_url)
         except Exception as e:
@@ -141,6 +143,12 @@ class EmailVerificationView(TemplateView):
     def get(self, request, token, *args, **kwargs):
         try:
             user = CustomUser.objects.get(verification_token=token)
+
+            if not user.is_active:
+                return self.render_to_response(
+                    self.get_context_data(success=False, error="Hisobingiz faol emas")
+                )
+
             if not user.is_verified:
                 user.is_verified = True
                 user.verification_token = ""
@@ -193,6 +201,7 @@ class PasswordResetView(TemplateView):
         import uuid
 
         from django.conf import settings
+        from django.urls import reverse
 
         email = request.POST.get("email", "").strip().lower()
         try:
@@ -200,7 +209,8 @@ class PasswordResetView(TemplateView):
             token = str(uuid.uuid4())
             user.reset_token = token
             user.save()
-            reset_url = f"{settings.FRONTEND_URL}/auth/password-reset-confirm/{token}/"
+            reset_path = reverse("auth:password-reset-confirm", kwargs={"token": token})
+            reset_url = f"{settings.FRONTEND_URL}{reset_path}"
             send_password_reset_email(user.email, user.display_name, reset_url)
         except CustomUser.DoesNotExist:
             pass
@@ -233,6 +243,12 @@ class PasswordResetConfirmView(TemplateView):
             )
         try:
             user = CustomUser.objects.get(reset_token=token)
+
+            if not user.is_active:
+                return self.render_to_response(
+                    self.get_context_data(error="Hisobingiz faol emas", token=token)
+                )
+
             user.set_password(password)
             user.reset_token = ""
             user.save()

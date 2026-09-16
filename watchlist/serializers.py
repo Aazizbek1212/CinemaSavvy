@@ -17,11 +17,11 @@ class WatchlistSerializer(serializers.ModelSerializer):
         read_only=True
     )
     movie_year = serializers.IntegerField(
-        source='movie.year',
+        source='movie.release_year',
         read_only=True
     )
     movie_rating = serializers.FloatField(
-        source='movie.rating',
+        source='movie.imdb_rating',
         read_only=True
     )
 

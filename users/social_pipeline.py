@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from django.contrib.auth import get_user_model
+from social_core.exceptions import AuthForbidden
 
 User = get_user_model()
 
@@ -34,6 +35,9 @@ def create_or_update_social_user(
 
     existing_user = User.objects.filter(email=email).first()
     if existing_user is not None:
+        if not existing_user.is_active:
+            raise AuthForbidden(backend)
+
         updated = False
         if full_name and not existing_user.full_name:
             existing_user.full_name = full_name

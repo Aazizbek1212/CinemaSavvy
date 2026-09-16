@@ -18,6 +18,26 @@ from .services import ElasticsearchService
 logger = logging.getLogger(__name__)
 
 
+def _safe_int(value, default=None):
+    """Query parametrni xavfsiz int ga o'tkazadi. Xato bo'lsa default qaytaradi."""
+    if value is None or value == "":
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _safe_float(value, default=None):
+    """Query parametrni xavfsiz float ga o'tkazadi. Xato bo'lsa default qaytaradi."""
+    if value is None or value == "":
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
 class SearchAPIView(APIView):
     """
     GET /api/search/?q=&genre=&year_min=&year_max=&page=
@@ -46,16 +66,16 @@ class SearchAPIView(APIView):
             query=query,
             genre=p.get("genre") or None,
             language=p.get("language") or None,
-            year_min=int(p["year_min"]) if p.get("year_min", "").isdigit() else None,
-            year_max=int(p["year_max"]) if p.get("year_max", "").isdigit() else None,
+            year_min=_safe_int(p.get("year_min")),
+            year_max=_safe_int(p.get("year_max")),
             is_premium=(
                 True  if p.get("is_premium") == "true"  else
                 False if p.get("is_premium") == "false" else
                 None
             ),
-            rating_min=float(p["rating_min"]) if p.get("rating_min") else None,
-            page=int(p.get("page", 1)),
-            limit=int(p.get("limit", 20)),
+            rating_min=_safe_float(p.get("rating_min")),
+            page=_safe_int(p.get("page"), default=1),
+            limit=_safe_int(p.get("limit"), default=20),
         )
 
         return Response({

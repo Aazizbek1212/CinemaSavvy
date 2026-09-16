@@ -62,29 +62,31 @@ document.addEventListener('alpine:init', () => {
     async submitReview(slug) {
       if (!this.rating || this.submitting) return;
 
-      // ✅ FIX #1: Token mavjudligini tekshirish
-      const token = getToken();
-      if (!token) {
-        toast('Iltimos, tizimga kiring', 'error');
-        return;
-      }
-
       this.submitting = true;
       try {
+        const headers = {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+        };
+        // Token bo'lsa qo'shamiz, lekin talab qilmaymiz — sessiya orqali ham kirish mumkin
+        const token = getToken();
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const res = await fetch(`/api/reviews/movies/${slug}/reviews/create/`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
-            // ✅ FIX #2: Faqat token bor bo'lsa yuborish
-            'Authorization': `Bearer ${token}`,
-          },
+          headers,
+          credentials: 'include',  // sessiya cookie'sini yuborish uchun majburiy
           body: JSON.stringify({ rating: this.rating, text: this.text }),
         });
+
         if (res.ok) {
           this.rating = 0; this.text = '';
           htmx.trigger('#reviews-list', 'load');
           toast('Bahoyingiz qabul qilindi!', 'success');
+        } else if (res.status === 401 || res.status === 403) {
+          toast('Iltimos, tizimga kiring', 'error');
         } else {
           const err = await res.json();
           const msg = err.error?.non_field_errors?.[0] || 'Xato yuz berdi';

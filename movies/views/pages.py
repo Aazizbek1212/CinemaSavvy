@@ -243,7 +243,6 @@ class MovieDetailPageView(SeoMixin, DetailView):
 # ─────────────────────────────────────────────
 # Watch
 # ─────────────────────────────────────────────
-
 class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
     template_name       = "pages/watch.html"
     model               = Movie
@@ -255,20 +254,20 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
         return Movie.objects.published()
 
     def dispatch(self, request, *args, **kwargs):
-        # Avval login tekshiruvi (LoginRequiredMixin orqali)
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        response = super().dispatch(request, *args, **kwargs)
-        return response
+
+        # Obyektni oldindan olib, premium tekshiruvini shu yerda bajaramiz
+        self.object = self.get_object()
+        if self.object.is_premium and not request.user.is_premium:
+            from django.shortcuts import redirect
+            return redirect("auth:subscription")
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         ctx   = super().get_context_data(**kwargs)
-        movie = self.object
-
-        # Premium tekshiruv
-        if movie.is_premium and not self.request.user.is_premium:
-            from django.shortcuts import redirect
-            return redirect("auth:subscription")
+        movie = self.object   # premium tekshiruvi endi bu yerda YO'Q
 
         available_files = movie.video_files.filter(status="ready").select_related("language")
 

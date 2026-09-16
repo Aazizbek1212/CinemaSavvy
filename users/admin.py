@@ -2,11 +2,15 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
+from .forms import CustomUserChangeForm, CustomUserCreationForm
 from .models import CustomUser
 
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
+    form = CustomUserChangeForm
+    add_form = CustomUserCreationForm
+
     list_display = ("email", "full_name", "is_verified", "subscription_tier", "is_premium", "is_active", "date_joined")
     list_filter = ("is_active", "is_verified", "is_staff", "subscription_tier")
     search_fields = ("email", "full_name")

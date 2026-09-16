@@ -112,5 +112,5 @@ class WatchHistoryView(generics.ListAPIView):
         return (
             WatchHistory.objects.filter(user=self.request.user)
             .select_related("movie")
-            .order_by("-updated_at")[:50]
+            .order_by("-updated_at")
         )

@@ -34,6 +34,7 @@ class PaymentTransaction(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["provider", "external_id"],
+                condition=~models.Q(external_id=""),
                 name="unique_payment_provider_external_id",
             ),
         ]

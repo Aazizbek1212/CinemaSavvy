@@ -96,7 +96,7 @@ class FFmpegProcessor:
         cmd = [
             "ffmpeg", "-y",  # overwrite output (global flag must come before output)
             "-i", input_path,
-            "-vf", f"scale={settings['resolution']}",
+            "-vf", f"scale={settings['resolution'].replace('x', ':')}",
             "-c:v", "libx264",
             "-crf", settings["crf"],
             "-maxrate", settings["video_bitrate"],
