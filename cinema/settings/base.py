@@ -263,11 +263,12 @@ LOGGING = {
         "movies": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
 }
-CSRF_TRUSTED_ORIGINS: list = config(
-    "CSRF_TRUSTED_ORIGINS",
-    default="",
-    cast=Csv(),
-)
+CSRF_TRUSTED_ORIGINS = [
+    "https://3.125.45.192.sslip.io",
+    "http://localhost",
+    "http://127.0.0.1"
+]
+
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = None
