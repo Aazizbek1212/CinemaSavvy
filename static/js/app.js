@@ -162,13 +162,20 @@ function switchLanguage(langCode) {
   const btn = document.getElementById('lang-btn-' + langCode);
   if (btn) btn.classList.add('active');
 
-  // Alpine.js videoPlayer ga xabar berish
+  // HLS (videoPlayer) holatida: streamni shu tilda qayta yuklaymiz
   const playerEl = document.querySelector('[x-data^="videoPlayer"]');
   if (playerEl && playerEl._x_dataStack) {
     const player = playerEl._x_dataStack[0];
-    if (player) {
+    if (player && typeof player.loadStream === 'function') {
       player.selectedLang = langCode;
       player.loadStream();
+      return;
     }
+  }
+
+  // YouTube / oddiy video holatida alohida stream yo'q —
+  // foydalanuvchiga til almashtirilganini bildiramiz.
+  if (typeof toast === 'function') {
+    toast('Til tanlandi: ' + langCode.toUpperCase(), 'info');
   }
 }

@@ -33,6 +33,8 @@ jobs:
             git fetch --prune origin "$DEPLOY_BRANCH"
             git checkout -B "$DEPLOY_BRANCH" "origin/$DEPLOY_BRANCH"
             git reset --hard "origin/$DEPLOY_BRANCH"
+            # `--build` Dockerfile ichida `npm run build` ni ishga tushiradi,
+            # shu bilan static/css/main.css (Tailwind) tayyorlanadi.
             docker compose up -d --build
             docker compose restart
             DB_USER="$(docker compose exec -T db printenv POSTGRES_USER | tr -d '\r\n')"

@@ -270,14 +270,14 @@ LOGGING = {
         "movies": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
 }
-CSRF_TRUSTED_ORIGINS = [
-    "https://3.125.45.192.sslip.io"
-]
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS: list = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://localhost:8000,http://127.0.0.1:8000",
+    cast=Csv(),
+)
 
-
+# ⚠️ HTTPS/secure-cookie sozlamalari `production.py` da boshqariladi
+# (SECURE_SSL_REDIRECT, SESSION_COOKIE_SECURE, CSRF_COOKIE_SECURE).
+# base.py da majburiy yoqilsa, local HTTP muhitida cheksiz redirect bo'ladi.
 
 USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = None

@@ -74,30 +74,43 @@ class RegisterPageView(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        display_name     = request.POST.get("display_name", "").strip()
+        # Template input nomi `full_name`; moslik uchun `display_name` ham qabul qilinadi.
+        display_name     = (
+            request.POST.get("full_name")
+            or request.POST.get("display_name")
+            or ""
+        ).strip()
         email            = request.POST.get("email", "").strip().lower()
         password         = request.POST.get("password", "")
         password_confirm = request.POST.get("password_confirm", "")
 
+        # Xatolik holatida kiritilgan qiymatlarni qaytarish uchun
+        form_data = {"full_name": display_name, "email": email}
+
         # Validatsiya
         if not display_name or not email or not password:
             return self.render_to_response(
-                self.get_context_data(error="Barcha maydonlarni to'ldiring")
+                self.get_context_data(error="Barcha maydonlarni to'ldiring", form_data=form_data)
             )
 
         if password != password_confirm:
             return self.render_to_response(
-                self.get_context_data(error="Parollar mos kelmaydi")
+                self.get_context_data(error="Parollar mos kelmaydi", form_data=form_data)
             )
 
         if len(password) < 8:
             return self.render_to_response(
-                self.get_context_data(error="Parol kamida 8 ta belgidan iborat bo'lishi kerak")
+                self.get_context_data(
+                    error="Parol kamida 8 ta belgidan iborat bo'lishi kerak",
+                    form_data=form_data,
+                )
             )
 
         if CustomUser.objects.filter(email=email).exists():
             return self.render_to_response(
-                self.get_context_data(error="Bu email allaqachon ro'yxatdan o'tgan")
+                self.get_context_data(
+                    error="Bu email allaqachon ro'yxatdan o'tgan", form_data=form_data
+                )
             )
 
         # Foydalanuvchi yaratish
@@ -124,7 +137,7 @@ class RegisterPageView(TemplateView):
             logger.error("Failed to send verification email: %s", e)
 
         logger.info("User registered: %s", user.email)
-        return redirect("auth:register_success")
+        return redirect("auth:register-success")
 
 
 class LogoutView(TemplateView):
@@ -176,6 +189,8 @@ class ProfilePageView(LoginRequiredMixin, TemplateView):
         ctx = super().get_context_data(**kwargs)
         from streaming.models import WatchHistory
         from watchlist.models import Watchlist
+        # Template `reviews_count` va `watch_count` nomlarini kutadi
+        # (profil statistikasi). Eski `*_count` nomlari ham saqlanadi.
         try:
             ctx["watchlist_count"] = Watchlist.objects.filter(user=self.request.user).count()
         except Exception:
@@ -184,6 +199,14 @@ class ProfilePageView(LoginRequiredMixin, TemplateView):
             ctx["history_count"] = WatchHistory.objects.filter(user=self.request.user).count()
         except Exception:
             ctx["history_count"] = 0
+        try:
+            from reviews.models import Review
+            ctx["reviews_count"] = Review.objects.filter(
+                user=self.request.user, is_active=True
+            ).count()
+        except Exception:
+            ctx["reviews_count"] = 0
+        ctx["watch_count"] = ctx["history_count"]
         return ctx
 
     def post(self, request, *args, **kwargs):
@@ -214,7 +237,7 @@ class PasswordResetView(TemplateView):
             send_password_reset_email(user.email, user.display_name, reset_url)
         except CustomUser.DoesNotExist:
             pass
-        return redirect("auth:password_reset_done")
+        return redirect("auth:password-reset-done")
 
 
 class PasswordResetDoneView(TemplateView):

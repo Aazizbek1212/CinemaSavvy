@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     libpq-dev \
     gcc \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -17,6 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Tailwind CSS ni build qilib, static/css/main.css ni to'ldiramiz
+RUN cd frontend && npm install && npm run build
 EXPOSE 8000
-
 ENTRYPOINT ["sh", "scripts/entrypoint.sh"]

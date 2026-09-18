@@ -6,7 +6,6 @@ from movies.views.pages import (
     MovieDetailPageView,
     MovieReviewsPartialView,
     PersonDetailPageView,
-    SearchView,
     WatchHistoryPageView,
     WatchPageView,
 )
@@ -36,9 +35,9 @@ urlpatterns = [
          PersonDetailPageView.as_view(),
          name="person-detail"),
 
-    path("search/",
-         SearchView.as_view(),
-         name="search"),
+    # Eslatma: `search/` URL `search.urls` da ro'yxatga olingan
+    # (name="search-page"). Bu yerda takroran ro'yxatga olish URL
+    # konfliktiga olib kelgan edi — olib tashlandi.
 
     path("history/",
          WatchHistoryPageView.as_view(),

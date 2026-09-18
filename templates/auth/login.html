@@ -147,15 +147,16 @@ canvas#auth-bg { position:absolute; inset:0; z-index:0; }
         <div style="font-size:13px;color:var(--txd)">Hisobingizga kiring va tomosha qilishni davom eting.</div>
       </div>
 
-      {% if form.errors %}
+      {% if error %}
         <div class="auth-error">
           <i class="ti ti-alert-circle" style="font-size:16px;color:#E07070;flex-shrink:0" aria-hidden="true"></i>
-          <p style="font-size:13px;color:#E07070">Email yoki parol noto'g'ri.</p>
+          <p style="font-size:13px;color:#E07070">{{ error }}</p>
         </div>
       {% endif %}
 
       <form method="post" action="{% url 'auth:login' %}" x-data="{showPass:false}">
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next|default:'/' }}" />
 
         <div class="auth-field">
           <label>Email manzil</label>

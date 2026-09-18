@@ -29,7 +29,7 @@ urlpatterns = [
     path("social/", include("social_django.urls", namespace="social")),
 
     # Search
-    path("", include("search.urls", namespace="search")),
+    path("", include(("search.urls", "search"), namespace="search")),
 ]
 
 if settings.DEBUG:

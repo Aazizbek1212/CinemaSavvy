@@ -68,7 +68,7 @@
     <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Asosiy</a>
     <a href="{% url 'catalog' %}" {% if request.resolver_match.url_name == 'catalog' %}class="active"{% endif %}>Filmlar</a>
     <a href="{% url 'catalog' %}?content_type=series">Seriallar</a>
-    <a href="{% url 'search' %}" {% if request.resolver_match.url_name == 'search' %}class="active"{% endif %}>Qidirish</a>
+    <a href="{% url 'search:search-page' %}" {% if request.resolver_match.url_name == 'search-page' %}class="active"{% endif %}>Qidirish</a>
   </div>
 
   <div class="cs-nav-right">
@@ -157,7 +157,7 @@
   <a href="{% url 'catalog' %}?content_type=series" class="cs-mobile-link">
     <i class="ti ti-device-tv" style="font-size:22px" aria-hidden="true"></i> Seriallar
   </a>
-  <a href="{% url 'search' %}" class="cs-mobile-link {% if request.resolver_match.url_name == 'search' %}active{% endif %}">
+  <a href="{% url 'search:search-page' %}" class="cs-mobile-link {% if request.resolver_match.url_name == 'search-page' %}active{% endif %}">
     <i class="ti ti-search" style="font-size:22px" aria-hidden="true"></i> Qidirish
   </a>
 

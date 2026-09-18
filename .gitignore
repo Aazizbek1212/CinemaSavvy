@@ -224,4 +224,12 @@ node_modules/
 # Local generated secrets (do NOT commit)
 secrets/
 secrets/.env.generated
+# Django collectstatic natijasi (generatsiya qilinadi)
+staticfiles/
+
+# Foydalanuvchi yuklagan media fayllar
+media/
+
+# Frontend build artefaktlari
+frontend/node_modules/
 

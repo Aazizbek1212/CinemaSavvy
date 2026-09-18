@@ -353,11 +353,8 @@
 
 {% block extra_scripts %}
 
-<!-- ===== ODDIY VIDEO PLAYER (video_url) ===== -->
-{% if video_url %}
+<!-- ===== Umumiy player yordamchilari (barcha player turlari uchun) ===== -->
 <script>
-const simplePlayer = document.getElementById('simple-player');
-
 function showSkipAnim(side) {
   const el = document.getElementById('skip-' + side);
   if (!el) return;
@@ -367,12 +364,19 @@ function showSkipAnim(side) {
 
 function toggleFullscreen() {
   const el = document.getElementById('player-container');
+  if (!el) return;
   if (!document.fullscreenElement) {
     el.requestFullscreen().catch(() => {});
   } else {
     document.exitFullscreen();
   }
 }
+</script>
+
+<!-- ===== ODDIY VIDEO PLAYER (video_url) ===== -->
+{% if video_url %}
+<script>
+const simplePlayer = document.getElementById('simple-player');
 
 if (simplePlayer) {
   // Double-click bilan skip
@@ -415,22 +419,6 @@ document.addEventListener('keydown', (e) => {
 {% if not youtube_url and not video_url %}
 <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
 <script>
-function toggleFullscreen() {
-  const el = document.getElementById('player-container');
-  if (!document.fullscreenElement) {
-    el.requestFullscreen().catch(() => {});
-  } else {
-    document.exitFullscreen();
-  }
-}
-
-function showSkipAnim(side) {
-  const el = document.getElementById('skip-' + side);
-  if (!el) return;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 600);
-}
-
 function videoPlayer(slug, resumePosition, defaultLang) {
   return {
     loading: true,

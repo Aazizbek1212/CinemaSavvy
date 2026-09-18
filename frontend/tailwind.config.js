@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./templates/**/*.html",
-    "./static/js/**/*.js",
+    "../templates/**/*.html",
+    "../static/js/**/*.js",
   ],
   darkMode: 'class',
   theme: {
@@ -27,25 +27,25 @@ module.exports = {
           100: '#FEF3C7',
           200: '#FDE68A',
           300: '#FCD34D',
-          400: '#FBBF24',
-          500: '#F5C518',
-          600: '#D97706',
-          700: '#B45309',
-          800: '#92400E',
+          400: '#D9B85C',
+          500: '#C9A84C',
+          600: '#A8872A',
+          700: '#876808',
+          800: '#925C0E',
           900: '#78350F',
         },
         // Yashil
         emerald: {
           400: '#34D399',
-          500: '#10B981',
-          600: '#059669',
+          500: '#1A5C2E',
+          600: '#144A24',
         },
         // Qizil
         crimson: {
           400: '#F87171',
-          500: '#EF4444',
-          600: '#DC2626',
-          700: '#B91C1C',
+          500: '#8B1A1A',
+          600: '#701515',
+          700: '#5C1A1A',
         },
       },
       fontFamily: {
