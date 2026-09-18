@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}To'lov holati — CinemaSavvy{% endblock %}
+
+{% block content %}
+<style>
+.pay-page { min-height:calc(100vh - 62px); display:flex; align-items:center; justify-content:center;
+  padding:40px 20px; background:var(--bg); position:relative; overflow:hidden; }
+.pay-card { position:relative; z-index:5; width:100%; max-width:480px;
+  background:rgba(18,18,26,0.92); border:1px solid rgba(201,168,76,0.15);
+  border-radius:6px; padding:40px 36px; text-align:center;
+  backdrop-filter:blur(18px); box-shadow:0 24px 80px rgba(0,0,0,0.6); }
+.pay-icon { width:84px; height:84px; border-radius:50%; margin:0 auto 20px;
+  display:flex; align-items:center; justify-content:center; }
+.pay-icon i { font-size:40px; }
+.pay-icon.ok    { background:rgba(26,92,46,0.2); border:1px solid rgba(26,92,46,0.4); }
+.pay-icon.ok i  { color:#70C085; }
+.pay-icon.wait  { background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.3); }
+.pay-icon.wait i{ color:var(--gold); }
+.pay-icon.err   { background:rgba(139,26,26,0.2); border:1px solid rgba(139,26,26,0.4); }
+.pay-icon.err i { color:#E07070; }
+.pay-title { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--tx); margin:0 0 10px; }
+.pay-sub { font-size:14px; color:var(--txd); line-height:1.7; margin:0 0 26px; }
+.pay-info { background:var(--bg3); border:1px solid rgba(201,168,76,0.1); border-radius:4px;
+  padding:16px; margin-bottom:24px; text-align:left; }
+.pay-row { display:flex; justify-content:space-between; padding:8px 0; font-size:13px;
+  border-bottom:1px solid rgba(201,168,76,0.06); }
+.pay-row:last-child { border-bottom:none; }
+.pay-row span:first-child { color:var(--txd); font-family:'Bebas Neue',sans-serif; letter-spacing:1.5px; }
+.pay-row span:last-child { color:var(--tx); font-weight:500; }
+.pay-badge { display:inline-flex; align-items:center; gap:6px; font-family:'Bebas Neue',sans-serif;
+  font-size:11px; letter-spacing:2px; padding:4px 12px; border-radius:2px; }
+.pay-badge.paid { background:rgba(26,92,46,0.2); border:1px solid rgba(26,92,46,0.4); color:#70C085; }
+.pay-badge.pending { background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.3); color:var(--gold); }
+.pay-badge.failed { background:rgba(139,26,26,0.2); border:1px solid rgba(139,26,26,0.4); color:#E07070; }
+.pay-actions { display:flex; gap:10px; }
+.pay-actions a { flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
+  padding:13px; border-radius:3px; text-decoration:none; font-family:'Bebas Neue',sans-serif;
+  font-size:13px; letter-spacing:2px; transition:all 0.2s; }
+</style>
+
+<div class="pay-page">
+ <div class="pay-card">
+
+    {% if payment.status == 'paid' %}
+      <div class="pay-icon ok"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+      <h1 class="pay-title">To'lov muvaffaqiyatli!</h1>
+      <p class="pay-sub">
+        Premium obunangiz faollashtirildi.<br/>
+        Endi barcha filmlarni cheklovsiz tomosha qilishingiz mumkin.
+      </p>
+    {% elif payment.status == 'canceled' or payment.status == 'failed' %}
+      <div class="pay-icon err"><i class="ti ti-circle-x" aria-hidden="true"></i></div>
+      <h1 class="pay-title">To'lov amalga oshmadi</h1>
+      <p class="pay-sub">
+        To'lov bekor qilindi yoki xatolik yuz berdi.<br/>
+        Qaytadan urinib ko'rishingiz mumkin.
+      </p>
+    {% else %}
+      <div class="pay-icon wait"><i class="ti ti-clock-hour-4" aria-hidden="true"></i></div>
+      <h1 class="pay-title">To'lov kutilmoqda</h1>
+      <p class="pay-sub">
+        To'lovingiz hali tasdiqlanmadi.<br/>
+        Bir necha daqiqadan so'ng sahifani yangilang.
+      </p>
+    {% endif %}
+
+    <div class="pay-info">
+      <div class="pay-row">
+        <span>TRANZAKSIYA</span>
+        <span style="font-family:monospace;font-size:11px">{{ payment.id|truncatechars:18 }}</span>
+      </div>
+      <div class="pay-row">
+        <span>SUMMA</span>
+        <span>{{ payment.amount }} {{ payment.currency }}</span>
+      </div>
+      <div class="pay-row">
+        <span>PROVAYDER</span>
+        <span style="text-transform:capitalize">{{ payment.provider }}</span>
+      </div>
+      <div class="pay-row">
+        <span>HOLAT</span>
+        <span>
+          {% if payment.status == 'paid' %}
+            <span class="pay-badge paid"><i class="ti ti-check"></i> TO'LANGAN</span>
+          {% elif payment.status == 'canceled' or payment.status == 'failed' %}
+            <span class="pay-badge failed"><i class="ti ti-x"></i> BEKOR QILINGAN</span>
+          {% else %}
+            <span class="pay-badge pending"><i class="ti ti-clock"></i> KUTILMOQDA</span>
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div class="pay-actions">
+      {% if payment.status == 'paid' %}
+        <a href="{% url 'home' %}" class="cs-btn-gold" style="flex:1">
+          <i class="ti ti-player-play"></i> Filmlarni ko'rish
+        </a>
+      {% else %}
+        <a href="{% url 'auth:subscription' %}" class="cs-btn-gold" style="flex:1">
+          <i class="ti ti-refresh"></i> Qaytadan urinish
+        </a>
+      {% endif %}
+    </div>
+
+ </div>
+</div>
+{% endblock %}

@@ -1,10 +1,11 @@
 import logging
 from typing import Any
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import DetailView, ListView, TemplateView
 
 from movies.models import Genre, Language, Movie, Person
@@ -188,6 +189,11 @@ class MovieDetailPageView(SeoMixin, DetailView):
     model               = Movie
     slug_field          = "slug"
     context_object_name = "movie"
+
+    @method_decorator(ensure_csrf_cookie)
+    def dispatch(self, *args, **kwargs):
+        # Sahifada izoh (review) yozish uchun CSRF cookie majburiy.
+        return super().dispatch(*args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
         return Movie.objects.published().with_relations()

@@ -2,7 +2,7 @@
 {% block title %}Premium obuna — Cinema.uz{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-16">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-16" x-data="subscriptionPage()">
 
   <!-- Header -->
   <div class="text-center mb-14 animate-fade-up">
@@ -72,15 +72,23 @@
           {% endfor %}
         </ul>
 
-        <button class="w-full py-3 rounded-xl font-semibold
-                       text-sm transition-all duration-200
-                       {% if plan.popular %}
-                         btn-gold
-                       {% else %}
-                         btn-ghost
-                       {% endif %}">
-          Hozir boshlash
-        </button>
+        {% if plan.popular %}
+          <button type="button"
+                  @click="startPayment($event)"
+                  :disabled="paying"
+                  class="w-full py-3 rounded-xl font-semibold btn-gold
+                         text-sm transition-all duration-200
+                         disabled:opacity-50 disabled:cursor-not-allowed">
+            <span x-show="!paying">Hozir boshlash</span>
+            <span x-show="paying">Yo'naltirilmoqda...</span>
+          </button>
+        {% else %}
+          <button type="button" disabled
+                  class="w-full py-3 rounded-xl font-semibold btn-ghost
+                         text-sm opacity-50 cursor-not-allowed">
+            Joriy reja
+          </button>
+        {% endif %}
 
         {% if plan.popular %}
           <p class="text-center text-ink-500 text-xs mt-3">
@@ -153,4 +161,43 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function subscriptionPage() {
+  return {
+    paying: false,
+
+    async startPayment(event) {
+      if (this.paying) return;
+      this.paying = true;
+      try {
+        const res = await fetch("{% url 'payments:create' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+          },
+          credentials: 'include',
+          body: JSON.stringify({ provider: 'click', plan: 'premium' }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.checkout_url) {
+          // Click to'lov sahifasiga yo'naltiramiz
+          window.location.href = data.checkout_url;
+        } else {
+          toast(data.detail || 'To\u2019lovni boshlashda xato', 'error');
+          this.paying = false;
+        }
+      } catch (e) {
+        toast('Tarmoq xatosi', 'error');
+        this.paying = false;
+      }
+    },
+  };
+}
+</script>
 {% endblock %}

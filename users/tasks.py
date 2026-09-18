@@ -11,17 +11,17 @@ logger = logging.getLogger(__name__)
 def send_verification_email(
     user_email: str,
     user_name: str,
-    verification_url: str,
+    verification_code: str,
 ) -> None:
-    """
-    Send email verification link.
+    """Ro'yxatdan o'tganda emailga 6 xonali tasdiqlash kodini yuboradi.
+
     In production this should be a Celery task with @shared_task.
     """
-    subject = "Cinema.uz — Emailingizni tasdiqlang"
+    subject = "CinemaSavvy — Tasdiqlash kodingiz"
     context = {
         "user_name": user_name,
-        "verification_url": verification_url,
-        "site_name": "Cinema.uz",
+        "verification_code": verification_code,
+        "site_name": "CinemaSavvy",
     }
 
     try:
@@ -36,7 +36,7 @@ def send_verification_email(
         )
         msg.attach_alternative(html_content, "text/html")
         msg.send(fail_silently=False)
-        logger.info("Verification email sent to: %s", user_email)
+        logger.info("Verification code sent to: %s", user_email)
 
     except Exception as exc:
         logger.error("Failed to send verification email to %s: %s", user_email, exc)
@@ -48,11 +48,11 @@ def send_password_reset_email(
     reset_url: str,
 ) -> None:
     """Send password reset link."""
-    subject = "Cinema.uz — Parolni tiklash"
+    subject = "CinemaSavvy — Parolni tiklash"
     context = {
         "user_name": user_name,
         "reset_url": reset_url,
-        "site_name": "Cinema.uz",
+        "site_name": "CinemaSavvy",
     }
 
     try:

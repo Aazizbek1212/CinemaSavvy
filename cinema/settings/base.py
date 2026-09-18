@@ -205,8 +205,19 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@cinema.uz')
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:8000')
 
-PAYMENT_PROVIDER = config('PAYMENT_PROVIDER', default='manual')
+PAYMENT_PROVIDER = config('PAYMENT_PROVIDER', default='click')
 PAYMENT_WEBHOOK_SECRET = config('PAYMENT_WEBHOOK_SECRET', default='')
+
+# ─── Click.uz (My.click.uz) to'lov tizimi ─────────────────────
+CLICK_SERVICE_ID = config('CLICK_SERVICE_ID', default='')
+CLICK_MERCHANT_ID = config('CLICK_MERCHANT_ID', default='')
+CLICK_MERCHANT_USER_ID = config('CLICK_MERCHANT_USER_ID', default='')
+CLICK_SECRET_KEY = config('CLICK_SECRET_KEY', default='')
+# Click checkout sahifasi (foydalanuvchi yo'naltiriladi)
+CLICK_CHECKOUT_URL = config(
+    'CLICK_CHECKOUT_URL',
+    default='https://my.click.uz/services/pay',
+)
 STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', default='')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
 STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')

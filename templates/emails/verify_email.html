@@ -54,28 +54,26 @@
       <h1>Emailingizni tasdiqlang</h1>
       <p>
         Salom, <strong style="color:#fff">{{ user_name }}</strong>!<br/>
-        Cinema.uz ga xush kelibsiz. Hisobingizni faollashtirish
-        uchun quyidagi tugmani bosing.
+        CinemaSavvy ga xush kelibsiz. Ro'yxatdan o'tishni yakunlash
+        uchun quyidagi 6 xonali kodni kiriting.
       </p>
 
-      <a href="{{ verification_url }}" class="btn">
-        Emailni tasdiqlash →
-      </a>
+      <!-- Tasdiqlash kodi -->
+      <div style="text-align:center;margin:0 0 24px">
+        <div style="display:inline-block;font-size:38px;font-weight:800;
+                    letter-spacing:12px;color:#0A0A0F;
+                    background:linear-gradient(135deg,#F5C518,#D97706);
+                    padding:16px 24px 16px 30px;border-radius:14px;
+                    font-family:'Courier New',monospace">
+          {{ verification_code }}
+        </div>
+      </div>
 
       <hr class="divider" />
 
       <p class="small">
-        Havola 3 kun davomida amal qiladi.<br/>
+        Kod 10 daqiqa davomida amal qiladi.<br/>
         Agar siz ro'yxatdan o'tmagan bo'lsangiz, bu xatni e'tiborsiz qoldiring.
-      </p>
-
-      <p class="small" style="margin-top:12px">
-        Tugma ishlamasa, quyidagi havolani brauzeringizga ko'chiring:
-      </p>
-      <p>
-        <a href="{{ verification_url }}" class="link">
-          {{ verification_url }}
-        </a>
       </p>
     </div>
 

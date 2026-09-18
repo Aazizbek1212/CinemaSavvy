@@ -26,6 +26,12 @@ class PaymentTransaction(models.Model):
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
     paid_at = models.DateTimeField(null=True, blank=True)
     raw_payload = models.JSONField(default=dict, blank=True)
+
+    # ─── Click.uz maydonlari ─────────────────
+    # Click tizimidagi tranzaksiya raqamlari (webhook orqali keladi)
+    click_trans_id = models.CharField(max_length=64, blank=True, default="", db_index=True)
+    click_paydoc_id = models.CharField(max_length=64, blank=True, default="")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

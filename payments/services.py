@@ -27,6 +27,35 @@ def create_payment(user, provider=None, plan="premium"):
     )
 
 
+def build_click_checkout_url(payment) -> str:
+    # Click checkout sahifasiga yo'naltiruvchi URL yasaydi.
+    # Foydalanuvchi shu havolaga o'tadi va Click'da to'lov qiladi.
+    # merchant_trans_id — bizning PaymentTransaction.id.
+    from urllib.parse import urlencode
+    base = getattr(settings, "CLICK_CHECKOUT_URL", "https://my.click.uz/services/pay")
+    params = {
+        "service_id": getattr(settings, "CLICK_SERVICE_ID", ""),
+        "merchant_id": getattr(settings, "CLICK_MERCHANT_ID", ""),
+        "amount": str(payment.amount),
+        "transaction_param": str(payment.id),  # merchant_trans_id
+        "return_url": f"{settings.FRONTEND_URL}/auth/subscription/status/{payment.id}/",
+    }
+    return f"{base}?{urlencode(params)}"
+
+
+def grant_premium_for_payment(payment, days: int = 30) -> None:
+    # To'langan tranzaksiya uchun premium beradi (atomik).
+    # Agar foydalanuvchining premium'i hali tugamagan bo'lsa —
+    # mavjud muddat ustiga qo'shiladi.
+    user = payment.user
+    now = timezone.now()
+    if user.is_premium and user.subscription_expires_at and user.subscription_expires_at > now:
+        expires_at = user.subscription_expires_at + timedelta(days=days)
+    else:
+        expires_at = now + timedelta(days=days)
+    user.upgrade_to_premium(expires_at)
+
+
 def verify_webhook_signature(raw_body: bytes, signature: str | None) -> bool:
     secret = getattr(settings, "PAYMENT_WEBHOOK_SECRET", "")
     if not secret or not signature:
@@ -44,10 +73,7 @@ def apply_successful_payment(payment_id, payload):
     )
     if payment.status != PaymentTransaction.Status.PAID:
         payment.mark_paid(payload)
-        expires_at = timezone.now() + timedelta(days=30)
-        if payment.user.is_premium and payment.user.subscription_expires_at:
-            expires_at = payment.user.subscription_expires_at + timedelta(days=30)
-        payment.user.upgrade_to_premium(expires_at)
+        grant_premium_for_payment(payment)
     return payment
 
 

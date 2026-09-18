@@ -178,4 +178,17 @@ function switchLanguage(langCode) {
   if (typeof toast === 'function') {
     toast('Til tanlandi: ' + langCode.toUpperCase(), 'info');
   }
-}
+}// ─── Xush kelibsiz xabari (ro'yxatdan o'tgandan keyin) ──
+// Register → email tasdiqlash → home?welcome=1
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('welcome') === '1') {
+    setTimeout(() => {
+      toast('🎉 Xush kelibsiz! Sizga 1 haftalik BEPUL Premium taqdim etildi.', 'success');
+    }, 600);
+    // URL'dan ?welcome=1 ni olib tashlaymiz (sahifa yangilanganda qayta chiqmasin)
+    params.delete('welcome');
+    const clean = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.replaceState({}, '', clean);
+  }
+});
