@@ -382,6 +382,17 @@ class MovieFile(TimeStampedModel):
     )
     processing_error = models.TextField(_("processing error"), blank=True)
 
+    # ── Telegram storage ──────────────────────
+    telegram_file_id = models.CharField(
+        _("Telegram file ID"), max_length=255,
+        blank=True, null=True,
+        help_text="Telegram'dagi video xabarining file_id qiymati",
+    )
+    telegram_message_id = models.BigIntegerField(
+        _("Telegram message ID"), null=True, blank=True,
+        help_text="Telegram kanalidagi xabar ID raqami",
+    )
+
     class Meta:
         verbose_name = _("movie file")
         verbose_name_plural = _("movie files")

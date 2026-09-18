@@ -2,6 +2,13 @@ from datetime import timedelta
 from pathlib import Path
 
 from decouple import Csv, config
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHANNEL_ID = os.environ.get('TELEGRAM_CHANNEL_ID')
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
