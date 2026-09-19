@@ -1,5 +1,7 @@
 from django.urls import path
 
+from . import views
+
 from movies.views.pages import (
     CatalogPageView,
     HomePageView,
@@ -34,6 +36,9 @@ urlpatterns = [
     path("persons/<slug:slug>/",
          PersonDetailPageView.as_view(),
          name="person-detail"),
+
+    # ... mavjud yo'llar ...
+    path("stream/<uuid:file_id>/", views.stream_movie_file, name="stream_movie_file"),
 
     # Eslatma: `search/` URL `search.urls` da ro'yxatga olingan
     # (name="search-page"). Bu yerda takroran ro'yxatga olish URL

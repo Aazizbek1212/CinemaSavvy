@@ -1,17 +1,73 @@
 import logging
 from typing import Any
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import QuerySet
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import DetailView, ListView, TemplateView
 
-from movies.models import Genre, Language, Movie, Person
+from movies.models import Genre, Language, Movie, MovieFile, Person
 from streaming.services import WatchHistoryService
 
 logger = logging.getLogger(__name__)
+
+import requests
+from django.conf import settings
+from django.http import StreamingHttpResponse, Http404
+
+
+def get_telegram_file_url(file_id: str) -> str:
+    """Telegram file_id orqali vaqtinchalik to'g'ridan-to'g'ri havola oladi."""
+    url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/getFile"
+    response = requests.get(url, params={"file_id": file_id}, timeout=15)
+    data = response.json()
+    if not data.get("ok"):
+        raise Http404("Video topilmadi")
+    file_path = data["result"]["file_path"]
+    return f"https://api.telegram.org/file/bot{settings.TELEGRAM_BOT_TOKEN}/{file_path}"
+
+
+@login_required
+def stream_movie_file(request, file_id):
+    movie_file = get_object_or_404(MovieFile, pk=file_id)
+
+    if not movie_file.telegram_file_id:
+        raise Http404("Video hali yuklanmagan")
+
+    # Premium tekshiruvi — MovieFile orqali tegishli filmni topamiz
+    movie = movie_file.movie
+    if movie.is_premium and not request.user.is_premium:
+        return redirect("auth:subscription")
+
+    telegram_url = get_telegram_file_url(movie_file.telegram_file_id)
+
+    # Foydalanuvchi brauzeridan kelgan Range so'rovini Telegram'ga uzatamiz
+    range_header = request.META.get("HTTP_RANGE")
+    headers = {"Range": range_header} if range_header else {}
+
+    telegram_response = requests.get(
+        telegram_url, headers=headers, stream=True, timeout=30
+    )
+
+    status_code = telegram_response.status_code  # 206 (partial) yoki 200
+
+    response = StreamingHttpResponse(
+        telegram_response.iter_content(chunk_size=8192),
+        status=status_code,
+        content_type=telegram_response.headers.get("Content-Type", "video/mp4"),
+    )
+
+    # Muhim sarlavhalarni ko'chiramiz — shu orqali video surish (seek) ishlaydi
+    for header in ("Content-Length", "Content-Range", "Accept-Ranges"):
+        if header in telegram_response.headers:
+            response[header] = telegram_response.headers[header]
+
+    response["Accept-Ranges"] = "bytes"
+    return response
 
 
 # ─────────────────────────────────────────────
@@ -290,7 +346,13 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
         )
 
         first_file = available_files.first()
-        video_url = f"/media/{first_file.file_key}" if first_file else ""
+
+        video_url = ""
+        if first_file:
+            if first_file.telegram_file_id:
+                video_url = reverse("stream_movie_file", kwargs={"file_id": first_file.id})
+            else:
+                video_url = f"/media/{first_file.file_key}"
 
         import contextlib
 
