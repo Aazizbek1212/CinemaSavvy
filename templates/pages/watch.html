@@ -145,8 +145,19 @@
         </video>
 
       {% else %}
-        <video id="cinema-player" class="video-js vjs-default-skin"
-          style="width:100%;height:100%" controls preload="auto" playsinline></video>
+        <!-- MP4 Telethon stream pleyeri -->
+        {% with movie_file=movie.files.first %}
+          {% if movie_file %}
+            <video id="simple-player"
+              style="width:100%;height:100%;position:absolute;inset:0;z-index:50"
+              controls autoplay preload="metadata">
+              <source src="{% url 'stream_movie' movie_file.id %}" type="video/mp4">
+            </video>
+          {% else %}
+            <video id="cinema-player" class="video-js vjs-default-skin"
+              style="width:100%;height:100%" controls preload="auto" playsinline></video>
+          {% endif %}
+        {% endwith %}
       {% endif %}
 
       <!-- Loading overlay -->
@@ -373,47 +384,45 @@ function toggleFullscreen() {
 }
 </script>
 
-<!-- ===== ODDIY VIDEO PLAYER (video_url) ===== -->
-{% if video_url %}
+<!-- ===== ODDIY VIDEO PLAYER (video_url yoki Telethon stream) ===== -->
 <script>
-const simplePlayer = document.getElementById('simple-player');
+document.addEventListener('DOMContentLoaded', () => {
+  const simplePlayer = document.getElementById('simple-player');
 
-if (simplePlayer) {
-  // Double-click bilan skip
-  simplePlayer.addEventListener('dblclick', (e) => {
-    const rect = simplePlayer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    if (x < rect.width / 2) {
-      simplePlayer.currentTime = Math.max(0, simplePlayer.currentTime - 10);
-      showSkipAnim('left');
-    } else {
-      simplePlayer.currentTime = Math.min(simplePlayer.duration, simplePlayer.currentTime + 10);
-      showSkipAnim('right');
-    }
-  });
-}
+  if (simplePlayer) {
+    // Double-click bilan skip
+    simplePlayer.addEventListener('dblclick', (e) => {
+      const rect = simplePlayer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      if (x < rect.width / 2) {
+        simplePlayer.currentTime = Math.max(0, simplePlayer.currentTime - 10);
+        showSkipAnim('left');
+      } else {
+        simplePlayer.currentTime = Math.min(simplePlayer.duration, simplePlayer.currentTime + 10);
+        showSkipAnim('right');
+      }
+    });
 
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-  if (!simplePlayer) return;
-  // Input ichida bo'lsa ishlamas
-  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
 
-  if (e.key === 'ArrowLeft') {
-    e.preventDefault();
-    simplePlayer.currentTime = Math.max(0, simplePlayer.currentTime - 10);
-    showSkipAnim('left');
-  } else if (e.key === 'ArrowRight') {
-    e.preventDefault();
-    simplePlayer.currentTime = Math.min(simplePlayer.duration, simplePlayer.currentTime + 10);
-    showSkipAnim('right');
-  } else if (e.key === ' ') {
-    e.preventDefault();
-    simplePlayer.paused ? simplePlayer.play() : simplePlayer.pause();
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        simplePlayer.currentTime = Math.max(0, simplePlayer.currentTime - 10);
+        showSkipAnim('left');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        simplePlayer.currentTime = Math.min(simplePlayer.duration, simplePlayer.currentTime + 10);
+        showSkipAnim('right');
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        simplePlayer.paused ? simplePlayer.play() : simplePlayer.pause();
+      }
+    });
   }
 });
 </script>
-{% endif %}
 
 <!-- ===== HLS VIDEO PLAYER (VideoJS) ===== -->
 {% if not youtube_url and not video_url %}
@@ -421,7 +430,7 @@ document.addEventListener('keydown', (e) => {
 <script>
 function videoPlayer(slug, resumePosition, defaultLang) {
   return {
-    loading: true,
+    loading: false,
     error: false,
     errorMsg: '',
     playing: false,
@@ -440,7 +449,11 @@ function videoPlayer(slug, resumePosition, defaultLang) {
     tipTime: '00:00',
     selectedLang: defaultLang || '{{ default_lang }}',
 
-    async init() { await this.loadStream(); },
+    async init() {
+      const simplePlayer = document.getElementById('simple-player');
+      if (simplePlayer) return; // MP4 play bo'layotgan bo'lsa HLS ishlamaydi
+      await this.loadStream();
+    },
 
     async loadStream() {
       this.loading = true; this.error = false;
