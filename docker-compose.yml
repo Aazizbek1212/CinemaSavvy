@@ -1,17 +1,13 @@
 services:
-  web:
-    # sizning web xizmat
-    depends_on:
-      - telegram-bot-api
-
   telegram-bot-api:
     image: aiogram/telegram-bot-api:latest
     environment:
-      TELEGRAM_API_ID: "YOUR_API_ID"       # my.telegram.org saytidan olinadi
-      TELEGRAM_API_HASH: "YOUR_API_HASH"   # my.telegram.org saytidan olinadi
+      TELEGRAM_API_ID: "YOUR_API_ID"
+      TELEGRAM_API_HASH: "YOUR_API_HASH"
       TELEGRAM_LOCAL: "true"
     volumes:
       - ./media:/var/lib/telegram-bot-api
+
   db:
     image: postgres:16
     environment:
@@ -53,6 +49,8 @@ services:
       db:
         condition: service_healthy
       redis:
+        condition: service_started
+      telegram-bot-api:                 # <-- BU QATORNI QO'SHING
         condition: service_started
 
   minio:
