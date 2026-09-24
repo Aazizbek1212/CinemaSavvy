@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from movies import views
 
 from movies.views.pages import (
     CatalogPageView,
