@@ -24,7 +24,7 @@ def get_telegram_file_url(file_id: str) -> str:
     """Telegram file_id orqali vaqtinchalik to'g'ridan-to'g'ri havola oladi (local Bot API server orqali)."""
     base_url = settings.TELEGRAM_LOCAL_API_URL
     url = f"{base_url}/bot{settings.TELEGRAM_BOT_TOKEN}/getFile"
-    response = requests.get(url, params={"file_id": file_id}, timeout=15)
+    response = requests.get(url, params={"file_id": file_id}, timeout=120)
     data = response.json()
     if not data.get("ok"):
         raise Http404("Video topilmadi")
