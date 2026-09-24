@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
+TELEGRAM_LOCAL_API_URL = os.environ.get('TELEGRAM_LOCAL_API_URL', 'https://api.telegram.org')
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHANNEL_ID = os.environ.get('TELEGRAM_CHANNEL_ID')
 TELEGRAM_API_URL = "http://telegram-bot-api:8081/bot{token}/{method}"

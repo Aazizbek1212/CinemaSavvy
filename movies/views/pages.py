@@ -21,14 +21,15 @@ from django.http import StreamingHttpResponse, Http404
 
 
 def get_telegram_file_url(file_id: str) -> str:
-    """Telegram file_id orqali vaqtinchalik to'g'ridan-to'g'ri havola oladi."""
-    url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/getFile"
+    """Telegram file_id orqali vaqtinchalik to'g'ridan-to'g'ri havola oladi (local Bot API server orqali)."""
+    base_url = settings.TELEGRAM_LOCAL_API_URL
+    url = f"{base_url}/bot{settings.TELEGRAM_BOT_TOKEN}/getFile"
     response = requests.get(url, params={"file_id": file_id}, timeout=15)
     data = response.json()
     if not data.get("ok"):
         raise Http404("Video topilmadi")
     file_path = data["result"]["file_path"]
-    return f"https://api.telegram.org/file/bot{settings.TELEGRAM_BOT_TOKEN}/{file_path}"
+    return f"{base_url}/file/bot{settings.TELEGRAM_BOT_TOKEN}/{file_path}"
 
 
 @login_required

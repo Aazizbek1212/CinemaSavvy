@@ -23,7 +23,7 @@ class Command(BaseCommand):
         movie_file.status = MovieFile.Status.PROCESSING
         movie_file.save(update_fields=['status'])
 
-        url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendVideo"
+        url = f"{settings.TELEGRAM_LOCAL_API_URL}/bot{settings.TELEGRAM_BOT_TOKEN}/sendVideo"
 
         self.stdout.write(f"Uploading {file_path} to Telegram...")
 
