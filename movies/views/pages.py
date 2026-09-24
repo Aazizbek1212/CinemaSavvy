@@ -345,7 +345,8 @@ class WatchPageView(LoginRequiredMixin, SeoMixin, DetailView):
             else (languages[0].code if languages else "")
         )
 
-        first_file = available_files.first()
+        # Avval Telegram'ga bog'langan faylni tanlaymiz, bo'lmasa boshqasini
+        first_file = available_files.filter(telegram_file_id__isnull=False).first() or available_files.first()
 
         video_url = ""
         if first_file:

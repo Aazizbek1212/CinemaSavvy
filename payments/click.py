@@ -82,7 +82,9 @@ def verify_sign(data: dict, action: str) -> bool:
     if not is_valid:
         logger.warning(
             "Click sign mos emas. expected=%s got=%s (raw=%s)",
-            expected, incoming_sign, raw,
+            expected,
+            incoming_sign,
+            raw,
         )
     return is_valid
 
@@ -107,8 +109,10 @@ def handle_prepare(data: dict) -> dict:
 
     # merchant_trans_id — bizning PaymentTransaction.id
     try:
-        payment = PaymentTransaction.objects.select_for_update().select_related("user").get(
-            id=merchant_trans_id
+        payment = (
+            PaymentTransaction.objects.select_for_update()
+            .select_related("user")
+            .get(id=merchant_trans_id)
         )
     except (PaymentTransaction.DoesNotExist, ValueError):
         return _err(ClickError.ORDER_NOT_FOUND, "Tranzaksiya topilmadi", data)
@@ -125,9 +129,15 @@ def handle_prepare(data: dict) -> dict:
     payment.click_paydoc_id = click_paydoc_id
     payment.provider = "click"
     payment.raw_payload = dict(data)
-    payment.save(update_fields=[
-        "click_trans_id", "click_paydoc_id", "provider", "raw_payload", "updated_at",
-    ])
+    payment.save(
+        update_fields=[
+            "click_trans_id",
+            "click_paydoc_id",
+            "provider",
+            "raw_payload",
+            "updated_at",
+        ]
+    )
 
     # merchant_prepare_id — keyingi Complete'da qaytaramiz (PaymentTransaction.id)
     return {
@@ -156,8 +166,10 @@ def handle_complete(data: dict) -> dict:
         return _err(ClickError.INCORRECT_AMOUNT, "Amount xato", data)
 
     try:
-        payment = PaymentTransaction.objects.select_for_update().select_related("user").get(
-            id=merchant_trans_id
+        payment = (
+            PaymentTransaction.objects.select_for_update()
+            .select_related("user")
+            .get(id=merchant_trans_id)
         )
     except (PaymentTransaction.DoesNotExist, ValueError):
         return _err(ClickError.ORDER_NOT_FOUND, "Tranzaksiya topilmadi", data)
@@ -196,6 +208,7 @@ def handle_complete(data: dict) -> dict:
     payment.mark_paid(payload=dict(data))
 
     from .services import grant_premium_for_payment
+
     grant_premium_for_payment(payment)
 
     logger.info("Click to'lov yakunlandi: %s (user=%s)", payment.id, payment.user_id)
